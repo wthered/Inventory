@@ -1,0 +1,566 @@
+/* ==========================================================================
+   WAREHOUSE SHOW PAGE - DARK THEME (FINAL SORTED)
+   ========================================================================== */
+
+/* 1. Global Utilities & Buttons
+   ========================================================================== */
+
+/* Base Button Component */
+.btn-base, .btn-primary, .btn-outline, .btn-print, .btn-secondary, .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    white-space: nowrap;
+    user-select: none;
+}
+
+/* Primary Variant */
+.btn-primary {
+    background: var(--color-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1); /* Αυξάνει ελαφρώς τη φωτεινότητα χωρίς νέα μεταβλητή */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+/* Outline & Print Variants */
+.btn-outline, .btn-print {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+}
+
+.btn-outline:hover, .btn-print:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* Secondary & Danger Variants */
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15); /* Αντί για --color-surface-light */
+}
+
+.btn-danger {
+    background: var(--color-error);
+    color: white;
+}
+
+.btn-danger:hover {
+    filter: brightness(1.1);
+}
+
+/* States */
+button:disabled, .btn-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* 2. Layout & Header
+   ========================================================================== */
+
+.warehouse-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--space-lg);
+}
+
+.show-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end; /* Στοιχίζει τα κουμπιά στη βάση του τίτλου */
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Αριστερό μέρος: Back link + Τίτλος */
+.header-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.back-link {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: var(--color-primary);
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.header-title h1 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+/* Badges δίπλα στον τίτλο */
+.header-badges {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: 4px; /* Μικρή διόρθωση για να "κάθεται" οπτικά με το κείμενο */
+}
+
+/* Δεξί μέρος: Κουμπιά δράσης */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+/* Responsive για κινητά */
+@media (max-width: 768px) {
+    .show-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-lg);
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+/* 3. Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.stat-box {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.stat-icon {
+    font-size: 1.5rem;
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+}
+
+.stat-number {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* 4. Cards & Info */
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-lg);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.card-header h3 {
+    font-size: 1rem;
+    color: var(--color-text-primary);
+}
+
+.card-body {
+    padding: var(--space-lg);
+}
+
+.info-list {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: space-between;
+    align-items: center;
+}
+
+.contact-list {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-label {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.info-value {
+    font-size: 1rem;
+    color: var(--color-text-primary);
+}
+
+.code-value {
+    font-family: 'Monaco', monospace;
+    color: var(--color-primary);
+    background: rgba(59, 130, 246, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    width: fit-content;
+}
+
+/* 5. Status Badges */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-accent);
+}
+
+.status-inactive {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-error);
+}
+
+.primary-badge {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--color-primary);
+    margin-left: var(--space-xs);
+}
+
+/* 6. Capacity & Progress */
+.capacity-stats {
+    display: flex;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-md);
+    align-items: center;
+    justify-content: space-between;
+}
+
+.capacity-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    display: block;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--color-primary);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+}
+
+/* 7. Locations Table */
+.locations-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.locations-table th {
+    padding: var(--space-md) var(--space-lg);
+    text-align: left;
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.locations-table td {
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    font-size: 0.9rem;
+}
+
+.location-code {
+    font-family: 'Monaco', monospace;
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.inventory-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.inventory-item-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-sm);
+    border-left: 2px solid var(--color-primary);
+}
+
+.product-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--color-text-primary);
+}
+
+.product-qty {
+    background: var(--color-primary);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.batch-tag {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+.text-empty {
+    color: var(--color-text-muted);
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+.status-occupied {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+}
+
+.location-name-sub {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+}
+
+/* ==========================================================================
+   7. Storage Grid Layout
+========================================================================== */
+
+.header-with-filter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex: 1;
+}
+
+.filter-row {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.form-select-sm {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+/* Locations Grid */
+.locations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+}
+
+/* Location Card */
+.location-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.location-card:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+}
+
+.loc-card-header {
+    padding: var(--space-md);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.loc-code {
+    display: block;
+    color: var(--color-primary);
+    font-weight: 800;
+    font-family: 'Monaco', monospace;
+    font-size: 1.1rem;
+}
+
+.loc-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+/* Items Stack */
+.loc-card-body {
+    padding: var(--space-md);
+    flex-grow: 1;
+}
+
+.item-entry {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 6px;
+    border-radius: var(--radius-sm);
+}
+
+.qty-pill {
+    background: var(--color-primary);
+    color: white;
+    min-width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.item-name {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Status colors */
+.location-card.is-occupied { border-left: 3px solid var(--color-primary); }
+.location-card.is-empty { opacity: 0.8; border-left: 3px solid var(--color-border); }
+
+.loc-card-footer {
+    padding: var(--space-sm) var(--space-md);
+    background: rgba(0,0,0,0.1);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.coords-info {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+}
+
+/* 8. Address Block */
+.address-block {
+    margin-bottom: var(--space-lg);
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-md);
+}
+
+/* 9. Responsive */
+@media (max-width: 992px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .show-header {
+        flex-direction: column;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}

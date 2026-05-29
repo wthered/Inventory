@@ -1,0 +1,110 @@
+<?php
+
+	return [
+		'payment_status' => [
+			'unpaid'         => 'Unpaid',
+			'partially_paid' => 'Partially Paid',
+			'paid'           => 'Paid',
+			'refunded'       => 'Refunded',
+		],
+
+		'sales_order_status' => [
+			'draft'      => 'Draft',
+			'pending'    => 'Pending',
+			'confirmed'  => 'Confirmed',
+			'processing' => 'Processing',
+			'shipped'    => 'Shipped',
+			'delivered'  => 'Delivered',
+			'completed'  => 'Completed',
+			'cancelled'  => 'Cancelled',
+			'returned'   => 'Returned',
+		],
+
+		'payment_terms' => [
+			'cash'       => 'Cash',
+			'immediate'  => 'Immediate Payment',
+			'credit_7'   => 'Credit (7 Days)',
+			'credit_15'  => 'Credit (15 Days)',
+			'credit_30'  => 'Credit (30 Days)',
+			'credit_45'  => 'Credit (45 Days)',
+			'credit_60'  => 'Credit (60 Days)',
+			'credit_90'  => 'Credit (90 Days)',
+			'credit_120' => 'Credit (120 Days)',
+			'eom'        => 'End of Month (EOM)',
+			'eom_30'     => '30 Days after EOM',
+			'eom_60'     => '60 Days after EOM',
+			'cia'        => 'Cash in Advance',
+			'cod'        => 'Cash on Delivery',
+		],
+
+		'customer_type' => [
+			'individual'  => 'Individual',
+			'retail'      => 'Retail Customer',
+			'wholesale'   => 'Wholesale Partner',
+			'corporate'   => 'Corporate Client',
+			'business'    => 'Business / SME',
+			'freelancer'  => 'Freelancer / Professional',
+			'government'  => 'Government / Public Sector',
+			'non_profit'  => 'Non-Profit / NGO',
+			'distributor' => 'Distributor',
+			'prospect'    => 'Prospect / Lead',
+		],
+
+		'transfer_status' => [
+			'draft'           => 'Draft',
+			'pending'         => 'Pending',
+			'approved'        => 'Approved',
+			'in_transit'      => 'In Transit',
+			'completed'       => 'Completed',
+			'canceled'        => 'Cancelled',
+			'failed'          => 'Failed',
+			'on_hold'         => 'On Hold',
+			'expired'         => 'Expired',
+			'refunded'        => 'Refunded',
+			'action_required' => 'Action Required',
+			'partial'         => 'Partially Received',
+			'returned'        => 'Returned',
+		],
+
+		'alert_type' => [
+			'low_stock'     => 'Low Stock',
+			'out_of_stock'  => 'Out of Stock',
+			'overstock'     => 'Overstock',
+			'expiring_soon' => 'Expiring Soon',
+			'expired'       => 'Expired',
+		],
+
+		'transaction_reason' => [
+			'purchase'           => 'Purchase / Procurement',
+			'customer_return_in' => 'Customer Return',
+			'found'              => 'Found (Surplus)',
+			'production'         => 'Production',
+			'supplier_return_in' => 'Supplier Return',
+			'sale'               => 'Sale',
+			'damage'             => 'Damage / Destruction',
+			'loss'               => 'Loss / Theft',
+			'sample'             => 'Sample',
+			'promotion'          => 'Promotion / Marketing',
+			'expiration'         => 'Product Expiration',
+			'adjustment'         => 'Manual Adjustment',
+			'transfer_in'        => 'Transfer (Inward)',
+			'transfer_out'       => 'Transfer (Outward)',
+			'other'              => 'Other / Miscellaneous',
+		],
+
+		'quality_status' => [
+			'new'       => 'New / Sealed',
+			'opened'    => 'Open Box',
+			'damaged'   => 'Damaged',
+			'defective' => 'Defective',
+			'expired'   => 'Expired',
+		],
+
+		'stock_return_status' => [
+			'pending'    => 'Pending',
+			'received'   => 'Received',
+			'inspecting' => 'Inspecting',
+			'completed'  => 'Completed',
+			'cancelled'  => 'Cancelled',
+		],
+	];

@@ -1,0 +1,75 @@
+/* =========================================
+   FOOTER.CSS
+   Dedicated styles for the global footer component.
+========================================= */
+
+body .footer {
+	background-color: var(--color-surface);
+	border-top: 1px solid var(--color-border);
+	padding: var(--space-xl) var(--space-md) var(--space-md);
+	color: var(--color-text-muted);
+	margin-top: var(--space-xl);
+	width: 100%;
+	position: relative;
+	bottom: 0;
+	left: 0;
+}
+
+.footer-container {
+	max-width: 1200px;
+	margin: 0 auto;
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: var(--space-xl);
+}
+
+.footer-left {
+	flex-basis: 300px;
+}
+
+.footer-logo {
+	color: var(--color-text-primary);
+	margin-bottom: var(--space-sm);
+	font-size: 1.5rem;
+}
+
+.footer-left h3 {
+	margin-top: 0;
+}
+
+.footer-links {
+	display: flex;
+	gap: var(--space-xl);
+}
+
+.footer-column h4 {
+	color: var(--color-text-secondary);
+	margin-bottom: var(--space-md);
+	font-size: 1.1rem;
+}
+
+.footer-column ul {
+	list-style: none;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.footer-bottom {
+	max-width: 1200px;
+	margin: var(--space-lg) auto 0;
+	padding-top: var(--space-md);
+	border-top: 1px solid var(--color-border);
+	text-align: center;
+}
+
+.footer a {
+	color: var(--color-text-muted);
+	text-decoration: none;
+}
+
+.footer a:hover {
+	color: var(--color-primary);
+}

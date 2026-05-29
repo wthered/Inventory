@@ -1,0 +1,272 @@
+/* =========================================================
+   DASHBOARD STYLES (Specific Overrides and Components)
+   This file assumes style.css has already defined:
+   - All :root color/spacing/shadow variables.
+   - Global resets (*, body, font-family, box-sizing, min-height).
+========================================================= */
+
+
+/* =========================================
+   BASE STYLES (Unique Overrides)
+========================================= */
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #60a5fa; /* A slightly lighter blue for hover */
+}
+
+/* Main content wrapper (for when this content is in the main dashboard view) */
+main {
+    flex: 1;
+    padding: var(--space-xl);
+    width: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--color-text-primary);
+    margin-top: 0;
+    line-height: 1.2;
+}
+
+/* =========================================
+   CARD & SECTION STYLES
+========================================= */
+
+.card {
+    background-color: var(--color-surface);
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border);
+    transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.section-header h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* =========================================
+   DASHBOARD LAYOUT
+========================================= */
+
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: var(--space-xl);
+    color: var(--color-text-primary);
+}
+
+.dashboard-grid {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-areas:
+        "deck deck"
+        "reports activity";
+    grid-template-columns: 2fr 1fr; /* Reports panel is wider */
+}
+
+/* Mapping Grid Areas */
+.summary-deck { grid-area: deck; }
+.main-reports-panel { grid-area: reports; }
+.activity-feed-panel { grid-area: activity; }
+
+
+/* =========================================
+   SUMMARY DECK (Cards)
+========================================= */
+
+.summary-deck {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-lg);
+}
+
+.metric-card {
+    /* Inherits .card styles */
+}
+
+.metric-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.metric-card-header i {
+    font-size: 1.5rem;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+}
+
+.metric-card h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.metric-card p {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+    line-height: 1;
+}
+
+.metric-card .caption {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-top: var(--space-sm);
+}
+
+/* Icon Color Mapping (for visual distinction) */
+.metric-card:nth-child(1) i { background-color: rgba(59, 130, 246, 0.2); color: var(--color-primary); } /* Primary */
+.metric-card:nth-child(2) i { background-color: rgba(16, 185, 129, 0.2); color: var(--color-accent); } /* Success */
+.metric-card:nth-child(3) i { background-color: rgba(245, 158, 11, 0.2); color: var(--color-warning); } /* Warning */
+.metric-card:nth-child(4) i { background-color: rgba(239, 68, 68, 0.2); color: var(--color-error); }   /* Error */
+
+
+/* =========================================
+   ACTIVITY FEED
+========================================= */
+
+.activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.activity-list li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md) 0;
+    border-bottom: 1px dashed var(--color-border);
+}
+
+.activity-list li:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    font-size: 1.2rem;
+    color: var(--color-primary);
+    min-width: 25px;
+    text-align: center;
+}
+
+.activity-details {
+    flex-grow: 1;
+}
+
+.activity-details p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+}
+
+.activity-details strong {
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.activity-time {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+/* =========================================
+   REPORTS / CHART AREA
+========================================= */
+
+.main-reports-panel {
+    /* Inherits .card styles */
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-placeholder {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+    font-style: italic;
+    font-size: 1.1rem;
+    background-color: var(--color-bg-alt);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-md);
+}
+
+
+/* =========================================
+   MEDIA QUERIES (Responsiveness)
+========================================= */
+
+@media (max-width: 1024px) {
+    main {
+        padding: var(--space-lg);
+    }
+
+    .dashboard-grid {
+        grid-template-areas:
+            "deck"
+            "reports"
+            "activity";
+        grid-template-columns: 1fr;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        margin-bottom: var(--space-lg);
+    }
+}
+
+@media (max-width: 768px) {
+    .summary-deck {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-md);
+    }
+    .metric-card p {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .summary-deck {
+        grid-template-columns: 1fr;
+    }
+    main {
+        padding: var(--space-md);
+    }
+}

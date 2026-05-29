@@ -1,0 +1,135 @@
+/* =========================================
+   🔐 AUTH PAGES (Login / Register / Forgot)
+   Works with global style.css
+========================================= */
+
+/* --- Page Layout --- */
+body {
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* --- Auth Container --- */
+.auth-container {
+    background-color: var(--color-surface);
+    padding: var(--space-xl);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    animation: fadeIn 0.4s ease;
+}
+
+/* --- Page Title --- */
+.auth-container h1 {
+    text-align: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+/* --- Form --- */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+/* --- Input Group --- */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-group label {
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+}
+
+.input-group input {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-primary);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-group input:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+    outline: none;
+}
+
+/* --- Error Messages --- */
+.error-message {
+    color: #ef4444;
+    font-size: 0.85rem;
+}
+
+/* --- Buttons --- */
+.auth-button {
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-md);
+    background-color: var(--color-accent);
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.auth-button:hover {
+    background-color: #059669;
+}
+
+/* --- Footer Links --- */
+.auth-links {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.auth-links a {
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.auth-links a:hover {
+    color: #34d399;
+}
+
+.auth-links span {
+    color: var(--color-text-muted);
+}
+
+/* --- Animations --- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- Responsive --- */
+@media (max-width: 480px) {
+    .auth-container {
+        padding: var(--space-lg);
+    }
+}

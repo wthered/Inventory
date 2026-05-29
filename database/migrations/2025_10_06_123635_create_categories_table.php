@@ -1,0 +1,39 @@
+<?php
+
+	use Illuminate\Database\Migrations\Migration;
+	use Illuminate\Database\Schema\Blueprint;
+	use Illuminate\Support\Facades\Schema;
+
+	return new class extends Migration {
+		/**
+		 * Run the migrations.
+		 */
+		public function up(): void {
+			Schema::create('categories', function (Blueprint $table) {
+				$table->increments('id');
+				$table->string('name');
+				$table->string('slug')->unique();
+				$table->text('description')->nullable();
+				$table->unsignedInteger('parent_id')->nullable();
+				$table->foreign('parent_id')->references('id')->on('categories')->nullOnDelete();
+				$table->string('image')->nullable();
+				$table->integer('sort_order')->default(0);
+				$table->boolean('is_active')->default(true);
+				$table->timestamps();
+				$table->softDeletes();
+
+				$table->index([
+					'parent_id',
+					'is_active'
+				], 'categories_parent_is_active');
+				$table->unique(['parent_id', 'sort_order'], 'categories_parent_order_unix');
+			});
+		}
+
+		/**
+		 * Reverse the migrations.
+		 */
+		public function down(): void {
+			Schema::dropIfExists('categories');
+		}
+	};

@@ -1,0 +1,625 @@
+/* =========================================
+   INVENTORY PRODUCTS STYLES (Refactored)
+   Assumes global variables from dashboard.css are present.
+========================================= */
+
+
+
+/* =========================================
+   1. BASE LAYOUT & UTILITIES
+========================================= */
+
+/* Main content wrapper (for when this content is in the main dashboard view) */
+main {
+    flex: 1;
+    transition: margin-left 0.3s;
+    margin-left: 0;
+    padding: var(--space-lg);
+    width: 100%;
+}
+
+/* General card styling (used for summary deck and forms) */
+.card {
+    background-color: var(--color-surface);
+    padding: var(--space-lg); /* Using smaller padding for summary cards/general use */
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border);
+}
+
+.text-muted {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+/* =========================================
+   2. BUTTONS (Standardized)
+========================================= */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+/* Primary/Add Button */
+.btn.add {
+    padding: 0.6rem 1.2rem; /* Slightly smaller for inline action */
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.btn.add:hover {
+    background-color: #2563eb;
+}
+
+/* Secondary/Back/Cancel Button */
+.btn.back {
+    background-color: transparent;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+}
+
+.btn.back:hover {
+    background-color: #2d3846; /* Slightly lighter slate for hover */
+    color: var(--color-primary);
+}
+
+/* Edit/Submit Button (used inside form actions) */
+.btn.edit {
+    background-color: var(--color-primary);
+    color: #fff;
+}
+
+.btn.edit:hover {
+    background-color: #2563eb;
+}
+
+
+/* =========================================
+   3. FORM COMPONENTS
+========================================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-xl);
+}
+
+.form-grid .group-box {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: var(--space-sm);
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+.form-group input:not([type="checkbox"]),
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    background-color: var(--color-surface); /* Consistent input background */
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary); /* Consistent input text color */
+    padding: 0.75rem 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+    justify-content: flex-end;
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-lg);
+}
+
+/* =========================================
+   Product Action Buttons (Typically in a Table Cell)
+   -- FIX: Now allows wrapping for tight table columns.
+========================================= */
+
+/* Container for the buttons */
+.product-actions {
+    display: flex;
+    gap: 0.25rem; /* Reduced gap for compactness */
+    flex-wrap: wrap; /* CRITICAL FIX: Allows buttons to stack if the column width is too small */
+    align-items: center;
+    justify-content: flex-end; /* Aligns actions neatly to the right of the cell */
+    line-height: 1.2;
+}
+
+.product-actions a {
+    flex: 1;
+}
+
+/* Base style for small buttons (overrides the main .btn padding/font size) */
+.btn.small {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: var(--radius-sm);
+    min-width: 60px; /* Gives "View" and "Edit" consistent minimum space */
+    text-align: center;
+}
+
+.btn.small i {
+    font-size: 0.9rem;
+}
+
+/* 1. View Button (Subtle/Secondary) */
+.btn.small.view {
+    background-color: var(--color-surface);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.btn.small.view:hover {
+    background-color: var(--color-bg-alt);
+    color: var(--color-primary);
+}
+
+/* 2. Edit Button (Primary Accent) */
+.btn.small.edit {
+    background-color: var(--color-primary);
+    color: var(--color-text-primary);
+}
+
+.btn.small.edit:hover {
+    background-color: #2563eb;
+}
+
+/* 3. Delete Button (Danger/Error) */
+.btn.small.delete {
+    background-color: var(--color-error);
+    color: var(--color-text-primary);
+}
+
+.btn.small.delete:hover {
+    background-color: #c93737;
+}
+
+/* Ensure active state keeps the focus/primary color logic */
+.btn.small:active {
+    transform: translateY(1px);
+}
+
+/* =========================================
+   4. PRODUCTS LIST VIEW
+========================================= */
+
+/* Header (Search & Add) */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xl);
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.actions {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+}
+
+.search-input {
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-md);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 250px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Summary Cards Deck */
+.row {
+    margin-bottom: var(--space-xl);
+}
+
+#deck {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-lg);
+}
+
+#deck .card {
+    /* Inherits general .card styles */
+    transition: transform 0.2s;
+}
+
+#deck .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 10px rgba(0, 0, 0, 0.3);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.card-header i {
+    font-size: 1.2rem;
+    color: var(--color-accent);
+}
+
+.card-header h3 {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+    font-weight: 500;
+}
+
+#deck .card p {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+/* Specific card colors (for icons) */
+.card:nth-child(1) .card-header i {
+    color: var(--color-primary);
+}
+
+/* Total Products */
+.card:nth-child(2) .card-header i {
+    color: var(--color-warning);
+}
+
+/* Low Stock */
+.card:nth-child(3) .card-header i {
+    color: var(--color-error);
+}
+
+/* Out of Stock */
+.card:nth-child(4) .card-header i {
+    color: var(--color-accent);
+}
+
+/* Inventory Value */
+
+
+/* Filters */
+.filters {
+    display: flex;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+    flex-wrap: wrap;
+}
+
+.filter {
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    /* Custom SVG down arrow for select element */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2364748b'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd' /%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem top 50%;
+    background-size: 0.8rem auto;
+    flex: 1;
+}
+
+/* Product Table */
+.table-container {
+    overflow-x: auto;
+    margin-bottom: var(--space-xl);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+}
+
+.products-container {
+    min-width: 1000px; /* Minimum width for the table content */
+}
+
+.products-header, .product-row {
+    display: grid;
+    /* Image | Name | SKU | Category | Supplier | Stock | Price | Actions */
+    grid-template-columns: 80px 1.5fr 1fr 1fr 1.5fr 1fr 1.5fr 100px;
+    padding: var(--space-md) var(--space-lg);
+    align-items: center;
+    text-align: left;
+}
+
+.products-header {
+    background-color: var(--color-bg);
+    color: var(--color-text-muted);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+}
+
+.product-row {
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color 0.2s;
+}
+
+.product-row:last-of-type {
+    border-bottom: none;
+}
+
+.product-row:hover {
+    background-color: var(--color-bg);
+}
+
+.product-row > div {
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.product-row .product-image {
+    width: 64px;
+    height: 64px;
+    background-color: var(--color-bg);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    overflow: hidden;
+}
+
+/* Πρόσθεσε αυτό για την ίδια την εικόνα */
+.product-row .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.product-row .product-name {
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.product-row .stock-status.low {
+    color: var(--color-warning);
+    font-weight: 700;
+}
+
+.product-row .stock-status.out {
+    color: var(--color-error);
+    font-weight: 700;
+}
+
+.product-row .stock-status.in {
+    color: var(--color-accent);
+    font-weight: 700;
+}
+
+.product-row .actions .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    background-color: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-sm);
+}
+
+.pagination {
+    padding: var(--space-md) var(--space-lg);
+    text-align: right;
+    border-top: 1px solid var(--color-border);
+}
+
+
+/* Recent Activity */
+.activities {
+    background-color: var(--color-surface);
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border);
+}
+
+.activities .activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.activities h2 {
+    font-size: 1.2rem;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.activities .view-all {
+    /* Βάση Κουμπιού */
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+
+    /* Γραμματοσειρά & Χρώμα */
+    color: #4f46e5; /* Ένα μπλε χρώμα για σύνδεση (Indigo-600) */
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+
+    /* Εφέ */
+    border-radius: 6px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.activities .view-all:hover {
+    background-color: #eef2ff; /* Πολύ ανοιχτό μπλε στο hover */
+    color: #3730a3; /* Πιο σκούρο μπλε στο hover */
+}
+
+.activities .view-all:active {
+    background-color: #d1d5db; /* Εφέ πατήματος */
+}
+
+.activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.activity-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-md) 0;
+    border-bottom: 1px dashed var(--color-border);
+}
+
+.activity-list li:last-child {
+    border-bottom: none;
+}
+
+.activity-list i {
+    font-size: 1rem;
+    color: var(--color-primary);
+    min-width: 20px;
+    text-align: center;
+}
+
+.activity-details p {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+}
+
+.activity-details strong {
+    color: var(--color-text-primary);
+}
+
+.activity-details span {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    display: block;
+    margin-top: 0.2rem;
+}
+
+
+/* =========================================
+   5. MEDIA QUERIES (Responsiveness)
+========================================= */
+@media (max-width: 1024px) {
+    #box {
+        padding: var(--space-lg);
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header h1 {
+        margin-bottom: var(--space-md);
+    }
+
+    .actions {
+        width: 100%;
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .search-input, .btn.add {
+        width: 100%;
+    }
+
+    #deck {
+        grid-template-columns: 1fr 1fr; /* Two columns on tablets */
+    }
+
+    .filters {
+        flex-direction: column;
+    }
+
+    .filter {
+        width: 100%;
+    }
+
+    .products-header, .product-row {
+        padding: var(--space-sm) var(--space-md);
+    }
+}
+
+@media (max-width: 480px) {
+    #deck {
+        grid-template-columns: 1fr; /* Single column on phones */
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .activities {
+        padding: var(--space-md);
+    }
+}
