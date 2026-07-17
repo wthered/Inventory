@@ -3,6 +3,7 @@
 	namespace Database\Seeders;
 
 	use Database\Seeders\inventories\Audits\InventoryAuditSeeder;
+	use Database\Seeders\inventories\InventoryMovementLogSeeder;
 	use Database\Seeders\inventories\InventorySeeder;
 	use Database\Seeders\inventories\InventoryTransactionsSeeder;
 	use Database\Seeders\products\BrandSeeder;
@@ -75,6 +76,7 @@
 			// Inventory Audit Seeder (along with items)
 			$this->call([
 				InventoryAuditSeeder::class,
+				InventoryMovementLogSeeder::class,
 			]);
 		}
 	}

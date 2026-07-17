@@ -1,0 +1,186 @@
+/* ==========================================================================
+   0. Global Variables & Fallbacks (PhpStorm Fix)
+   ========================================================================== */
+:root {
+    /* Placeholder για να μην υπογραμμίζει το PhpStorm τη μεταβλητή ως undefined */
+    --badge-color: #94a3b8;
+}
+
+/* ==========================================================================
+   1. Badges & Statuses (Dynamic Alignment με TransferStatus Enum)
+   ========================================================================== */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 0.025em;
+
+    /* Δυναμικό color mix βασισμένο στο Enum. Fallback στο Slate αν δεν περαστεί */
+    color: var(--badge-color);
+    background-color: color-mix(in srgb, var(--badge-color) 15%, white);
+    border: 1px solid color-mix(in srgb, var(--badge-color) 30%, white);
+}
+
+/* Ειδικά badges για Εισαγωγή / Εξαγωγή (Αν χρησιμοποιούνται παράλληλα) */
+.badge-inflow {
+    background: #d4edda;
+    color: #155724;
+    border-radius: 4px;
+}
+
+.badge-outflow {
+    background: #f8d7da;
+    color: #721c24;
+    border-radius: 4px;
+}
+
+/* ==========================================================================
+   2. Στοιχεία Λίστας Stock Transfers
+   ========================================================================== */
+.trx-number {
+    font-weight: 700;
+    color: #4e73df;
+}
+
+.text-muted {
+    color: #64748b;
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+.item-count {
+    background: #e0e7ff;
+    color: #4338ca;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   3. Διάταξη Διαδρομής (Source Warehouse -> Target Warehouse)
+   ========================================================================== */
+.route-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.location-badge {
+    background-color: #f1f5f9;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.route-arrow {
+    color: #94a3b8;
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+/* ==========================================================================
+   4. Actions & Pagination
+   ========================================================================== */
+.action-links {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center; /* Ευθυγράμμιση κειμένου και button στον οριζόντιο άξονα */
+    gap: 1rem;
+}
+
+.action-links a,
+.btn-link-delete {
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.15s ease-in-out;
+}
+
+.link-view {
+    color: #4e73df;
+}
+
+.link-view:hover {
+    text-decoration: underline;
+    color: #2e59d9;
+}
+
+.link-edit {
+    color: #1cc88a;
+}
+
+.link-edit:hover {
+    text-decoration: underline;
+    color: #17a673;
+}
+
+/* 📌 Inline Delete Form & Button */
+.delete-form {
+    display: inline-flex;
+    margin: 0;
+    padding: 0;
+}
+
+.btn-link-delete {
+    color: #ef4444; /* Κόκκινο soft/professional */
+}
+
+.btn-link-delete:hover {
+    text-decoration: underline;
+    color: #dc2626;
+}
+
+.pagination-container {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ==========================================================================
+   5. Media Queries (Responsive Adjustments)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .route-display {
+        gap: 0.25rem;
+    }
+
+    .location-badge {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.4rem;
+    }
+
+    .route-arrow {
+        font-size: 1rem;
+    }
+
+    .action-links {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.5rem; /* Κρατάμε το πιο άνετο spacing για mobile touch targets */
+    }
+
+    .delete-form {
+        width: auto;
+    }
+
+    .pagination-container {
+        justify-content: center;
+    }
+}

@@ -49,7 +49,10 @@
 				return;
 			}
 
-			InventoryTransaction::insert($this->list->toArray());
+//			InventoryTransaction::insert($this->list->toArray());
+			$this->list->chunk(self::BATCH_SIZE)->each(function (Collection $transactions) {
+				InventoryTransaction::query()->insert($transactions->toArray());
+			});
 
 			// Καθαρισμός μνήμης
 			$this->list = Collection::empty();

@@ -2,6 +2,7 @@
 
 	namespace App\Http\Requests\Warehouses;
 
+	use App\Models\Warehouse;
 	use App\Rules\Warehouses\ValidZoneForWarehouse;
 	use Illuminate\Contracts\Validation\ValidationRule;
 	use Illuminate\Foundation\Http\FormRequest;
@@ -79,18 +80,17 @@
 		}
 
 		/**
-		 * Get the validated data.
-		 *
-		 * Note: If you need the warehouse ID in the validated data,
-		 * you can add it from the route parameter
+		 * Handle a passed validation attempt.
 		 */
-		public function validated($key = null, $default = null): array {
-			$validated = parent::validated($key, $default);
+		protected function passedValidation(): void {
+			$this->merge([
+				// Μετατροπή του zone σε καθαρό integer μετά το επιτυχές validation
+				'zone' => (int) $this->input('zone'),
 
-			// Add warehouse ID from route parameter
-			$validated['warehouse_id'] = $this->route('warehouse')->id;
-
-			return $validated;
+				// Εξασφαλίζουμε ότι το warehouse_id υπάρχει στα δεδομένα μας
+				// παίρνοντάς το είτε από το input είτε από το route object
+				'warehouse_id' => $this->route('warehouse') instanceof Warehouse ? $this->route('warehouse')->id : (int) $this->input('warehouse'),
+			]);
 		}
 
 		/**

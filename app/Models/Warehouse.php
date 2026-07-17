@@ -6,6 +6,9 @@
 	use App\Enums\WarehouseType;
 	use App\Models\Concerns\HasStockTransfers;
 	use App\Models\Inventories\Inventory;
+	use Database\Factories\WarehouseFactory;
+	use Illuminate\Database\Eloquent\Factories\Factory;
+	use Illuminate\Database\Eloquent\Factories\HasFactory;
 	use Illuminate\Database\Eloquent\Model;
 	use Illuminate\Database\Eloquent\Relations\BelongsTo;
 	use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,13 +17,14 @@
 	use LaravelIdea\Helper\App\Models\_IH_StockTransfer_C;
 
 	class Warehouse extends Model {
-		use softDeletes, HasStockTransfers;
+		use softDeletes, HasStockTransfers, HasFactory;
 
 		protected $fillable = [
 			'name',
 			'code',
 			'type',
 			'address_id',
+			'manager_id',
 			'zones',
 			'aisles',
 			'racks',
@@ -31,6 +35,13 @@
 		protected $casts = [
 			'type' => WarehouseType::class,
 		];
+
+		/**
+		 * Create a new factory instance for the model.
+		 */
+		protected static function newFactory(): WarehouseFactory|Factory {
+			return WarehouseFactory::new();
+		}
 
 		/**
 		 * Get all inventory records stored in this warehouse.
@@ -92,8 +103,26 @@
 			return StockTransfer::query()->where('source_warehouse_id', $this->id)->orWhere('target_warehouse_id', $this->id)->get();
 		}
 
-		public function getOccupancyPercentageAttribute(): float|int {
+		/**
+		 * Υπολογίζει δυναμικά πόσα μοναδικά SLOTS (Locations)
+		 * έχουν αυτή τη στιγμή πραγματικό απόθεμα (> 0)
+		 */
+		public function getCurrentCapacityAttribute(): int
+		{
+			return $this->inventories()
+				->where('quantity', '>', 0)
+				->distinct('location_id')
+				->count('location_id');
+		}
+
+		/**
+		 * Υπολογίζει το ποσοστό με βάση το δυναμικό current_capacity
+		 */
+		public function getOccupancyPercentageAttribute(): float|int
+		{
 			if ($this->capacity <= 0) return 0;
+
+			// Καλεί το δυναμικό attribute παραπάνω
 			return 100 * ($this->current_capacity / $this->capacity);
 		}
 

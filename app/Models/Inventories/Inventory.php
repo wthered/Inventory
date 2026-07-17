@@ -8,6 +8,7 @@
 	use App\Models\WarehouseLocation;
 	use Illuminate\Database\Eloquent\Model;
 	use Illuminate\Database\Eloquent\Relations\BelongsTo;
+	use Illuminate\Database\Eloquent\Relations\HasMany;
 
 	class Inventory extends Model {
 
@@ -26,6 +27,25 @@
 			'manufacturing_date' => 'date',
 			'expiry_date'        => 'date',
 		];
+
+		/**
+		 * Relationship to log transactional errors or physical audit discrepancies.
+		 * Allows you to call: $inventory->movementLogs()->create([...])
+		 */
+		public function movementLogs(): Inventory|HasMany {
+			return $this->hasMany(InventoryMovementLog::class, 'product_id', 'product_id')
+				->whereColumn('warehouse_id', 'inventories.warehouse_id')
+				->whereColumn('location_id', 'inventories.location_id');
+		}
+
+		/**
+		 * Relationship to the physical stocktake audit items.
+		 * Allows you to call: $inventory->auditItems()->create([...])
+		 */
+		public function auditItems(): Inventory|HasMany {
+			return $this->hasMany(InventoryAuditItem::class, 'product_id', 'product_id')
+				->whereColumn('location_id', 'inventories.location_id');
+		}
 
 		/**
 		 * Get the product that owns this inventory record.

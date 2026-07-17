@@ -56,49 +56,12 @@
 					'min:1',
 					new ValidAisleForWarehouse($this->input('warehouse')),
 					function ($attribute, $value, $fail) use ($warehouse) {
-//						dd(compact('attribute', 'value', 'warehouse'));
 						if ($warehouse && $value > $warehouse->aisles) {
 							$fail("Aisle cannot exceed " . $warehouse->aisles . " for this warehouse.");
 						}
 					},
 				],
 			];
-		}
-
-		/**
-		 * Configure the validator instance.
-		 */
-		public function withValidator($validator): void {
-			$validator->after(function ($validator) {
-				// Only perform these checks if basic validation passes
-				if ($validator->errors()->any()) {
-					return;
-				}
-
-				$warehouseId = $this->input('warehouse');
-				$zone        = $this->input('zone');
-				$aisle       = $this->input('aisle');
-
-				// Fetch warehouse to check zone and aisle limits
-				$warehouse = Warehouse::query()->find($warehouseId);
-
-				if (!$warehouse) {
-					// This should already be caught by the exists rule, but as a fallback
-					$validator->errors()->add('warehouse', 'The specified warehouse does not exist.');
-					return;
-				}
-
-				// Validate zone against warehouse limit
-				if ($zone > $warehouse->zones) {
-					$validator->errors()->add('zone', "Zone cannot exceed " . $warehouse->zones . " for this warehouse.");
-				}
-
-				// Validate aisle against warehouse limit (assuming there's an aisle_count property)
-				// Adjust the property name based on your actual database column
-				if (isset($warehouse->aisles) && $aisle > $warehouse->aisles) {
-					$validator->errors()->add('aisle', "Aisle cannot exceed " . $warehouse->aisles . " for this warehouse.");
-				}
-			});
 		}
 
 		/**
@@ -139,27 +102,27 @@
 		}
 
 		/**
-		 * Get the validated data.
-		 */
-		public function validated($key = null, $default = null): array {
-			$validated = parent::validated($key, $default);
-			return [
-				'product'   => $validated['product'],
-				'warehouse' => $validated['warehouse'],
-				'zone'      => $validated['zone'],
-				'aisle'     => $validated['aisle'],
-			];
-		}
-
-		/**
 		 * Prepare the data for validation.
 		 */
 		protected function prepareForValidation(): void {
+			$warehouse = $this->route('warehouse');
+
 			$this->merge([
-				'product'   => (int) $this->input('product'),
-				'warehouse' => (int) $this->route('warehouse')->id,
+				'product'   => $this->input('product') ? (int) $this->input('product') : null,
+				'warehouse' => $warehouse instanceof Warehouse ? $warehouse->id : (int) $this->input('warehouse'),
 				'zone'      => (int) Str::after($this->input('zone'), 'Z'),
 				'aisle'     => (int) Str::after($this->input('aisle'), 'A'),
+			]);
+		}
+
+		/**
+		 * Handle a passed validation attempt.
+		 */
+		protected function passedValidation(): void {
+			$warehouse = $this->route('warehouse');
+
+			$this->merge([
+				'warehouse_id' => $warehouse instanceof Warehouse ? $warehouse->id : (int) $this->input('warehouse'),
 			]);
 		}
 	}

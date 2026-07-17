@@ -3,13 +3,16 @@
 	namespace App\Services\Stock;
 
 	use App\Enums\Inventory\AdjustmentReason;
+	use Exception;
 
 	class AdjustmentReasonService {
 		/**
 		 * Generate complete HTML select dropdown for adjustment reasons
+		 *
+		 * @throws Exception
 		 */
 		public function generateReasonDropdown(?string $selectedValue = null, array $attributes = []): string {
-			$reasons = AdjustmentReason::forDropdown();
+			$reasons = AdjustmentReason::forDropdown()->toArray();
 
 			// Build select attributes
 			$selectAttributes = array_merge([

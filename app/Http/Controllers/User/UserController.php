@@ -3,6 +3,7 @@
 	namespace App\Http\Controllers\User;
 
 	use App\DataTransferObjects\UserDTO;
+	use App\Enums\Purchases\PurchaseOrderStatus;
 	use App\Http\Controllers\Controller;
 	use App\Models\Customer;
 	use App\Models\Product;
@@ -22,7 +23,7 @@
 			return view('user.dashboard', [
 				// 2. Μετατρέπουμε το Model σε DTO χρησιμοποιώντας τη static μέθοδο
 				'user'          => UserDTO::fromModel($userModel),
-				'pending'       => PurchaseOrder::query()->where('status', 'pending')->count(),
+				'pending'       => PurchaseOrder::query()->where('status_id', PurchaseOrderStatus::AWAITING_APPROVAL->value)->count(),
 				'warehouses'    => Warehouse::query()->count(),
 				'customers'     => Customer::query()->where('is_active', true)->count(),
 				'products'      => Product::query()->count(),

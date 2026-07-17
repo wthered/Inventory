@@ -4,7 +4,7 @@
 
 	use App\Contracts\StockMovementHeader;
 	use App\Enums\Inventory\AdjustmentReason;
-	use App\Enums\Inventory\TransactionReason;
+	use App\Enums\Inventory\MovementStatus;
 	use App\Enums\Inventory\TransactionType;
 	use App\Traits\HasStockMovement;
 	use Illuminate\Database\Eloquent\Model;
@@ -30,21 +30,23 @@
 			'adjustment_date',
 			'notes',
 			'status',
-			// draft, approved, rejected
 			'created_by',
 			'approved_by',
 			'approved_at',
 		];
 
 		protected $casts = [
-			"product"      => "integer",
-			"location"     => "integer",
-			"type"         => "string",
-			"quantity"     => 'integer',
-			"notes"        => "string",
-			"warehouse_id" => "integer",
-			"created_by"   => "integer",
-			'reason'       => AdjustmentReason::class,
+			"product"         => "integer",
+			"location"        => "integer",
+			"type"            => "string",
+			"quantity"        => 'integer',
+			"notes"           => "string",
+			"warehouse_id"    => "integer",
+			"created_at"      => "datetime",
+			"approved_at"     => "datetime",
+			"adjustment_date" => "date:Y-m-d",
+			'reason'          => AdjustmentReason::class,
+			"status"          => MovementStatus::class,
 		];
 
 		/*
@@ -75,6 +77,7 @@
 		public function locations(): BelongsTo {
 			return $this->belongsTo(WarehouseLocation::class);
 		}
+
 		/**
 		 * Get the user who performed the adjustment.
 		 */
@@ -90,7 +93,10 @@
 		}
 
 		public function getSourceWarehouseId(): ?int { return $this->warehouse_id; }
+
 		public function getTargetWarehouseId(): ?int { return null; }
+
 		public function getMovementReason(): string { return TransactionType::ADJUSTMENT->value; }
+
 		public function getReferenceModel(): Model { return $this; }
 	}

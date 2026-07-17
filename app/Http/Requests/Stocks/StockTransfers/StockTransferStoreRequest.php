@@ -33,13 +33,17 @@
 				'product_id' => [
 					'required',
 					'integer',
-					Rule::exists('products', 'id'),
-					// Add custom rule to check if product exists in source warehouse
+					Rule::exists('products', 'id')->whereNull('deleted_at'),
+					// Έλεγχος αν το προϊόν υπάρχει γενικά στο source warehouse
 					function ($attribute, $value, $fail) {
 						$sourceWarehouseId = $this->input('sourceLocation.warehouse');
 						if ($sourceWarehouseId) {
-							$location = Inventory::query()->where('product_id', $value)->where('warehouse_id', $sourceWarehouseId);
-							if (!$location->exists()) {
+							$exists = Inventory::query()
+								->where('product_id', $value)
+								->where('warehouse_id', $sourceWarehouseId)
+								->exists();
+
+							if (!$exists) {
 								$fail('The selected product is not available in the source warehouse.');
 							}
 						}
@@ -50,14 +54,29 @@
 					'required',
 					'integer',
 					'min:1',
-					// Check if source has enough stock
+					// Έλεγχος διαθέσιμου αποθέματος στη συγκεκριμένη θέση
 					function ($attribute, $value, $fail) {
 						$productId         = $this->input('product_id');
 						$sourceWarehouseId = $this->input('sourceLocation.warehouse');
-						$sourceLocation = $this->input('location_id');
 
 						if ($productId && $sourceWarehouseId) {
-							$currentStock = Inventory::where('product_id', $productId)->where('warehouse_id', $sourceWarehouseId)->where('location_id', $sourceLocation)->value('available_quantity') ?? 0;
+							$query = Inventory::where('product_id', $productId)->where('warehouse_id', $sourceWarehouseId);
+
+							// Αν υπάρχει συγκεκριμένο location_id το χρησιμοποιούμε,
+							// αλλιώς φιλτράρουμε με τα ιεραρχικά στοιχεία της θέσης
+							if ($this->input('location_id')) {
+								$query->where('location_id', $this->input('location_id'));
+							} else {
+								$query->whereHas('location', function ($q) {
+									$q->where('zone', $this->input('sourceLocation.zone'))
+										->where('aisle', $this->input('sourceLocation.aisle'))
+										->where('rack', $this->input('sourceLocation.rack'))
+										->where('shelf', $this->input('sourceLocation.shelf'))
+										->where('bin', $this->input('sourceLocation.bin'));
+								});
+							}
+
+							$currentStock = $query->value('available_quantity') ?? 0;
 
 							if (intval($value) > $currentStock) {
 								$fail("Insufficient stock. Available: " . $currentStock);
@@ -76,7 +95,7 @@
 				'sourceLocation.warehouse' => [
 					'required',
 					'integer',
-					Rule::exists('warehouses', 'id'),
+					Rule::exists('warehouses', 'id')->whereNull('deleted_at'),
 				],
 				'sourceLocation.zone'      => [
 					'required',
@@ -108,7 +127,7 @@
 				'targetLocation.warehouse' => [
 					'required',
 					'integer',
-					Rule::exists('warehouses', 'id'),
+					Rule::exists('warehouses', 'id')->whereNull('deleted_at'),
 				],
 				'targetLocation.zone'      => [
 					'required',
@@ -136,11 +155,10 @@
 					new ValidBinForWarehouse($this->input('targetLocation.warehouse')),
 				],
 
-				// Optional location_id (if you're updating an existing location)
 				'location_id'              => [
 					'nullable',
 					'integer',
-					Rule::exists('warehouse_locations', 'id'),
+					Rule::exists('warehouse_locations', 'id')->whereNull('deleted_at'),
 				],
 			];
 		}
@@ -151,40 +169,32 @@
 				'product_id.exists'   => 'The selected product does not exist.',
 
 				'quantity.required' => 'Quantity is required.',
-				'quantity.numeric'  => 'Quantity must be a number.',
-				'quantity.min'      => 'Quantity must be at least 0.01.',
-				'quantity.max'      => 'Quantity is too large.',
+				'quantity.integer'  => 'Quantity must be a valid integer.',
+				'quantity.min'      => 'Quantity must be at least 1.',
 
-				'sourceLocation.warehouse.required'  => 'Source warehouse is required.',
-				'sourceLocation.warehouse.exists'    => 'The source warehouse does not exist.',
-				'sourceLocation.warehouse.string'    => 'Source warehouse should be a string and not and not :input',
+				'sourceLocation.warehouse.required' => 'Source warehouse is required.',
+				'sourceLocation.warehouse.exists'   => 'The source warehouse does not exist.',
 
 				'sourceLocation.zone.required'  => 'Source zone is required.',
-				'sourceLocation.zone.integer'    => 'Source zone should be a string and not and :input.',
-
+				'sourceLocation.zone.integer'   => 'Source zone must be an integer.',
 				'sourceLocation.aisle.required' => 'Source aisle is required.',
-				'sourceLocation.aisle.integer'    => 'Source aisle should be a number and not and :input.',
-
+				'sourceLocation.aisle.integer'  => 'Source aisle must be an integer.',
 				'sourceLocation.rack.required'  => 'Source rack is required.',
-				'sourceLocation.rack.integer' => 'Source rack should be a number and not and :input.',
-
+				'sourceLocation.rack.integer'   => 'Source rack must be an integer.',
 				'sourceLocation.shelf.required' => 'Source shelf is required.',
-				'sourceLocation.shelf.integer' => 'Source shelf should be a number and not and :input.',
-
+				'sourceLocation.shelf.integer'  => 'Source shelf must be an integer.',
 				'sourceLocation.bin.required'   => 'Source bin is required.',
-				'sourceLocation.bin.integer' => 'Source bin should be a number and not and :input.',
+				'sourceLocation.bin.integer'    => 'Source bin must be an integer.',
 
-				'targetLocation.warehouse.required'  => 'Target warehouse is required.',
-				'targetLocation.warehouse.exists'    => 'The target warehouse does not exist.',
-				'targetLocation.warehouse.string'    => 'Target warehouse should be a string and not and not and :input',
+				'targetLocation.warehouse.required' => 'Target warehouse is required.',
+				'targetLocation.warehouse.exists'   => 'The target warehouse does not exist.',
+				'targetLocation.zone.required'      => 'Target zone is required.',
+				'targetLocation.aisle.required'     => 'Target aisle is required.',
+				'targetLocation.rack.required'      => 'Target rack is required.',
+				'targetLocation.shelf.required'     => 'Target shelf is required.',
+				'targetLocation.bin.required'       => 'Target bin is required.',
 
-				'targetLocation.zone.required'  => 'Target zone is required.',
-				'targetLocation.aisle.required' => 'Target aisle is required.',
-				'targetLocation.rack.required'  => 'Target rack is required.',
-				'targetLocation.shelf.required' => 'Target shelf is required.',
-				'targetLocation.bin.required'   => 'Target bin is required.',
-
-				'notes.max' => 'Notes cannot exceed 1000 characters.',
+				'notes.max' => 'Notes cannot exceed 255 characters.',
 			];
 		}
 
@@ -208,36 +218,34 @@
 		}
 
 		/**
-		 * Get the validated data with location objects.
+		 * Handle a passed validation attempt.
+		 * * Αυτή η μέθοδος τρέχει ΜΟΝΟ αν το validation πετύχει.
+		 * Αναδιαμορφώνει τη δομή των δεδομένων πριν αυτά πάνε στον Controller.
 		 */
-		public function validated($key = null, $default = null) {
-			$validated = parent::validated($key, $default);
+		protected function passedValidation(): void {
+			// Δημιουργούμε τα flat αντικείμενα τοποθεσιών που θέλει ο Controller μας
+			$this->merge([
+				'source_location' => [
+					'warehouse_id' => $this->input('sourceLocation.warehouse'),
+					'zone'         => $this->input('sourceLocation.zone'),
+					'aisle'        => $this->input('sourceLocation.aisle'),
+					'rack'         => $this->input('sourceLocation.rack'),
+					'shelf'        => $this->input('sourceLocation.shelf'),
+					'bin'          => $this->input('sourceLocation.bin'),
+				],
+				'target_location' => [
+					'warehouse_id' => $this->input('targetLocation.warehouse'),
+					'zone'         => $this->input('targetLocation.zone'),
+					'aisle'        => $this->input('targetLocation.aisle'),
+					'rack'         => $this->input('targetLocation.rack'),
+					'shelf'        => $this->input('targetLocation.shelf'),
+					'bin'          => $this->input('targetLocation.bin'),
+				],
+			]);
 
-//			dd($validated);
-
-			// Create location objects from the nested arrays
-			$validated['source_location'] = [
-				'warehouse_id' => $validated['sourceLocation']['warehouse'],
-				'zone'         => $validated['sourceLocation']['zone'],
-				'aisle'        => $validated['sourceLocation']['aisle'],
-				'rack'         => $validated['sourceLocation']['rack'],
-				'shelf'        => $validated['sourceLocation']['shelf'],
-				'bin'          => $validated['sourceLocation']['bin'],
-			];
-
-			$validated['target_location'] = [
-				'warehouse_id' => $validated['targetLocation']['warehouse'],
-				'zone'         => $validated['targetLocation']['zone'],
-				'aisle'        => $validated['targetLocation']['aisle'],
-				'rack'         => $validated['targetLocation']['rack'],
-				'shelf'        => $validated['targetLocation']['shelf'],
-				'bin'          => $validated['targetLocation']['bin'],
-			];
-
-			// Remove the nested arrays if you don't need them
-			unset($validated['sourceLocation'], $validated['targetLocation']);
-
-			return $validated;
+			// Αφαιρούμε τα παλιά nested arrays από το Request, ώστε να μην μπερδεύουν τον Controller
+			$this->request->remove('sourceLocation');
+			$this->request->remove('targetLocation');
 		}
 
 		/**
@@ -245,27 +253,28 @@
 		 */
 		protected function prepareForValidation(): void {
 			$this->merge([
-				'product_id'     => (int) $this->input('product_id'),
-				'quantity'       => (int) $this->input('quantity'),
+				'product_id' => $this->input('product_id') ? (int) $this->input('product_id') : null,
+				'quantity'   => $this->input('quantity') ? (int) $this->input('quantity') : null,
+
 				'sourceLocation' => [
 					'warehouse' => (int) $this->input('sourceLocation.warehouse'),
-					'zone'      => (int) Str::after($this->input('sourceLocation.zone'), 'Z'),
-					'aisle'     => (int) Str::after($this->input('sourceLocation.aisle'), 'A'),
+					'zone'      => (int) Str::after($this->input('sourceLocation.zone'), config('warehouses.prefixes.zone')),
+					'aisle'     => (int) Str::after($this->input('sourceLocation.aisle'), config('warehouses.prefixes.aisle')),
 					'rack'      => (int) $this->input('sourceLocation.rack'),
 					'shelf'     => (int) $this->input('sourceLocation.shelf'),
 					'bin'       => (int) $this->input('sourceLocation.bin'),
 				],
+
 				'targetLocation' => [
 					'warehouse' => (int) $this->input('targetLocation.warehouse'),
-					'zone'      => (int) Str::after($this->input('targetLocation.zone'), 'Z'),
-					'aisle'     => (int) Str::after($this->input('targetLocation.aisle'), 'A'),
+					'zone'      => (int) Str::after($this->input('targetLocation.zone'), config('warehouses.prefixes.zone')),
+					'aisle'     => (int) Str::after($this->input('targetLocation.aisle'), config('warehouses.prefixes.aisle')),
 					'rack'      => (int) $this->input('targetLocation.rack'),
 					'shelf'     => (int) $this->input('targetLocation.shelf'),
 					'bin'       => (int) $this->input('targetLocation.bin'),
 				],
-				'location_id'    => !empty($this->input('location_id')) ? intval($this->input('location_id')) : null,
-			]);
 
-//			dd($this->input());
+				'location_id' => !empty($this->input('location_id')) ? (int) $this->input('location_id') : null,
+			]);
 		}
 	}

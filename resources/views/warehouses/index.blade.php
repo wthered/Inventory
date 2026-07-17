@@ -1,17 +1,17 @@
+@php use App\Enums\WarehouseType;use App\Models\Warehouse; @endphp
 @extends('templates.general')
 
 @section('title', 'Warehouses Management')
 
 @section('styles')
     <link rel="stylesheet" href="{{ asset('css/warehouses/index.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/warehouses/pagination.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/pagination.css') }}">
 @endsection
 
 @section('content')
-    <div class="warehouse-container" id="box">
-        <!-- Header -->
-        <div class="warehouse-header">
-            <div>
+    <div class="warehouse-container">
+        <header class="warehouse-header">
+            <div class="header-main">
                 <h1 class="warehouse-title">
                     <span class="warehouse-icon">🏢</span>
                     Warehouse Management
@@ -19,302 +19,156 @@
                 <p class="warehouse-subtitle">Manage storage locations and inventory distribution</p>
             </div>
             <div class="header-actions">
-                @can('create', \App\Models\Warehouse::class)
-                    <a href="{{ route('inventory.warehouses.warehouse.create') }}" class="btn-primary">
-                        <span class="btn-icon">+</span>
-                        Add Warehouse
+                @can('create', Warehouse::class)
+                    <a href="{{ route('inventory.warehouses.create') }}" class="btn-primary">
+                        <span class="btn-icon-plus">+</span> Add Warehouse
                     </a>
                 @endcan
             </div>
-        </div>
+        </header>
 
-        <!-- Search & Filters -->
         <div class="card filters-card">
             <div class="card-header">
-                <h3 class="card-title">Filter Warehouses</h3>
+                <h3 class="card-title">🔍 Filter Warehouses</h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('inventory.warehouses.warehouse.index') }}" method="GET" class="filter-form">
+                <form action="{{ route('inventory.warehouses.index') }}" method="GET" class="filter-form">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="search" class="form-label">Search</label>
-                            <div class="search-input-group">
-                                <span class="search-icon">🔍</span>
-                                <input type="text"
-                                       id="search"
-                                       name="search"
-                                       class="form-control search-input"
-                                       placeholder="Search by name, code, location..."
-                                       value="{{ request('search') }}">
-                                <button type="submit" class="search-button">Search</button>
-                            </div>
+                            <input type="text" name="search" id="search" value="{{ request('search') }}" class="form-control" placeholder="Name, code, city, country...">
                         </div>
-
+                        <div class="form-group">
+                            <label for="type" class="form-label">Warehouse Type</label>
+                            <select name="type" id="type" class="form-select">
+                                <option value="">All Types</option>
+                                @foreach(WarehouseType::cases() as $type)
+                                    <option value="{{ $type->value }}" {{ request('type') == $type->value ? 'selected' : '' }}>
+                                        {{ $type->label() }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="form-group">
                             <label for="status" class="form-label">Status</label>
-                            <select id="status" name="status" class="form-select">
+                            <select name="status" id="status" class="form-select">
                                 <option value="">All Statuses</option>
-                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                <option value="maintenance" {{ request('status') == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
+                                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active
+                                    Only
+                                </option>
+                                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>
+                                    Inactive Only
+                                </option>
                             </select>
                         </div>
-
-                        <div class="form-group">
-                            <label for="sort" class="form-label">Sort By</label>
-                            <select id="sort" name="sort" class="form-select">
-                                <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Name (A-Z)</option>
-                                <option value="created_at" {{ request('sort') == 'created_at' ? 'selected' : '' }}>Date Added</option>
-                                <option value="capacity" {{ request('sort') == 'capacity' ? 'selected' : '' }}>Capacity</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">&nbsp;</label>
-                            <div class="filter-buttons">
-                                <button type="submit" class="btn-secondary">
-                                    Apply Filters
-                                </button>
-                                <a href="{{ route('inventory.warehouses.warehouse.index') }}" class="btn-outline">
-                                    Clear
-                                </a>
-                            </div>
-                        </div>
+                    </div>
+                    <div class="filter-actions-bar">
+                        <a href="{{ route('inventory.warehouses.index') }}" class="btn-outline">Reset</a>
+                        <button type="submit" class="btn-primary">Apply Filters</button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- Statistics Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-content">
-                    <div class="stat-info">
-                        <span class="stat-label">Total Warehouses</span>
-                        <span class="stat-value">4</span>
-                    </div>
-                    <div class="stat-icon">
-                        <span>🏭</span>
-                    </div>
-                </div>
-                <div class="stat-trend up">+2 this month</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-content">
-                    <div class="stat-info">
-                        <span class="stat-label">Active Warehouses</span>
-                        <span class="stat-value">{{ $warehouses->where('is_active', true)->count() }}</span>
-                    </div>
-                    <div class="stat-icon">
-                        <span>✅</span>
-                    </div>
-                </div>
-                <div class="stat-trend">Operational</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-content">
-                    <div class="stat-info">
-                        <span class="stat-label">Total Capacity</span>
-                        <span class="stat-value">{{ number_format($warehouses->sum('capacity')) }}</span>
-                        <span class="stat-unit">sq.ft</span>
-                    </div>
-                    <div class="stat-icon">
-                        <span>📏</span>
-                    </div>
-                </div>
-                <div class="stat-trend">Available space</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-content">
-                    <div class="stat-info">
-                        <span class="stat-label">Avg Occupancy</span>
-                        <span class="stat-value">78%</span>
-                    </div>
-                    <div class="stat-icon">
-                        <span>📊</span>
-                    </div>
-                </div>
-                <div class="stat-trend down">-2% from last month</div>
-            </div>
-        </div>
-
-        <!-- Main Table -->
-        <div class="card">
-            <div class="card-header table-header">
-                <h3 class="card-title">Warehouse List</h3>
+        <div class="card table-card">
+            <div class="card-header table-header-flex">
+                <h3 class="card-title">Warehouse Records ({{ $warehouses->total() }})</h3>
                 <div class="table-actions">
-                    <div class="bulk-actions">
-                        <select id="bulkAction" class="form-select bulk-select">
-                            <option value="">Bulk Actions</option>
-                            <option value="activate">Activate</option>
-                            <option value="deactivate">Deactivate</option>
-                            <option value="delete">Delete</option>
-                        </select>
-                        <button id="applyBulkAction" class="btn-outline">Apply</button>
-                    </div>
-                    <button class="btn-outline" onclick="exportTable()">
-                        <span class="btn-icon">📥</span>
-                        Export
-                    </button>
                 </div>
             </div>
-
-            <div class="table-container">
-                <table class="warehouse-table">
-                    <thead>
-                    <tr>
-                        <th class="checkbox-col">
-                            <input type="checkbox" id="selectAll" class="table-checkbox">
-                        </th>
-                        <th>Warehouse</th>
-                        <th>Location</th>
-                        <th>Capacity</th>
-                        <th>Inventory</th>
-                        <th>Status</th>
-                        <th>Last Updated</th>
-                        <th class="actions-col">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @forelse($warehouses as $warehouse)
-                        <tr class="warehouse-row">
-                            <td class="checkbox-col">
-                                <input type="checkbox" value="{{ $warehouse->id }}" class="table-checkbox row-checkbox">
-                            </td>
-                            <td>
-                                <div class="warehouse-info">
-                                    <div class="warehouse-avatar">
-                                        {{ substr($warehouse->name, 0, 2) }}
-                                    </div>
-                                    <div class="warehouse-details">
-                                        <div class="warehouse-name">{{ $warehouse->name }}</div>
-                                        <div class="warehouse-code">{{ $warehouse->code }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="location-info">
-                                    <div class="location-text">{{ $warehouse->city }}, {{ $warehouse->country }}</div>
-                                    <div class="location-address">{{ Str::limit($warehouse->address, 30) }}</div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="capacity-container">
-                                    <div class="capacity-bar">
-                                        <div class="capacity-fill" style="width: {{ min(100, ($warehouse->current_capacity / max(1, $warehouse->capacity)) * 100) }}%"></div>
-                                    </div>
-                                    <div class="capacity-text">
-                                        {{ number_format($warehouse->current_capacity) }} / {{ number_format($warehouse->capacity) }}
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="inventory-count">
-                                    <span class="count-badge">{{ $warehouse->inventory_items_count ?? 0 }}</span>
-                                    <span class="count-label">items</span>
-                                </div>
-                            </td>
-                            <td>
-                            <span class="status-badge status-{{ $warehouse->deleted_at ? 'inactive' : 'active' }}">
-                                {{ $warehouse->deleted_at ? 'Inactive' : 'Active' }}
-                                @if($warehouse->under_maintenance)
-                                    <span class="maintenance-indicator">⚠️</span>
-                                @endif
-                            </span>
-                            </td>
-                            <td>
-                                <div class="timestamp">
-                                    <div class="time-ago">{{ $warehouse->updated_at->diffForHumans() }}</div>
-                                    <div class="date">{{ $warehouse->updated_at->format('M d, Y') }}</div>
-                                </div>
-                            </td>
-                            <td class="actions-col">
-                                <div class="action-buttons">
-                                    <a href="{{ route('inventory.warehouses.warehouse.show', $warehouse) }}" class="action-btn view-btn" title="View">
-                                        👁️
-                                    </a>
-                                    @can('update', $warehouse)
-                                        <a href="{{ route('inventory.warehouses.warehouse.edit', $warehouse) }}" class="action-btn edit-btn" title="Edit">
-                                            ✏️
-                                        </a>
-                                    @endcan
-                                    @can('delete', $warehouse)
-                                        <button class="action-btn delete-btn"
-                                                title="Delete"
-                                                onclick="showDeleteModal('{{ $warehouse->id }}', '{{ $warehouse->name }}')">
-                                            🗑️
-                                        </button>
-                                    @endcan
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
+            <div class="card-body no-padding">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
                         <tr>
-                            <td colspan="8" class="empty-state">
-                                <div class="empty-content">
-                                    <div class="empty-icon">🏢</div>
-                                    <h3>No Warehouses Found</h3>
-                                    <p>Get started by creating your first warehouse</p>
-                                    @can('create', \App\Models\Warehouse::class)
-                                        <a href="{{ route('inventory.warehouses.warehouse.create') }}" class="btn-primary">
-                                            Create Warehouse
-                                        </a>
-                                    @endcan
-                                </div>
-                            </td>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Location</th>
+                            <th>Manager</th>
+                            <th>Type</th>
+                            <th class="text-right">Total Locations (slots)</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
                         </tr>
-                    @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            @if($warehouses->hasPages())
-                <div class="table-footer">
-                    <div class="pagination-info">
-                        Showing {{ $warehouses->firstItem() ?? 0 }} to {{ $warehouses->lastItem() ?? 0 }} of 5 warehouses
-                    </div>
-                    <div class="pagination-controls">
-                        {{ $warehouses->links('vendor.pagination.simple') }}
-                    </div>
+                        </thead>
+                        <tbody>
+                        @forelse($warehouses as $warehouse)
+                            <tr>
+                                <td>
+                                    <span class="code-value">{{ $warehouse->code }}</span>
+                                </td>
+                                <td>
+                                    <div class="warehouse-name-cell">
+                                        <a href="{{ route('inventory.warehouses.show', $warehouse->id) }}" class="record-link">
+                                            {{ $warehouse->name }}
+                                        </a>
+                                        @if($warehouse->isPrimary)
+                                            <span class="inline-badge-primary" title="Primary Warehouse">⭐ Primary</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="location-text">📍 {{ $warehouse->city }}, {{ $warehouse->country }}</span>
+                                </td>
+                                <td>
+                                    <span class="manager-text">{{ $warehouse->manager?->account?->full_name ?? '—' }}</span>
+                                </td>
+                                <td>
+                                    <span class="type-text">{{ $warehouse->type->label() }}</span>
+                                </td>
+                                <td class="text-right font-numeric">
+                                    <div class="capacity-cell-wrapper">
+                                        <span class="capacity-numbers">
+                                            📍 <strong>{{ $warehouse->locations_count ?? $warehouse->locations()->count() }}</strong>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-{{ $warehouse->is_active ? 'active' : 'inactive' }}">
+                                        {{ $warehouse->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="actions-cell-group">
+                                        <a href="{{ route('inventory.warehouses.show', $warehouse->id) }}" class="btn-icon" title="View Details">👁️</a>
+                                        @can('update', $warehouse)
+                                            <a href="{{ route('inventory.warehouses.edit', $warehouse->id) }}" class="btn-icon edit-icon" title="Edit">✏️</a>
+                                        @endcan
+                                        @can('delete', $warehouse)
+                                            <button type="button" class="btn-icon delete-icon" title="Delete" onclick="openDeleteModal({{ $warehouse->id }}, '{{ addslashes($warehouse->name) }}')">
+                                                🗑️
+                                            </button>
+                                        @endcan
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="text-center no-records">
+                                    No warehouse locations matched your filtering criteria.
+                                </td>
+                            </tr>
+                        @endforelse
+                        </tbody>
+                    </table>
                 </div>
-            @endif
+            </div>
         </div>
 
-        <!-- Quick Links -->
-        <div class="quick-links">
-            <div class="quick-link-card">
-                <div class="quick-link-icon">📦</div>
-                <div class="quick-link-content">
-                    <h4>Inventory Management</h4>
-                    <p>View and manage all inventory items</p>
-                    <a href="{{ route('inventory.inventory.index') }}" class="quick-link-btn">Go to Inventory →</a>
-                </div>
-            </div>
+        <div class="pagination-wrapper">
+            {{ $warehouses->links('vendor.pagination.default_custom') }}
+        </div>
 
-            <div class="quick-link-card">
-                <div class="quick-link-icon">🔄</div>
-                <div class="quick-link-content">
-                    <h4>Transfers</h4>
-                    <p>Manage transfers between warehouses</p>
-                    <a href="#" class="quick-link-btn">View Transfers from view transfers.index →</a>
-                </div>
-            </div>
-
-            <div class="quick-link-card">
-                <div class="quick-link-icon">📈</div>
-                <div class="quick-link-content">
-                    <h4>Reports</h4>
-                    <p>View warehouse performance reports</p>
-                    <a href="#" class="quick-link-btn">Generate Report from reports.warehouses →</a>
+        <div class="quick-links-grid">
+            <div class="card report-card-hint">
+                <div class="card-body">
+                    <h4>📊 Warehouse Performance Reports</h4>
+                    <p>Analyze layout efficiency, capacity occupancy records, and log activities.</p>
+                    <a href="#" class="quick-link-action">Generate Analytics Overview →</a>
                 </div>
             </div>
         </div>
 
-        <!-- Delete Modal -->
         <div id="deleteModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -322,17 +176,19 @@
                     <button class="modal-close" onclick="closeModal()">×</button>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure you want to delete <strong id="deleteWarehouseName"></strong>?</p>
+                    <p>Are you sure you want to completely drop <strong id=\"deleteWarehouseName\"></strong> from
+                        database management systems?</p>
                     <div class="warning-box">
-                        ⚠️ This action cannot be undone. All associated inventory will be removed.
+                        ⚠️ Danger: This computational drop process is completely absolute. All structural assignments
+                        and related localized stock maps are altered irrevocably.
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn-outline" onclick="closeModal()">Cancel</button>
+                    <button class="btn-outline" onclick="closeModal()">Cancel Procedure</button>
                     <form id="deleteForm" method="POST" style="display: inline;">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn-danger">Delete Warehouse</button>
+                        <button type="submit" class="btn-danger">Confirm Delete</button>
                     </form>
                 </div>
             </div>

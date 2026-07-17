@@ -48,8 +48,6 @@
 		public function getLocations(FetchProductLocationOptionsRequest $request, Product $product): JsonResponse {
 			$input = $request->validated();
 
-//			dd($input);
-
 			$options = $this->locationService->getLocationOptions($product->id, $input['warehouse'], $input['location'] ?? null);
 
 			return response()->json($options);

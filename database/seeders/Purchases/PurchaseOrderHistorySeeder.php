@@ -15,12 +15,9 @@
 		 * Run the database seeds.
 		 */
 		public function run(): void {
-
 			$totalHistoryCount = 0;
 			$historyInserts    = [];
-			$now               = Carbon::now();
 
-			// 1. Load IDs for efficient random selection (avoids loading full Eloquent models)
 			$purchaseOrderIds = PurchaseOrder::query()->pluck('id')->all();
 			$userIds          = User::query()->pluck('id')->all();
 
@@ -29,63 +26,51 @@
 				return;
 			}
 
-			// 2. Loop through every Purchase Order ID to create a history trail
 			foreach ($purchaseOrderIds as $order_id) {
-
-				// Randomly select a user who initiated these changes
 				$userId = Arr::random($userIds);
 
-				// Randomly generate between 4 and 8 events per Purchase Order
-				$numEvents = mt_rand(4, 8);
+				// 2 έως 4 λογικά βήματα ιστορικού ανά παραγγελία
+				$numEvents = mt_rand(2, 4);
+				$orderRecord = PurchaseOrder::find($order_id);
+				$baseTime = Carbon::parse($orderRecord->order_date);
+
+				$events = ['Created', 'Approved', 'Items Verified', 'Status Shifted'];
 
 				for ($i = 0; $i < $numEvents; $i++) {
+					$event = $events[$i] ?? 'General Update';
+					$historyTime = $baseTime->copy()->addHours($i * mt_rand(2, 24));
 
-					// Simulate event time: occurred randomly within the last 3 days (72 hours)
-					$hoursAgo = mt_rand(0, 72);
-
-					// Generate a precise, random timestamp for creation/update
-					$historyTime = $now->copy()->subHours($hoursAgo)->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59))->timezone(config('app.timezone', 'UTC'))->toDateTimeString();
-
-					// Event type rotation
-					$events = [
-						'Created',
-						'Status Changed',
-						'Item Updated',
-						'Vendor Note Added',
-						'Invoice Attached',
-						'Received'
-					];
-					$event  = Arr::random($events);
-
-					// Simple dynamic description based on event
 					$description = match ($event) {
-						'Created' => 'Purchase Order initialized.',
-						'Status Changed' => 'Status updated to ' . Arr::random([
-								'Awaiting Approval',
-								'Sent to Vendor',
-								'Completed'
-							]),
-						'Item Updated' => 'Quantity or price adjusted for an item.',
-						'Vendor Note Added' => 'Vendor communication added to the record.',
-						'Invoice Attached' => 'Received and attached invoice document.',
-						'Received' => 'Partial or full receipt recorded.',
-						default => 'General update.',
+						'Created'        => 'Purchase Order initialized in the system.',
+						'Approved'       => 'Order reviewed and approved by warehouse authorities.',
+						'Items Verified' => 'Physical goods matching delivery notes verified.',
+						'Status Shifted' => 'Order state migrated to its final status code.',
+						default          => 'System automation state trigger.',
 					};
+
+					// Δομημένα JSON details όπως απαιτεί η νέα μας έκδοση
+					$jsonDetails = [
+						'triggered_by' => 'User ID ' . $userId,
+						'context'      => Str::slug($event, '_'),
+						'snapshot'     => [
+							'status_id'   => $orderRecord->status_id,
+							'grand_total' => $orderRecord->grand_total
+						]
+					];
 
 					$historyInserts[] = [
 						'purchase_order_id' => $order_id,
 						'user_id'           => $userId,
 						'action'            => Str::lower(Str::replace(' ', '_', $event)),
 						'event'             => $event,
-						'details'           => $description,
+						'details'           => json_encode($jsonDetails), // Cast σε JSON string για το insert
 						'description'       => $description,
-						'created_at'        => $historyTime,
-						'updated_at'        => $historyTime,
+						'created_at'        => $historyTime->toDateTimeString(),
+						'updated_at'        => $historyTime->toDateTimeString(),
 					];
 
 					$totalHistoryCount++;
 
-					// 3. Chunked Insertion: If the batch hits the size limit, insert and clear
 					if (count($historyInserts) >= self::BATCH_SIZE) {
 						DB::table('purchase_order_histories')->insert($historyInserts);
 						$historyInserts = [];
@@ -93,11 +78,10 @@
 				}
 			}
 
-			// 4. Insert remaining records
 			if (!empty($historyInserts)) {
 				DB::table('purchase_order_histories')->insert($historyInserts);
 			}
 
-			$this->command->info("Successfully seeded " . $totalHistoryCount . " Purchase Order history records via chunked insertion.");
+			$this->command->info("Successfully seeded {$totalHistoryCount} purchase order history log entries.");
 		}
 	}

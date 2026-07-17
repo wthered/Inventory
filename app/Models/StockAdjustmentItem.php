@@ -3,6 +3,8 @@
 	namespace App\Models;
 
 	use App\Contracts\StockMoveable;
+	use App\Enums\Inventory\AdjustmentReason;
+	use App\Enums\Inventory\AdjustmentType;
 	use App\Models\Inventories\InventoryTransaction;
 	use Carbon\Carbon;
 	use Illuminate\Database\Eloquent\Model;
@@ -54,6 +56,8 @@
 			'quantity_after'      => 'integer',
 			'unit_cost'           => 'float',
 			'notes'               => 'string',
+			'reason'              => AdjustmentReason::class,
+			'type'                => AdjustmentType::class,
 		];
 
 		/*

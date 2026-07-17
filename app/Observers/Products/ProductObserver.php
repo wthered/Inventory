@@ -143,6 +143,8 @@
 
 		/**
 		 * Ενέργεια: creating (Πριν τη Δημιουργία)
+		 *
+		 * @throws Exception
 		 */
 		public function creating(Product $product): void {
 			// Auto-generate SKU if not provided
@@ -160,7 +162,7 @@
 		 * @throws Exception
 		 */
 		private function generateUniqueSku(): string {
-			$maxAttempts = 100;
+			$maxAttempts = 128;
 			$attempts    = 0;
 
 			do {
@@ -170,9 +172,7 @@
 				if ($attempts >= $maxAttempts) {
 					throw new Exception('Failed to generate unique SKU after '.$maxAttempts.' attempts');
 				}
-			} while (Product::query()
-				->where('sku', $sku)
-				->exists());
+			} while (Product::query()->where('sku', $sku)->exists());
 
 			return $sku;
 		}

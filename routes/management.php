@@ -1,5 +1,6 @@
 <?php
 
+	use App\Http\Controllers\BrandController;
 	use App\Http\Controllers\FilterController;
 	use App\Http\Controllers\Inventory\CategoryController;
 	use App\Http\Controllers\Inventory\CustomerController;
@@ -11,194 +12,123 @@
 	use App\Http\Controllers\InvoiceController;
 	use App\Http\Controllers\Reports\InventoryController;
 	use App\Http\Controllers\Stock\StockAdjustmentController;
+	use App\Http\Controllers\Stock\StockReturnController;
 	use App\Http\Controllers\Stock\StockTransferController;
 	use Illuminate\Support\Facades\Route;
 
-	/******************************************************************
-	 ** If you want modern grouping + prefixes → bootstrap/app.php
-	 ** If you want simple inclusion → require in web.php
-	 ** I chose the most modern option (bootstrap/app.php)
-	 ******************************************************************/
+	/*
+	|--------------------------------------------------------------------------
+	| Inventory Catalog Management Routes
+	|--------------------------------------------------------------------------
+	*/
 
-	Route::middleware([
-		'auth',
-		'verified'
-	])->group(function () {
+	// Products & Categories Resource Operations
+	Route::resource('products', ProductController::class);
 
-		// Products Resource
-		Route::resource('products', ProductController::class);
+	// Search products for adjustments or other dropdown autocompletes
+	Route::post('/products/search', [ProductController::class, 'search'])->name('products.search');
 
-		Route::prefix('products')->name('products.')->group(function () {
-			// Product Image
-			Route::post('/{product}/upload-images', [
-				ProductImageController::class,
-				'store'
-			])->name('image.upload');
+	Route::prefix('products')->group(function () {
+		Route::post('/{product}/upload-images', [
+			ProductImageController::class, 'store'
+		])->name('products.image.upload');
+		Route::delete('/image/{image}', [ProductImageController::class, 'destroy'])->name('products.image.destroy');
 
-			// filter products in http://inventory.pliassas.gr/products
-			Route::post('/filter', [
-				FilterController::class,
-				'products'
-			]);
+		Route::resource('categories', CategoryController::class);
 
-			Route::delete('/{product}/remove-image', [
-				ProductImageController::class,
-				'delete'
-			])->name('image.remove');
-
-			// Διαδρομή για την ενέργεια Clone (αντιγραφή)
-			Route::get('{product}/clone', [
-				ProductController::class,
-				'clone'
-			])->name('clone');
-
-			// Διαδρομή για την προβολή ιστορικού
-			Route::get('{product}/history', [
-				ProductController::class,
-				'history'
-			])->name('history');
-
-			Route::post('{product}/locations', [
-				InventoryController::class,
-				'getLocations'
-			])->name('locations');
-
-			Route::post('{product}/inventories', [
-				InventoryController::class,
-				'getInventories'
-			])->name('inventories');
-
-			Route::post('{product}/information', [
-				ProductController::class,
-				'getInformation'
-			])->name('information');
-
-			Route::resource('categories', CategoryController::class);
-
-			Route::prefix('categories')->name('categories.')->group(function () {
-				// Get all level 2 categories
-				Route::post('/{category}/filter', [
-					CategoryController::class,
-					'filter'
-				])->name('getSubCategories');
-			});
-		});
-
-		// Warehouses
-		Route::prefix('warehouses')->name('warehouses.')->group(function () {
-			Route::resource('warehouse', WarehouseController::class);
-
-			Route::post('/warehouse/{warehouse}/locations', [
-				WarehouseController::class,
-				'getLocations'
-			])->name('locations');
-
-			Route::post('/warehouse/{warehouse}/locations/zones', [
-				WarehouseController::class,
-				'getZones'
-			])->name('locations');
-
-			Route::post('/warehouse/{warehouse}/locations/aisles', [
-				WarehouseController::class,
-				'getAisles'
-			])->name('locations');
-
-			Route::post('/warehouse/{warehouse}/locations/racks', [
-				WarehouseController::class,
-				'getRacks'
-			])->name('locations');
-
-			Route::post('/warehouse/{warehouse}/locations/shelves', [
-				WarehouseController::class,
-				'getShelves'
-			])->name('locations');
-
-			Route::post('/warehouse/{warehouse}/locations/bins', [
-				WarehouseController::class,
-				'getBins'
-			])->name('locations');
-
-			Route::post('/warehouse/list', [
-				WarehouseController::class,
-				'getWarehouseList'
-			])->name('list');
-
-			Route::post('/warehouse/{warehouse}/filter', [
-				WarehouseController::class,
-				'filter'
-			])->name('filter');
-
-			Route::post('/warehouse/{warehouse}/status/toggle', [
-				WarehouseController::class,
-				'toggleStatus'
-			])->name('status');
-
-			// 2. Warehouse activity route
-			Route::get('/{warehouse}/activity', [
-				WarehouseController::class,
-				'activity'
-			])->name('warehouse.activity');
-		});
-
-		// Suppliers
-		Route::prefix('suppliers')->name('suppliers.')->group(function () {
-			Route::get('/', [
-				SupplierController::class,
-				'index'
-			])->name('index');
-		});
-
-		// Customers
-		Route::prefix('customers')->name('customers.')->group(function () {
-				Route::get('/', [
-					CustomerController::class,
-					'index'
-				])->name('index');
-			});
-
-		// Invoices
-		Route::prefix('invoices')->name('invoices.')->group(function () {
-			Route::get('/', [
-				InvoiceController::class,
-				'index'
-			])->name('index');
-		});
-
-		// Purchases
-		Route::prefix('purchases')->name('purchases.')->group(function () {
-			Route::get('/', [
-				PurchaseController::class,
-				'index'
-			])->name('index');
-		});
-
-		// Inventories
-		Route::prefix('inventories')->group(function () {
-			Route::resource('inventory', InventoryController::class);
-
-			Route::prefix('inventory')->name('stock.')->group(function () {
-				Route::post('{inventory}/transfer', [
-					StockTransferController::class,
-					'store'
-				])->name('transfer');
-
-				// Inside the AdjustmentModal, I don't have access to $inventory
-				Route::post('{inventory}/adjust', [
-					StockAdjustmentController::class,
-					'store'
-				])->name('adjust');
-
-				Route::post('adjustment/reasons', [
-					StockAdjustmentController::class,
-					'getReasons'
-				])->name('adjustment.reasons');
-			});
-
-			Route::resource('transfers', StockTransferController::class);
-		});
-
-		// Transfers
-//		Route::prefix('transfers')->group(function () {
-//			Route::resource('transfer', StockTransferController::class);
-//		});
+		Route::post('/{product}/clone', [ProductController::class, 'clone'])->name('product.clone');
+		Route::post('/{product}/history', [ProductController::class, 'history'])->name('product.history');
+		Route::post('/{product}/information', [
+			ProductController::class, 'getInformation'
+		])->name('product.information');
 	});
+
+	// Suppliers Resource Operations
+	Route::resource('suppliers', SupplierController::class);
+
+	// Single-Action Structural View Resources
+	Route::resource('customers', CustomerController::class)->only(['index']);
+	Route::resource('invoices', InvoiceController::class)->only(['index']);
+	Route::resource('purchases', PurchaseController::class);
+
+	/*
+	|--------------------------------------------------------------------------
+	| Warehouses Layout & Location Architecture Module
+	|--------------------------------------------------------------------------
+	*/
+
+	// Core RESTful Resource for Warehouse Crud Operations
+	Route::resource('warehouses', WarehouseController::class);
+
+	// Advanced Warehouse Structural AJAX Filters and Status Actions
+	Route::prefix('warehouses')->name('warehouses.')->controller(WarehouseController::class)->group(function () {
+		// Custom Warehouse Node Operational Upstream Toggles
+		Route::patch('/{warehouse}/toggle-status', 'toggleStatus')->name('toggle-status');
+		Route::get('/{warehouse}/activity', 'activity')->name('activity');
+		Route::post('/{warehouse}/filter', 'filter')->name('filter');
+
+		// Cascading Spatial Dropdowns (Organized safely down to Bin level)
+		Route::post('/locations', 'getLocations')->name('base');
+		Route::post('/location/details', 'getLocationDetails')->name('base');
+
+		Route::post('/zones', 'getZones')->name('zones');
+		Route::post('/aisles', 'getAisles')->name('aisles');
+		Route::post('/racks', 'getRacks')->name('racks');
+		Route::post('/shelves', 'getShelves')->name('shelves');
+		Route::post('/bins', 'getBins')->name('bins');
+	});
+
+	/*
+	|--------------------------------------------------------------------------
+	| .....................
+	|--------------------------------------------------------------------------
+	*/
+	Route::prefix('categories')->name('categories.')->controller(CategoryController::class)->group(function () {
+		Route::post('/{category}/brands', 'filterBrands')->name('filter.brands');
+	});
+
+	/*
+	|--------------------------------------------------------------------------
+	| .....................
+	|--------------------------------------------------------------------------
+	*/
+	Route::prefix('brands')->name('brands.')->controller(BrandController::class)->group(function () {
+		Route::post('/{brand}/products', 'getProducts')->name('products');
+	});
+
+	/*
+	|--------------------------------------------------------------------------
+	| Stock Movements, Adjustments & Ledger Ledger Control
+	|--------------------------------------------------------------------------
+	*/
+
+	Route::prefix('inventories')->group(function () {
+		Route::resource('inventory', InventoryController::class);
+
+		// Core Inline Event Logging Handlers
+		Route::post('/{inventory}/transfer', [StockTransferController::class, 'store'])->name('transfer');
+		Route::post('/{inventory}/adjust', [StockAdjustmentController::class, 'store'])->name('adjust');
+
+		// Stock Validation & Setup (FIXED: Route names are unique now)
+		Route::post('/adjustment/reasons', [StockAdjustmentController::class, 'reasons'])->name('reasons');
+		Route::post('/adjustment/validation', [StockAdjustmentController::class, 'check'])->name('validation');
+	});
+
+	// Full historical documentation resource workflows over time
+	Route::resource('transfers', StockTransferController::class)->except(['store']);
+
+	// Έγκριση Παραστατικού Προσαρμογής
+	Route::patch('adjustments/{adjustment}/approve', [
+		StockAdjustmentController::class, 'approve'
+	])->name('adjustments.approve');
+
+	Route::resource('adjustments', StockAdjustmentController::class)->except(['store']);
+
+	Route::resource('returns', StockReturnController::class);
+
+	/*
+	|--------------------------------------------------------------------------
+	| Global Framework Utilities
+	|--------------------------------------------------------------------------
+	*/
+	Route::get('/filters', [FilterController::class, 'getFilters'])->name('global');

@@ -12,18 +12,17 @@
 		/**
 		 * @var int The size of the batch to insert at one time.
 		 */
-		protected const int BATCH_SIZE = 512;
+		protected const BATCH_SIZE = 512;
 		protected Collection $list;
 		protected Carbon     $startDate;
 		protected int        $requests;
 
 		public function __construct() {
 			$this->list      = Collection::empty();
-			$this->startDate = Carbon::now()
+			$this->startDate = Carbon::now(config('app.timezone'))
 				->subYears(mt_rand(Carbon::today()->yearOfCentury(), Carbon::today()->yearOfCentury() + 20))
 				->subMonths(mt_rand(0, Carbon::today()->month))
-				->subDays(mt_rand(0, Carbon::today()->day))
-				->timezone(config('app.timezone'));
+				->subDays(mt_rand(0, Carbon::today()->day));
 			$this->requests  = 0;
 		}
 

@@ -122,7 +122,7 @@ class TransferModal {
 				await this.fetchSourceLocations().then(response => {
 					const availableQuantity = response['inventory'].find(inventory => inventory.warehouse === this.currentProduct.warehouseId && inventory.location === this.currentProduct.locationId);
                     console.log("[Line 124]", response);
-					document.getElementById("sourceZone").innerHTML = response['']
+					document.getElementById("sourceZone").innerHTML = response['zone'];
 					this.availableQuantity.textContent = availableQuantity.available;
 					this.transferQuantity.value = availableQuantity.available;
 					this.transferQuantity.max = availableQuantity.available;
@@ -208,7 +208,8 @@ class TransferModal {
                 console.log("Window will be reloaded in this use case");
 			}
 			const error = await response.json();
-			throw new Error(error.message || 'Request failed');
+			// throw new Error(error.message || 'Request failed');
+			throw new Error(JSON.stringify(error));
 		}
 
 		return await response.json();
@@ -226,7 +227,7 @@ class TransferModal {
 	 * Load warehouses
 	 */
 	async loadWarehouses() {
-		const warehouses = await this.fetchAPI('/warehouses/warehouse/list', {
+		const warehouses = await this.fetchAPI('/warehouses/list', {
 			product_id: this.currentProduct.productId,
 			warehouse_id: this.currentProduct.warehouseId,
 			location_id: this.currentProduct.locationId
@@ -462,47 +463,15 @@ class TransferModal {
 
 		this.destinationRequestData.warehouse = this.currentProduct.warehouseId;
 		this.destinationRequestData.product = this.currentProduct.productId;
-		const destinations = await this.fetchAPI(`/warehouses/warehouse/${warehouseId}/locations/zones`, this.destinationRequestData);
+		const destinations = await this.fetchAPI(`/warehouses/${warehouseId}/locations/zones`, this.destinationRequestData);
 
 		if (destinations.success && destinations['zone']) {
-			this.destinationZone.innerHTML = '<option value="" disabled>Select Zone</option>';
+			this.destinationZone.innerHTML = '<option value="" selected>Select Zone</option>';
 			destinations['zone'].forEach(zone => {
-				this.destinationZone.add(new Option(`Zone ${zone.text}`, zone.value));
+				this.destinationZone.add(new Option(zone.text, zone.value));
 			});
 			this.destinationZone.disabled = false;
 		}
-
-		// Aisle Dropdown
-		// if(destinations['aisle']) {
-		// 	destinations['aisle'].forEach(destination => {
-		// 		this.destinationAisle.add(new Option(destination.value, destination.text));
-		// 	});
-		// 	this.destinationAisle.disabled = false;
-		// }
-
-		// Rack Dropdown
-		// if(destinations['rack']) {
-		// 	destinations['rack'].forEach(destination => {
-		// 		this.destinationRack.add(new Option(`Rack ${destination.value}`, destination.text));
-		// 	});
-		// 	this.destinationRack.disabled = false;
-		// }
-
-		// Shelf Dropdown
-		// if(destinations['shelf']) {
-		// 	destinations['shelf'].forEach(destination => {
-		// 		this.destinationShelf.add(new Option(`Shelf ${destination.value}`, destination.text));
-		// 	});
-		// 	this.destinationShelf.disabled = false;
-		// }
-
-		// Bin Dropdown
-		// if(destinations['bin']) {
-		// 	destinations['bin'].forEach(destination => {
-		// 		this.destinationBin.add(new Option(`Bin ${destination.value}`, destination.text));
-		// 	});
-		// 	this.destinationBin.disabled = false;
-		// }
 
 		this.resetDropdown(this.destinationAisle, 'Select Aisle');
 		this.resetDropdown(this.destinationRack, 'Select Rack');
@@ -522,14 +491,22 @@ class TransferModal {
 			return;
 		}
 
-		const locations = await this.fetchAPI(`/warehouses/warehouse/${warehouseId}/locations/aisles?zone=${zone}`, this.destinationRequestData);
+		const response = await this.fetchAPI(`/warehouses/${warehouseId}/locations/aisles?zone=${zone}`, this.destinationRequestData);
 
+		// 1. Καθαρίζουμε το select και το απενεργοποιούμε αρχικά
 		this.destinationAisle.innerHTML = '<option value="">Select Aisle</option>';
-		if (locations.success && locations['aisle']) {
-			locations['aisle'].forEach(aisle => {
-				this.destinationAisle.add(new Option(`Aisle ${aisle.text}`, aisle.value));
-			});
+		this.destinationAisle.disabled = true;
+
+		// 2. Ελέγχουμε αν η απάντηση είναι επιτυχής
+		if (response && response.success) {
+
+			// Αν το fetchAPI επιστρέφει ήδη τα data, χρησιμοποιείς το response.aisles.
+			// Αν επιστρέφει το raw Response, κάνεις πρώτα: const data = await response.json(); και μετά data.aisles
+			const aisles = response.aisles || response.data || response['aisles'];
+
+			// 3. Ενεργοποιούμε το select μόνο αν βρέθηκαν aisles
 			this.destinationAisle.disabled = false;
+			this.destinationAisle.innerHTML = '<option value="">Select Aisle</option>' + aisles.options;
 		}
 
 		this.resetDropdown(this.destinationRack, 'Select Rack');
@@ -549,11 +526,11 @@ class TransferModal {
 
 		this.destinationRequestData.product = this.destinationRequestData.product ?? this.currentProduct.productId;
 
-		const locations = await this.fetchAPI(`/warehouses/warehouse/${warehouseId}/locations/racks?zone=${zone}&aisle=${aisle}`, this.destinationRequestData);
+		const locations = await this.fetchAPI(`/warehouses/${warehouseId}/locations/racks?zone=${zone}&aisle=${aisle}`, this.destinationRequestData);
 
 		this.destinationRack.innerHTML = '<option value="">Select Rack</option>';
-		if (locations.success && locations.rack) {
-			locations.rack.forEach(rack => {
+		if (locations.success && locations.options.length > 0) {
+			locations.options.forEach(rack => {
 				this.destinationRack.add(new Option("Rack " + rack.text, rack.value));
 			});
 			this.destinationRack.disabled = false;
@@ -574,11 +551,11 @@ class TransferModal {
 			return;
 		}
 
-		const locations = await this.fetchAPI(`/warehouses/warehouse/${warehouseId}/locations/shelves?zone=${zone}&aisle=${aisle}&rack=${rack}`, this.destinationRequestData);
+		const locations = await this.fetchAPI(`/warehouses/${warehouseId}/locations/shelves?zone=${zone}&aisle=${aisle}&rack=${rack}`, this.destinationRequestData);
 
 		this.destinationShelf.innerHTML = '<option value="">Select Shelf</option>';
-		if (locations.success && locations.shelf) {
-			locations.shelf.forEach(shelf => {
+		if (locations.success && locations.options) {
+			locations.options.forEach(shelf => {
 				this.destinationShelf.add(new Option("Shelf " + shelf.text, shelf.value));
 			});
 			this.destinationShelf.disabled = false;
@@ -599,11 +576,11 @@ class TransferModal {
 			return;
 		}
 
-		const response = await this.fetchAPI(`/warehouses/warehouse/${warehouseId}/locations/bins?zone=${zone}&aisle=${aisle}&rack=${rack}&shelf=${shelf}`, this.destinationRequestData);
+		const response = await this.fetchAPI(`/warehouses/${warehouseId}/locations/bins?zone=${zone}&aisle=${aisle}&rack=${rack}&shelf=${shelf}`, this.destinationRequestData);
 
 		this.destinationBin.innerHTML = '<option value="">Select Bin</option>';
-		if (response.success && response.bin) {
-			response.bin.forEach(bin => {
+		if (response.success && response.options.length > 0) {
+			response.options.forEach(bin => {
 				this.destinationBin.add(new Option("Bin " + bin.text, bin.value));
 			});
 			this.destinationBin.disabled = false;
@@ -677,7 +654,7 @@ class TransferModal {
 		this.confirmBtn.textContent = 'Processing Transfer...';
 
 		try {
-			const data = await this.fetchAPI(`/inventories/inventory/${this.productInventory.id}/transfer`, transferData).then(response => {
+			const data = await this.fetchAPI(`/inventories/${this.productInventory.id}/transfer`, transferData).then(response => {
 				console.log("[Line 665] Transferring Response:", response);
 				return response;
 			});
@@ -693,6 +670,19 @@ class TransferModal {
 			}
 		} catch (error) {
 			console.error('Transfer error:', error.message);
+
+			try {
+				// Προσπαθούμε να κάνουμε parse το error μήπως είναι το JSON από την fetchAPI
+				const laravelError = JSON.parse(error.message);
+				if (laravelError.message) {
+					// Εμφανίζει το "The sourceLocation.shelf must not be greater than 5 for rack 5"
+					this.showError(laravelError.message);
+					return;
+				}
+			} catch (e) {
+				// Αν δεν είναι JSON (π.χ. network crash), συνεχίζει στο default alert
+			}
+
 			this.showError(error.message || 'An error occurred');
 		} finally {
 			this.confirmBtn.disabled = false;

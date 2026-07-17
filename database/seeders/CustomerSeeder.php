@@ -6,6 +6,7 @@
 	use App\Enums\Financial\PaymentTerms;
 	use App\Models\Customer;
 	use Carbon\Carbon;
+	use Database\Factories\CustomerFactory;
 	use Illuminate\Database\QueryException;
 	use Illuminate\Http\Client\ConnectionException;
 	use Illuminate\Support\Collection;
@@ -22,19 +23,18 @@
 		 * @throws ConnectionException
 		 */
 		public function run(): void {
-			$this->command->info('📡 Fetching customer data from Internet...');
+			$this->command->info('📡 Fetching customer data from Internet & mapping via CustomerFactory...');
 			$this->createCustomerList();
-			$this->command->info('✅ Customer seeding complete with ' . $this->requests . ' requests done and ' . Customer::count() . ' customers.!');
+			$this->command->info('✅ Customer seeding complete with ' . $this->requests . ' requests done and ' . Customer::query()->count() . ' customers.!');
 		}
 
 		/**
 		 * @throws ConnectionException
 		 */
 		private function createCustomerList(): void {
-			$this->list = Collection::empty();
 			$creation_time = Carbon::now(config('app.timezone'));
+
 			for ($round = 0; $round < $this->rounds; $round++) {
-				// Make the API request
 				$response = Http::withHeaders([
 					'X-API-Key' => config('services.mockaroo.token'),
 				])->get('https://my.api.mockaroo.com/customers.json');
@@ -42,64 +42,70 @@
 				$this->requests++;
 
 				if ($response->failed()) {
-					$this->command->error('❌ Failed to fetch customers from external API');
-					$customerStates = $this->generateStates();
-					for ($index = 0; $index < 1024; $index++) {
-						$customerState = $customerStates->random();
-						$this->list->push([
-							'code'             => Str::uuid7()->toString(),
-							'name'             => fake()->company(),
-							'email'            => fake()->freeEmail(),
-							'phone'            => fake()->phoneNumber(),
-							'company_name'     => fake()->company(),
-							'tax_number'       => fake()->randomElement([
-								0,
-								8,
-								18,
-								24,
-								36
-							]),
-							'billing_address'  => fake()->streetAddress(),
-							'shipping_address' => fake()->address(),
-							'city'             => fake()->city(),
-							'state'            => $customerState['name'],
-							'country'          => fake()->country(),
-							'postal_code'      => fake()->postcode(),
-							'customer_type'    => fake()->randomElement(CustomerType::cases())->value,
-							'credit_limit'     => fake()->randomFloat(2, 0, 8 * 1024),
-							'payment_terms'    => fake()->randomElement(PaymentTerms::cases())->value,
-							'notes'            => fake()->realText(),
-							'is_active'        => fake()->boolean(),
-							'created_at'       => $creation_time->subHours(mt_rand(1, 23))->subMinutes(mt_rand(1, 59))->subSeconds(mt_rand(1, 59))->timezone(config('app.timezone'))->toDateTimeString(),
-							'updated_at'       => $creation_time->addHours(mt_rand(1, 23))->addMinutes(mt_rand(1, 59))->addSeconds(mt_rand(1, 59))->timezone(config('app.timezone'))->toDateTimeString(),
-						]);
-					}
-				} else {
-					// ΣΠΟΥΔΑΙΟ: Χρησιμοποίησε merge για να μην χάνεις τους προηγούμενους γύρους
-					$newData = Collection::make($response->json());
-					$this->list = $this->list->merge($newData)->unique('code')->values();
-//					$this->command->info("Fetched " . $this->list->count() . " customers from external API");
+					$this->command->error('❌ Mockaroo API dropped connection. Using fallback CustomerFactory state.');
+
+					// Fallback: Αν πέσει το API, παράγουμε 64 records από το Factory απευθείας για να μη σταματήσει το build
+					$fallbackData = CustomerFactory::new()->count(64)->raw([
+						'created_at' => $creation_time,
+						'updated_at' => $creation_time,
+					]);
+					$this->list = $this->list->merge($fallbackData);
+					continue;
 				}
-				$this->command->info('[Round ' . Str::padLeft($round + 1, Str::length(8)) . ' of ' . $this->rounds . '] 💾 Will seed ' . $this->list->count() . ' customers...');
+
+				// Επιτυχία API: Mapping των εξωτερικών δεδομένων πάνω στο Factory structure
+				$apiCustomers = Collection::make($response->json());
+
+				$formatted = $apiCustomers->map(function ($customer) use ($creation_time) {
+					// Χρήση του factory ->raw() για να εξασφαλίσουμε ομοιομορφία
+					// και συμπλήρωση τυχόν πεδίων που λείπουν από το API payload
+					return CustomerFactory::new()->raw([
+						'code'             => $customer['code'] ?? 'CUST-' . Str::upper(Str::random(5)) . mt_rand(100, 999),
+						'name'             => $customer['name'] ?? fake()->name(),
+						'email'            => $customer['email'] ?? null,
+						'phone'            => $customer['phone'] ?? fake()->phoneNumber(),
+						'company_name'     => $customer['company_name'] ?? null,
+						'tax_number'       => $customer['tax_number'] ?? null,
+						'billing_address'  => $customer['billing_address'] ?? null,
+						'shipping_address' => $customer['shipping_address'] ?? null,
+						'city'             => $customer['city'] ?? null,
+						'state'            => $customer['state'] ?? null,
+						'country'          => $customer['country'] ?? null,
+						'postal_code'      => $customer['postal_code'] ?? null,
+						'customer_type'    => $customer['customer_type'] ?? CustomerType::INDIVIDUAL->value,
+						'credit_limit'     => $customer['credit_limit'] ?? 0,
+						'payment_terms'    => $customer['payment_terms'] ?? PaymentTerms::CASH->value,
+						'notes'            => $customer['notes'] ?? null,
+						'is_active'        => !isset($customer['is_active']) || $customer['is_active'],
+						'created_at'       => $creation_time,
+						'updated_at'       => $creation_time,
+					]);
+				});
+
+				$this->list = $this->list->merge($formatted);
 			}
 
-			// Το Insert πρέπει να γίνει ΕΞΩ από το loop (όπως το έχεις, αλλά τώρα η λίστα θα είναι γεμάτη)
+			// Chunked Upsert για προστασία μνήμης και αποφυγή Integrity Constraint Violations
 			$this->list->chunk(self::BATCH_SIZE)->each(function (Collection $customers) {
 				try {
-					Customer::query()->insert($customers->shuffle()->toArray());
+					$formattedCustomers = $customers->toArray();
+
+					Customer::query()->upsert(
+						$formattedCustomers,
+						['code'], // Μοναδικό key
+						[
+							'name', 'email', 'phone', 'company_name', 'tax_number',
+							'billing_address', 'shipping_address', 'city', 'state',
+							'country', 'postal_code', 'customer_type', 'credit_limit',
+							'payment_terms', 'notes', 'is_active', 'updated_at'
+						]
+					);
 				} catch (QueryException $e) {
-					// Log the error for debugging
-					Log::error('Failed to create customer: ' . $e->getMessage());
-					Log::error('Customer data: ', $customers->toArray());
+					Log::error('Failed to process customer chunk: ' . $e->getMessage());
 				}
 			});
 
-			$this->command->info("We have found " . Customer::query()->count() . " customers in Database.");
+			$this->command->info("We have found " . Customer::query()->count() . " / " . $this->list->count() . " customers in database");
 			$this->list = Customer::query()->pluck('id');
-			Customer::query()->where('updated_at', '<', 'created_at')->get()->each(function ($customer) use (&$creation_time) {
-				$customer->update([
-					'updated_at' => $creation_time->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
-				]);
-			});
 		}
 	}

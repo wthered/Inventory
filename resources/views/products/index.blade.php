@@ -97,9 +97,8 @@
 					@endforeach
 				</div>
 
-				<div class="pagination">
-					{{ $product_list->links('vendor.pagination.default_custom') }}
-				</div>
+				{{ $product_list->links('vendor.pagination.default_custom') }}
+
 			</div>
 		</div>
 

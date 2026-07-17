@@ -1,0 +1,28 @@
+<!-- Child Category Placeholder -->
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="300" height="200" fill="#ffffff" rx="8"/>
+
+    <!-- Border -->
+    <rect x="1" y="1" width="298" height="198" fill="none" stroke="#e2e8f0" stroke-width="1.5" rx="7"/>
+
+    <!-- Icon - Product/Item Symbol -->
+    <rect x="110" y="45" width="80" height="55" fill="#e2e8f0" rx="6"/>
+    <rect x="120" y="55" width="60" height="35" fill="#94a3b8" rx="3"/>
+
+    <!-- Small decorative dots -->
+    <circle cx="125" cy="65" r="3" fill="#64748b"/>
+    <circle cx="145" cy="65" r="3" fill="#64748b"/>
+    <circle cx="165" cy="65" r="3" fill="#64748b"/>
+
+    <!-- Arrow/Tag -->
+    <rect x="130" y="100" width="40" height="12" fill="#94a3b8" rx="2"/>
+    <polygon points="170,106 180,106 175,112" fill="#94a3b8"/>
+
+    <!-- Text -->
+    <text x="150" y="145" font-family="Arial, sans-serif" font-size="14" fill="#475569" text-anchor="middle" font-weight="bold">CHILD CATEGORY</text>
+    <text x="150" y="165" font-family="Arial, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">Sub-category</text>
+
+    <!-- Small gradient line at bottom -->
+    <rect x="80" y="185" width="140" height="2" fill="#cbd5e1" rx="1"/>
+</svg>

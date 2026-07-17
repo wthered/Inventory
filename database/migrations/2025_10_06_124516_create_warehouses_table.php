@@ -31,6 +31,7 @@
 				$table->unsignedTinyInteger('bins')->default(0);
 				$table->foreign('manager_id')->references('id')->on('users')->nullOnDelete();
 				$table->boolean('is_primary')->default(false);
+				$table->boolean('is_active')->default(true);
 				$table->timestamps();
 				$table->softDeletes();
 
@@ -41,24 +42,22 @@
 				$table->increments('id');
 
 				$table->unsignedInteger('warehouse_id')->nullable();
-				$table->foreign('warehouse_id', 'warehouse_locations_warehouse_foreign')
-					->references('id')
-					->on('warehouses')
-					->cascadeOnDelete();
+				$table->foreign('warehouse_id', 'warehouse_locations_warehouse_foreign')->references('id')->on('warehouses')->cascadeOnDelete();
 
 				$table->string('code')->unique();
 				$table->string('name');
-				$table->string('zone')->nullable();
-				$table->string('aisle')->nullable();
+				$table->unsignedTinyInteger('zone')->nullable();
+				$table->unsignedTinyInteger('aisle')->nullable();
 				$table->unsignedTinyInteger('rack')->nullable();
 				$table->unsignedTinyInteger('shelf')->nullable();
 				$table->unsignedTinyInteger('bin')->nullable();
 				// Συνολική χωρητικότητα σε τετραγωνικά μέτρα
-				$table->float('capacity', 12, 2)->default(0)->after('bins')->unsigned();
+				$table->float('capacity', 12)->default(0)->unsigned();
 				// Τρέχουσα χρήση (μπορεί να ενημερώνεται αυτόματα ή χειροκίνητα)
-				$table->float('current_capacity', 12, 2)->default(0)->after('capacity')->unsigned();
+				$table->float('current_capacity', 12)->default(0)->unsigned();
 
 				$table->text('description')->nullable();
+				$table->boolean('is_active')->default(true);
 
 				$table->timestamps();
 				$table->softDeletes();
@@ -71,6 +70,9 @@
 					'shelf',
 					'bin'
 				], 'warehouse_locations_unique');
+
+				// --- HIGH PERFORMANCE OPTIMIZATION INDEX INJECTION ---
+				$table->index(['warehouse_id', 'zone', 'aisle', 'rack'], 'locations_perfomance_idx');
 
 				$table->comment('Defines the hierarchical storage map (Zone, Aisle, Rack, Shelf, Bin). Records every unique, available storage slot within a warehouse and acts as the location master data for inventory placement.');
 			});

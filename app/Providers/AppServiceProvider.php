@@ -19,6 +19,8 @@
 	use App\Models\Scopes\Stocks\StockAdjustmentScope;
 	use App\Models\Scopes\Stocks\StockReturnScope;
 	use App\Models\Scopes\SupplierScope;
+	use App\Models\Scopes\Warehouses\WarehouseLocationScope;
+	use App\Models\Scopes\Warehouses\WarehouseScope;
 	use App\Models\StockAdjustment;
 	use App\Models\StockAdjustmentItem;
 	use App\Models\StockReturn;
@@ -26,6 +28,8 @@
 	use App\Models\StockTransfer;
 	use App\Models\StockTransferItem;
 	use App\Models\Supplier;
+	use App\Models\Warehouse;
+	use App\Models\WarehouseLocation;
 	use App\Observers\Inventory\InventoryTransactionObserver;
 	use App\Observers\Products\InventoryObserver;
 	use App\Observers\Products\ProductObserver;
@@ -38,6 +42,7 @@
 	use App\Services\Inventory\LocationOptionsService;
 	use App\Services\Inventory\StockMovementService;
 	use Illuminate\Support\ServiceProvider;
+	use Illuminate\Support\Facades\Gate;
 
 	class AppServiceProvider extends ServiceProvider {
 		/**
@@ -61,6 +66,12 @@
 		 * Bootstrap any application services.
 		 */
 		public function boot(): void {
+			// 📌 Super Admin Bypass: Αν ο χρήστης έχει ρόλο 'admin', παρακάμπτονται όλοι οι έλεγχοι permissions
+			Gate::before(function ($user, $ability) {
+				return $user->hasRole('admin') ? true : null;
+			});
+
+
 			Product::addGlobalScope(new ProductScope());
 			Category::addGlobalScope(new CategoryScope());
 			Brand::addGlobalScope(new BrandScope());
@@ -69,6 +80,10 @@
 			InventoryTransaction::addGlobalScope(new InventoryTransactionScope());
 			StockReturn::addGlobalScope(new StockReturnScope());
 			StockAdjustment::addGlobalScope(new StockAdjustmentScope());
+
+			// Warehouse related Scopes
+			Warehouse::addGlobalScope(new WarehouseScope());
+			WarehouseLocation::addGlobalScope(new WarehouseLocationScope());
 
 			// Model Observers
 			// AppServiceProvider.php or a dedicated ObserverServiceProvider.php

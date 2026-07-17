@@ -2,7 +2,6 @@
 
 	namespace Database\Seeders\products\Concerns;
 
-	use App\Models\Brand;
 	use App\Models\Category;
 	use App\Models\Product;
 	use Carbon\Carbon;
@@ -11,37 +10,39 @@
 
 	trait CanSeedInitialProducts {
 
-		protected function insertInitialProducts(): void {
+		protected function insertInitialProducts(): Carbon {
 			$this->command->info('Creating initial product records...');
 
-			$categories  = Category::pluck('id');
-			$brands      = Brand::pluck('id');
-			$initialTime = Carbon::now();
+			$categories  = Category::has('brands')->with('brands:id')->pluck('id');
+			$initialTime = Carbon::now(config('app.timezone'));
 			$dataMap     = $this->getCategoryDataMap();
 
-			foreach ($categories as $categoryId) {
+			foreach ($categories as $category) {
 
 				// 1. Παίρνουμε ένα τυχαίο KEY (string) ως default
 				$dataType = array_rand($dataMap);
 
 				// 2. Αναζήτηση αν η κατηγορία ανήκει σε συγκεκριμένο group
 				foreach ($dataMap as $key => $map) {
-					if (in_array($categoryId, $map['cats'])) {
+					if (in_array($category, $map['cats'])) {
 						$dataType = $key;
 						break;
 					}
 				}
 
+				$brands = Category::find($category)->brands()->pluck('id');
+
 				for ($i = 0; $i < 16; $i++) {
 					$uniqueId = Str::uuid7()->toString();
 					$shortId  = substr(explode('-', $uniqueId)[0], 0, 8);
+					$product_time = Carbon::now();
 
 					// Δημιουργία ρεαλιστικού ονόματος
 					$baseName = fake()->randomElement($dataMap[$dataType]['names']);
 					$productName = $baseName . ' ' . fake()->numerify() . ' ' . Str::upper(fake()->word());
 
 					$costPrice    = fake()->randomFloat(2, 5, 500);
-					$sellingPrice = fake()->randomFloat(2, $costPrice + 5, 1000);
+					$sellingPrice = fake()->randomFloat(2, $costPrice + mt_rand(4, 8), 128);
 					$stock        = ['min' => fake()->numberBetween(8, 1024)];
 					$stock['max'] = $stock['min'] + mt_rand(256, 4096);
 					$stock['current'] = mt_rand($stock['min'], $stock['max']);
@@ -52,7 +53,7 @@
 						'barcode'         => fake()->ean13(),
 						'name'            => $productName,
 						'description'     => fake()->optional()->paragraph(),
-						'category_id'     => $categoryId,
+						'category_id'     => $category,
 						'brand_id'        => $brands->random(),
 						'cost_price'      => $costPrice,
 						'selling_price'   => $sellingPrice,
@@ -68,21 +69,28 @@
 						// Παραγωγή specs βάσει τύπου
 						'specifications'  => json_encode($this->generateSpecifications($dataType)),
 
-						'created_at'      => $initialTime->copy()->subHours(rand(0, 23))->toDateTimeString(),
-						'updated_at'      => $initialTime->copy()->toDateTimeString(),
+						'created_at'      => $product_time->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
+						'updated_at'      => $product_time->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
 					]);
 
-					if ($this->list->count() >= static::BATCH_SIZE) {
-						Product::insertOrIgnore($this->list->toArray());
-						$this->list = collect();
-					}
+//					if ($this->list->count() >= static::BATCH_SIZE) {
+//						Product::insertOrIgnore($this->list->toArray());
+//						$this->list = collect();
+//					}
 				}
+
+				$this->list->chunk(self::BATCH_SIZE)->each(function (Collection $chunk) {
+					Product::insertOrIgnore($chunk->toArray());
+				});
+				$this->list = collect();
 			}
 
 			if ($this->list->isNotEmpty()) {
-				Product::insertOrIgnore($this->list->toArray());
+				Product::query()->insertOrIgnore($this->list->toArray());
 				$this->list = collect();
 			}
+
+			return $initialTime;
 		}
 
 		private function getCategoryDataMap(): array {

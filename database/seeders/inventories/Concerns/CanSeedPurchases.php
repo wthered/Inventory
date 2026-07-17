@@ -14,10 +14,10 @@
 		protected function seedPurchases(Collection $products, Collection $users): void {
 			$this->command->info('Generating purchase transactions safely...');
 
-			$poIds = PurchaseOrder::pluck('id');
+			$poIds = PurchaseOrder::query()->pluck('id');
 
 			if ($poIds->isEmpty()) {
-				$this->command->warn('No POs found.');
+				$this->command->warn('No Purchase Orders found.');
 				return;
 			}
 
@@ -28,7 +28,7 @@
 				return;
 			}
 
-			foreach (range(1, 2000) as $i) {
+			foreach (Collection::range(1, $randomLocations->count())->shuffle() as $location_index) {
 				$product = $products->random();
 
 				// 2. Διαλέγουμε τυχαία από τη συλλογή που είναι ήδη στη μνήμη (PHP random)
@@ -52,13 +52,14 @@
 					'reference_type'  => PurchaseOrder::class,
 					'reference_id'    => $poIds->random(),
 					'created_by'      => $users->random(),
-					'created_at'      => now()->subDays(rand(30, 60)),
+					'created_at'      => now()->subDays(mt_rand(30, 60)),
+					'updated_at'      => now()->addDays(mt_rand(30, 60))->setHours(mt_rand(0, 23))->setMinutes(mt_rand(0, 59))->setSeconds(mt_rand(0, 59)),
 				]);
 
 				// Χρήση static:: για να βρει το constant του ParentSeeder
-				if ($this->list->count() >= static::BATCH_SIZE) {
-					$this->flushList();
-				}
+//				if ($this->list->count() >= static::BATCH_SIZE) {
+//					$this->flushList();
+//				}
 			}
 
 			$this->flushList();

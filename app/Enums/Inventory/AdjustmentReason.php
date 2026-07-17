@@ -36,21 +36,6 @@
 		case ADJUSTMENT = 'adjustment';
 
 		/**
-		 * Get all reasons grouped by category
-		 *
-		 * @throws Exception
-		 */
-		public static function grouped(): array {
-			$grouped = [];
-
-			foreach (self::cases() as $reason) {
-				$grouped[$reason->category()][] = $reason;
-			}
-
-			return $grouped;
-		}
-
-		/**
 		 * Get category/group for this reason
 		 *
 		 * @throws Exception
@@ -159,14 +144,6 @@
 			]);
 		}
 
-		/**
-		 * Check if a raw string value is a valid adjustment reason.
-		 */
-		public static function isValid(string $value): bool {
-			dd($value);
-			return self::tryFrom($value)->isDecreaseReason() || self::tryFrom($value)->isIncreaseReason();
-		}
-
 		public function requiresNotes(): bool {
 			return in_array($this, [
 				self::DAMAGED,
@@ -261,5 +238,16 @@
 				self::DONATION => '❤️',
 				self::OTHER => '❓',
 			};
+		}
+
+		/**
+		 * Get a map of raw string values to enum instances
+		 */
+		public static function map(): array {
+			$map = [];
+			foreach (self::cases() as $reason) {
+				$map[$reason->value] = $reason;
+			}
+			return $map;
 		}
 	}

@@ -52,4 +52,8 @@
 				'success' => !empty($code)
 			]);
 		}
+
+		public function destroy(string $image) {
+			dd($image);
+		}
 	}

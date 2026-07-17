@@ -19,11 +19,10 @@
 		 * @param  Closure(string, ?string=): PotentiallyTranslatedString  $fail
 		 */
 		public function validate(string $attribute, mixed $value, Closure $fail): void {
-			$zoneNumber = intval($value);
 			$warehouse  = Warehouse::find($this->warehouse);
 
-			if ($zoneNumber >= $warehouse->zones) {
-				$fail("Η ζώνη $value δεν υπάρχει σε αυτόν τον αποθηκευτικό χώρο.");
+			if (intval($value) > $warehouse->aisles) {
+				$fail("Ο Διάδρομος ".$value." δεν υπάρχει σε αυτόν τον αποθηκευτικό χώρο.");
 			}
 		}
 	}

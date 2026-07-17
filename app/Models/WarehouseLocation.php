@@ -43,17 +43,14 @@
 		 */
 		public function products(): BelongsToMany {
 			return $this->belongsToMany(Product::class, 'inventories', 'location_id', 'product_id')->withPivot([
-					'warehouse_id',
-					'quantity',
-					'reserved_quantity',
-					'batch_number'
-				]);
+				'warehouse_id',
+				'quantity',
+				'reserved_quantity',
+				'batch_number'
+			]);
 		}
 
 		public function warehouse(): BelongsTo {
-			return $this->belongsTo(Warehouse::class, 'warehouse_id')->withPivot([
-					'product_id',
-					'quantity'
-				]);
+			return $this->belongsTo(Warehouse::class, 'warehouse_id');
 		}
 	}

@@ -1,6 +1,7 @@
 <?php
 
-	use App\Enums\TransferStatus;
+	use App\Enums\Inventory\MovementStatus;
+	use App\Enums\Inventory\TransferStatus;
 	use Illuminate\Database\Migrations\Migration;
 	use Illuminate\Database\Schema\Blueprint;
 	use Illuminate\Support\Facades\Schema;
@@ -22,7 +23,7 @@
 
 				// Use your Enum for status_id instead of string Enums
 				// This connects to the TransferStatus Enum we built earlier
-				$table->unsignedTinyInteger('status_id')->default(TransferStatus::PENDING->value);
+				$table->unsignedTinyInteger('status_id')->default(MovementStatus::PENDING->value);
 
 				// Dates
 				$table->date('transfer_date');
@@ -50,22 +51,35 @@
 			Schema::create('stock_transfer_items', function (Blueprint $table) {
 				$table->increments('id');
 				$table->unsignedInteger('stock_transfer_id');
+				$table->foreign('stock_transfer_id')->references('id')->on('stock_transfers')->cascadeOnDelete();
+
 				$table->unsignedInteger('product_id');
+				$table->foreign('product_id')->references('id')->on('products');
 
-				// Quantities (Crucial for audit trails)
-				$table->integer('quantity_requested'); // What we intended to move
-				$table->integer('quantity_delivered')->default(0); // What actually left Bin A
-				$table->integer('quantity_received')->default(0);  // What actually arrived at Bin B
+				// Παρτίδα (Batch)
+				$table->string('batch_number')->nullable()->comment('The specific product batch being transferred');
 
-				// Accountability (Moved from your other table)
-				$table->unsignedInteger('processed_by')->nullable(); // Who physically moved it
+				// Τοποθεσίες (Bins) - Σύνδεση με τον πίνακα warehouse_locations
+				$table->unsignedInteger('source_location_id')->comment('Source Bin (Bin A)');
+				$table->unsignedInteger('target_location_id')->comment('Target Bin (Bin B)');
+				$table->foreign('source_location_id')->references('id')->on('warehouse_locations');
+				$table->foreign('target_location_id')->references('id')->on('warehouse_locations');
+
+				// Ποσότητες (Κρατάμε το δικό σου εξαιρετικό σκεπτικό για το audit trail)
+				$table->integer('quantity_requested'); // Τι ζητήθηκε αρχικά
+				$table->integer('quantity_delivered')->default(0); // Τι έφυγε πραγματικά από το Bin A
+				$table->integer('quantity_received')->default(0);  // Τι έφτασε πραγματικά στο Bin B
+
+				// Λογοδοσία & Σημειώσεις
+				$table->unsignedInteger('processed_by')->nullable(); // Ποιος έκανε τη φυσική μετακίνηση
+				$table->foreign('processed_by')->references('id')->on('users')->nullOnDelete();
 				$table->dateTime('processed_at')->nullable();
 
 				$table->text('notes')->nullable();
 				$table->timestamps();
 
-				// Indexing
-				$table->unique(['stock_transfer_id', 'product_id'], 'transfer_product_unique');
+				// Σύνθετο index για γρήγορο search ανά παρτίδα ή τοποθεσία κατά τη μεταφορά
+				$table->index(['stock_transfer_id', 'product_id', 'batch_number'], 'transfer_item_batch_idx');
 			});
 		}
 

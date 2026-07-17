@@ -11,14 +11,11 @@
 		public function up(): void {
 			Schema::create('brands', function (Blueprint $table) {
 				$table->increments('id');
-				$table->string('name')->unique();
 				$table->string('slug')->unique();
 				$table->text('description')->nullable();
 				$table->string('logo')->nullable();
 				$table->string('website')->nullable();
 				$table->boolean('is_active')->default(true);
-				$table->unsignedInteger('category_id')->nullable()->comment('Category this brand belongs to');
-				$table->foreign('category_id')->references('id')->on('categories')->nullOnDelete();
 				$table->timestamps();
 				$table->softDeletes();
 			});

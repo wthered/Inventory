@@ -4,19 +4,20 @@
 
 @section('styles')
 	<link rel="stylesheet" href="{{ asset('css/warehouses/show.css') }}">
+	<link rel="stylesheet" href="{{ asset('css/pagination.css') }}">
 @endsection
 
 @section('content')
 	<div class="warehouse-container">
 		<header class="show-header">
 			<div class="header-main">
-				<a href="{{ route('inventory.warehouses.warehouse.index') }}" class="back-link">← Back to Warehouses</a>
+				<a href="{{ route('inventory.warehouses.index') }}" class="back-link">← Back to Warehouses</a>
 				<div class="header-title">
 					<h1>{{ $warehouse->name }}</h1>
 					<div class="header-badges">
-                    <span class="status-badge status-{{ $warehouse->is_active ? 'active' : 'inactive' }}">
-                        {{ $warehouse->is_active ? 'Active' : 'Inactive' }}
-                    </span>
+                        <span class="status-badge status-{{ $warehouse->is_active ? 'active' : 'inactive' }}">
+                            {{ $warehouse->is_active ? 'Active' : 'Inactive' }}
+                        </span>
 						@if($warehouse->isPrimary)
 							<span class="status-badge primary-badge">⭐ Primary</span>
 						@endif
@@ -25,7 +26,7 @@
 			</div>
 			<div class="header-actions">
 				<button class="btn-print" onclick="window.print()">🖨️ Print</button>
-				<a href="{{ route('inventory.warehouses.warehouse.edit', $warehouse->id) }}" class="btn-outline">✏️ Edit</a>
+				<a href="{{ route('inventory.warehouses.edit', $warehouse->id) }}" class="btn-outline">✏️ Edit</a>
 				<button class="btn-primary" onclick="showReportModal()">📊 Generate Report</button>
 			</div>
 		</header>
@@ -73,9 +74,11 @@
 		<div class="main-grid">
 			<div class="info-column">
 				<div class="card">
-					<div class="card-header"><h3>🏢 Warehouse Details</h3></div>
+					<div class="card-header">
+						<h3>🏢 Warehouse Details</h3>
+					</div>
 					<div class="card-body">
-						<div class="info-list">
+						<div class="info-grid">
 							<div class="info-item">
 								<span class="info-label">Identification Code</span>
 								<span class="info-value code-value">{{ $warehouse->code }}</span>
@@ -83,8 +86,8 @@
 							<div class="info-item">
 								<span class="info-label">Manager</span>
 								<span class="info-value">
-                                {{ $warehouse->manager?->account?->full_name ?? 'Not Assigned' }}
-                            </span>
+									{{ $warehouse->manager?->account?->full_name ?? 'Not Assigned' }}
+								</span>
 							</div>
 							<div class="info-item">
 								<span class="info-label">Warehouse Type</span>
@@ -95,16 +98,18 @@
 				</div>
 
 				<div class="card">
-					<div class="card-header"><h3>📏 Storage Capacity</h3></div>
+					<div class="card-header">
+						<h3>📊 Storage Capacity</h3>
+					</div>
 					<div class="card-body">
 						<div class="capacity-stats">
 							<div class="capacity-item">
-								<span class="capacity-label">Used Space</span>
-								<span class="capacity-value">{{ number_format($warehouse->current_capacity, 2) }} m²</span>
+								<span class="capacity-label">Used Slots</span>
+								<span class="capacity-value">{{ number_format($warehouse->current_capacity, 0) }}</span>
 							</div>
 							<div class="capacity-item">
-								<span class="capacity-label">Total Space</span>
-								<span class="capacity-value">{{ number_format($warehouse->capacity, 2) }} m²</span>
+								<span class="capacity-label">Total Slots</span>
+								<span class="capacity-value">{{ number_format($warehouse->capacity, 0) }} Slots</span>
 							</div>
 						</div>
 						<div class="capacity-progress">
@@ -113,7 +118,7 @@
 							</div>
 							<div class="progress-labels">
 								<span>0%</span>
-								<span>{{ $warehouse->occupancyPercentage }}% Occupied</span>
+								<span>{{ number_format($warehouse->occupancyPercentage, 1) }}% Occupied</span>
 								<span>100%</span>
 							</div>
 						</div>
@@ -122,22 +127,38 @@
 			</div>
 
 			<div class="contact-column">
-				<div class="card" style="height: calc(100% - var(--space-lg));">
-					<div class="card-header"><h3>📍 Location & Contact</h3></div>
-					<div class="card-body">
-						<div class="address-block">
-							<p><strong>Address:</strong> {{ $warehouse->address }}</p>
-							<p>{{ $warehouse->city }}, {{ $warehouse->postal_code }}</p>
-							<p>{{ $warehouse->country }}</p>
+				<div class="card structural-equalizer">
+					<div class="card-header">
+						<h3>📍 Location & Contact</h3>
+					</div>
+					<div class="card-body contact-layout">
+						<div class="address-grid-block">
+							<div class="info-item full-width-item">
+								<span class="info-label">Street Address</span>
+								<span class="info-value">{{ $warehouse->address }}</span>
+							</div>
+							<div class="info-item">
+								<span class="info-label">City / Region</span>
+								<span class="info-value">{{ $warehouse->city }}</span>
+							</div>
+							<div class="info-item">
+								<span class="info-label">Postal Code</span>
+								<span class="info-value">{{ $warehouse->postal_code }}</span>
+							</div>
+							<div class="info-item">
+								<span class="info-label">Country</span>
+								<span class="info-value">{{ $warehouse->country }}</span>
+							</div>
 						</div>
-						<div class="contact-list">
+
+						<div class="contact-grid-block">
 							<div class="info-item">
 								<span class="info-label">Phone Number</span>
-								<span class="info-value">{{ $warehouse->phone ?? 'N/A' }}</span>
+								<span class="info-value font-numeric">{{ $warehouse->phone ?? '—' }}</span>
 							</div>
 							<div class="info-item">
 								<span class="info-label">Email Address</span>
-								<span class="info-value">{{ $warehouse->email ?? 'N/A' }}</span>
+								<span class="info-value">{{ $warehouse->email ?? '—' }}</span>
 							</div>
 						</div>
 					</div>
@@ -149,7 +170,8 @@
 			<div class="card-header">
 				<div class="header-with-filter">
 					<h3>🗺️ Warehouse Locations (Storage Map)</h3>
-						<div class="filter-group">
+					<div class="filter-controls-group">
+						<div class="filter-select-wrapper">
 							<select name="zone" id="filter-zone" class="form-select-sm cascade-filter" data-next="aisle">
 								<option value="">All Zones</option>
 								@foreach($filterOptions['zones'] as $option)
@@ -159,30 +181,35 @@
 								@endforeach
 							</select>
 						</div>
-						<div class="filter-group">
+						<div class="filter-select-wrapper">
 							<select name="aisle" id="filter-aisle" class="form-select-sm cascade-filter" data-next="rack">
 								<option value="">Aisle</option>
 							</select>
 						</div>
-						<div class="filter-group">
+						<div class="filter-select-wrapper">
 							<select name="rack" id="filter-rack" class="form-select-sm cascade-filter" data-next="shelf">
 								<option value="">Rack</option>
 							</select>
 						</div>
-						<div class="filter-group">
+						<div class="filter-select-wrapper">
 							<select name="shelf" id="filter-shelf" class="form-select-sm cascade-filter">
 								<option value="">Shelf</option>
 							</select>
 						</div>
 						<input type="hidden" value="{{ $warehouse->id }}" name="warehouse_id" id="filter-warehouse">
+					</div>
 				</div>
 			</div>
 
 			<div class="card-body">
 				<div class="locations-grid" id="locations-grid">
-					@foreach($locations as $location)
-						@include('partials.location_card', ['location' => $location])
-					@endforeach
+					{{-- High performance template compilation loop bypassing individual sandbox variables --}}
+					@each('partials.location_card', $locations, 'location')
+				</div>
+
+				{{-- Render pagination anchors so users don't load thousands of nodes simultaneously --}}
+				<div class="pagination-wrapper" style="margin-top: var(--space-lg);">
+					{{ $locations->links() }}
 				</div>
 			</div>
 		</div>

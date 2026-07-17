@@ -1,11 +1,10 @@
 /* ==========================================================================
-   WAREHOUSE SHOW PAGE - DARK THEME (FINAL SORTED)
+   WAREHOUSE SHOW PAGE - DARK THEME ERP UNIFIED PHASING
    ========================================================================== */
 
-/* 1. Global Utilities & Buttons
+/* 1. Global Utilities & Action Tokens
    ========================================================================== */
 
-/* Base Button Component */
 .btn-base, .btn-primary, .btn-outline, .btn-print, .btn-secondary, .btn-danger {
     display: inline-flex;
     align-items: center;
@@ -23,40 +22,37 @@
     user-select: none;
 }
 
-/* Primary Variant */
 .btn-primary {
     background: var(--color-primary);
     color: white;
 }
 
 .btn-primary:hover {
-    filter: brightness(1.1); /* Αυξάνει ελαφρώς τη φωτεινότητα χωρίς νέα μεταβλητή */
+    filter: brightness(1.1);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
 }
 
-/* Outline & Print Variants */
 .btn-outline, .btn-print {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.03);
     border-color: var(--color-border);
     color: var(--color-text-primary);
 }
 
 .btn-outline:hover, .btn-print:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
     border-color: var(--color-primary);
     color: var(--color-primary);
 }
 
-/* Secondary & Danger Variants */
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.06);
     color: var(--color-text-primary);
     border: 1px solid var(--color-border);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.15); /* Αντί για --color-surface-light */
+    background: rgba(255, 255, 255, 0.12);
 }
 
 .btn-danger {
@@ -68,9 +64,8 @@
     filter: brightness(1.1);
 }
 
-/* States */
 button:disabled, .btn-disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
     filter: grayscale(1);
 }
@@ -79,7 +74,7 @@ button:active {
     transform: translateY(0);
 }
 
-/* 2. Layout & Header
+/* 2. Structured Framing Container Architecture
    ========================================================================== */
 
 .warehouse-container {
@@ -91,13 +86,12 @@ button:active {
 .show-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end; /* Στοιχίζει τα κουμπιά στη βάση του τίτλου */
+    align-items: flex-end;
     margin-bottom: var(--space-xl);
     padding-bottom: var(--space-lg);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--color-border);
 }
 
-/* Αριστερό μέρος: Back link + Τίτλος */
 .header-main {
     display: flex;
     flex-direction: column;
@@ -120,6 +114,7 @@ button:active {
     display: flex;
     align-items: center;
     gap: var(--space-md);
+    flex-wrap: wrap;
 }
 
 .header-title h1 {
@@ -128,42 +123,29 @@ button:active {
     color: var(--color-text-primary);
     margin: 0;
     letter-spacing: -0.02em;
+    line-height: 1.1;
 }
 
-/* Badges δίπλα στον τίτλο */
 .header-badges {
     display: flex;
-    gap: var(--space-sm);
-    margin-top: 4px; /* Μικρή διόρθωση για να "κάθεται" οπτικά με το κείμενο */
+    gap: var(--space-xs);
+    align-items: center;
 }
 
-/* Δεξί μέρος: Κουμπιά δράσης */
 .header-actions {
     display: flex;
     align-items: center;
     gap: var(--space-sm);
 }
 
-/* Responsive για κινητά */
-@media (max-width: 768px) {
-    .show-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-lg);
-    }
+/* 3. Metric Indicator Micro Cards
+   ========================================================================== */
 
-    .header-actions {
-        width: 100%;
-        justify-content: flex-start;
-    }
-}
-
-/* 3. Stats Grid */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: var(--space-md);
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-xl);
 }
 
 .stat-box {
@@ -177,36 +159,69 @@ button:active {
 }
 
 .stat-icon {
-    font-size: 1.5rem;
-    width: 45px;
-    height: 45px;
-    background: rgba(255, 255, 255, 0.03);
+    font-size: 1.35rem;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-md);
 }
 
+.stat-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
 .stat-number {
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     font-weight: 800;
     color: var(--color-text-primary);
+    letter-spacing: -0.01em;
 }
 
 .stat-label {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     color: var(--color-text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
+    font-weight: 600;
 }
 
-/* 4. Cards & Info */
+/* 4. Display Cards Grid Blueprinting
+   ========================================================================== */
+
+.main-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
+}
+
 .card {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     margin-bottom: var(--space-lg);
     overflow: hidden;
+}
+
+.card:last-child {
+    margin-bottom: 0;
+}
+
+.structural-equalizer {
+    height: 100%;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.structural-equalizer .card-body {
+    flex-grow: 1;
 }
 
 .card-header {
@@ -216,100 +231,143 @@ button:active {
 }
 
 .card-header h3 {
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--color-text-primary);
+    font-weight: 700;
+    margin: 0;
 }
 
 .card-body {
     padding: var(--space-lg);
 }
 
-.info-list {
-    display: flex;
-    gap: var(--space-md);
-    justify-content: space-between;
-    align-items: center;
+/* Symmetric Internal Information Mapping */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--space-lg);
 }
 
-.contact-list {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.address-grid-block {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md) var(--space-lg);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-lg);
+}
+
+.full-width-item {
+    grid-column: span 2;
+}
+
+.contact-grid-block {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--space-lg);
 }
 
 .info-item {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--space-xs);
 }
 
 .info-label {
     font-size: 0.7rem;
     color: var(--color-text-muted);
     text-transform: uppercase;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.05em;
 }
 
 .info-value {
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--color-text-primary);
+    font-weight: 500;
 }
 
 .code-value {
-    font-family: 'Monaco', monospace;
+    font-family: 'Monaco', 'Courier New', monospace;
     color: var(--color-primary);
-    background: rgba(59, 130, 246, 0.1);
-    padding: 4px 8px;
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    padding: 3px 8px;
     border-radius: 4px;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     width: fit-content;
+    font-weight: 600;
 }
 
-/* 5. Status Badges */
+.font-numeric {
+    font-variant-numeric: tabular-nums;
+}
+
+/* 5. State Representation Badges
+   ========================================================================== */
+
 .status-badge {
+    display: inline-flex;
+    align-items: center;
     padding: 4px 10px;
     border-radius: 20px;
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1;
 }
 
 .status-active {
-    background: rgba(16, 185, 129, 0.1);
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.15);
     color: var(--color-accent);
 }
 
 .status-inactive {
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.15);
     color: var(--color-error);
 }
 
 .primary-badge {
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.15);
     color: var(--color-primary);
-    margin-left: var(--space-xs);
 }
 
-/* 6. Capacity & Progress */
+/* 6. Linear Metrology / Volume Loading Components
+   ========================================================================== */
+
 .capacity-stats {
     display: flex;
-    gap: var(--space-xl);
     margin-bottom: var(--space-md);
     align-items: center;
     justify-content: space-between;
+    gap: var(--space-md);
+}
+
+.capacity-label {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 4px;
 }
 
 .capacity-value {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--color-text-primary);
-    display: block;
 }
 
 .progress-bar {
     width: 100%;
-    height: 10px;
-    background: rgba(255, 255, 255, 0.05);
+    height: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     overflow: hidden;
 }
@@ -317,104 +375,21 @@ button:active {
 .progress-fill {
     height: 100%;
     background: var(--color-primary);
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+    border-radius: 10px;
 }
 
 .progress-labels {
     display: flex;
     justify-content: space-between;
     margin-top: 8px;
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     color: var(--color-text-muted);
+    font-weight: 500;
 }
 
-/* 7. Locations Table */
-.locations-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.locations-table th {
-    padding: var(--space-md) var(--space-lg);
-    text-align: left;
-    font-size: 0.7rem;
-    color: var(--color-text-muted);
-    text-transform: uppercase;
-    border-bottom: 1px solid var(--color-border);
-}
-
-.locations-table td {
-    padding: var(--space-md) var(--space-lg);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-    font-size: 0.9rem;
-}
-
-.location-code {
-    font-family: 'Monaco', monospace;
-    color: var(--color-primary);
-    font-weight: 600;
-}
-
-.inventory-items-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.inventory-item-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-    padding: 6px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: var(--radius-sm);
-    border-left: 2px solid var(--color-primary);
-}
-
-.product-name {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: var(--color-text-primary);
-}
-
-.product-qty {
-    background: var(--color-primary);
-    color: white;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 800;
-}
-
-.batch-tag {
-    font-size: 0.7rem;
-    color: var(--color-text-muted);
-    background: rgba(255, 255, 255, 0.05);
-    padding: 1px 5px;
-    border-radius: 3px;
-}
-
-.text-empty {
-    color: var(--color-text-muted);
-    font-style: italic;
-    font-size: 0.85rem;
-}
-
-.status-occupied {
-    background: rgba(59, 130, 246, 0.1);
-    color: #60a5fa;
-}
-
-.location-name-sub {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-    margin-top: 2px;
-}
-
-/* ==========================================================================
-   7. Storage Grid Layout
-========================================================================== */
+/* 7. Advanced Interactive Space Filter & Mapping Layouts
+   ========================================================================== */
 
 .header-with-filter {
     display: flex;
@@ -424,17 +399,15 @@ button:active {
     gap: var(--space-md);
 }
 
-.filter-group {
+.filter-controls-group {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
-    flex: 1;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
 }
 
-.filter-row {
-    display: flex;
-    gap: var(--space-xs);
-    align-items: center;
+.filter-select-wrapper {
+    position: relative;
 }
 
 .form-select-sm {
@@ -443,124 +416,310 @@ button:active {
     color: var(--color-text-primary);
     padding: 6px 12px;
     border-radius: var(--radius-sm);
-    font-size: 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 500;
     cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 90px;
 }
 
-/* Locations Grid */
+.form-select-sm:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+#filter-zone.form-select-sm {
+    min-width: 130px;
+}
+
+/* Storage Matrix Placement */
 .locations-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--space-md);
-    margin-top: var(--space-md);
 }
 
-/* Location Card */
+/* ==========================================================================
+   9. WAREHOUSE LOCATION CARDS SYSTEM (ERP GRID)
+   ========================================================================== */
+
 .location-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--color-border);
+    background: #1e293b; /* Slate 800 - Συμβατό με το Dark Theme */
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--radius-md);
+    padding: var(--space-md);
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s, border-color 0.2s;
+    gap: var(--space-md);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
+/* Hover & Interactive Pipeline */
 .location-card:hover {
-    border-color: var(--color-primary);
     transform: translateY(-2px);
+    border-color: rgba(59, 130, 246, 0.4); /* Primary Blue Edge Highlight */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
+/* Header Architecture */
 .loc-card-header {
-    padding: var(--space-md);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: var(--space-sm);
+}
+
+.loc-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .loc-code {
-    display: block;
-    color: var(--color-primary);
-    font-weight: 800;
-    font-family: 'Monaco', monospace;
-    font-size: 1.1rem;
+    font-size: 0.72rem;
+    font-family: var(--font-mono, monospace), sans-serif;
+    color: var(--color-primary, #3b82f6);
+    font-weight: 700;
+    letter-spacing: 0.05em;
 }
 
 .loc-label {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #f8fafc);
 }
 
-/* Items Stack */
+/* Status Dot Component */
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981; /* Default Emerald Active Stock */
+    display: inline-block;
+    box-shadow: 0 0 8px #10b981;
+    margin-top: 4px;
+}
+
+/* Body Context & Empty State Architecture */
 .loc-card-body {
-    padding: var(--space-md);
     flex-grow: 1;
-}
-
-.item-entry {
-    display: flex;
-    gap: var(--space-sm);
-    margin-bottom: var(--space-sm);
-    background: rgba(255, 255, 255, 0.03);
-    padding: 6px;
-    border-radius: var(--radius-sm);
-}
-
-.qty-pill {
-    background: var(--color-primary);
-    color: white;
-    min-width: 24px;
-    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: 800;
+    min-height: 45px;
 }
 
-.item-name {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
+.empty-state-msg {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.35);
+    font-style: italic;
+    font-weight: 500;
 }
 
-/* Status colors */
-.location-card.is-occupied { border-left: 3px solid var(--color-primary); }
-.location-card.is-empty { opacity: 0.8; border-left: 3px solid var(--color-border); }
-
+/* Footer & Hierarchical Coordinates */
 .loc-card-footer {
-    padding: var(--space-sm) var(--space-md);
-    background: rgba(0,0,0,0.1);
-    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    display: flex;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: var(--space-sm);
 }
 
 .coords-info {
-    font-size: 0.7rem;
-    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    color: var(--color-text-secondary, #94a3b8);
+    font-weight: 600;
+    letter-spacing: 0.02em;
 }
 
-/* 8. Address Block */
-.address-block {
+/* ==========================================================================
+   10. SPECIAL CONDITION STATES (Empty Inventory Aesthetics)
+   ========================================================================== */
+
+.location-card.is-empty {
+    background: rgba(30, 41, 59, 0.4); /* Translucent / Hollow state */
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    box-shadow: none;
+}
+
+.location-card.is-empty:hover {
+    border-style: solid;
+    border-color: rgba(234, 179, 8, 0.3); /* Muted Yellow for Available Slot alert */
+    background: rgba(30, 41, 59, 0.6);
+}
+
+/* Empty State Variables overrides */
+.location-card.is-empty .loc-code {
+    color: #eab308; /* Yellow Alert Token */
+}
+
+.location-card.is-empty .status-dot {
+    background: #eab308; /* Idle status ready to be filled */
+    box-shadow: 0 0 6px rgba(234, 179, 8, 0.5);
+    animation: pulseEmptySlot 2s infinite ease-in-out;
+}
+
+/* Pulse animation to visually catch empty structural cells */
+@keyframes pulseEmptySlot {
+    0% { opacity: 0.4; transform: scale(0.95); }
+    50% { opacity: 1; transform: scale(1.05); box-shadow: 0 0 10px rgba(234, 179, 8, 0.8); }
+    100% { opacity: 0.4; transform: scale(0.95); }
+}
+
+/* ==========================================================================
+   SLOTS CAPACITY MONITORING SYSTEM
+   ========================================================================== */
+
+.capacity-stats {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-md);
     margin-bottom: var(--space-lg);
-    line-height: 1.6;
-    color: var(--color-text-secondary);
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: var(--space-md);
 }
 
-/* 9. Responsive */
-@media (max-width: 992px) {
+.capacity-item {
+    background: rgba(30, 41, 59, 0.7); /* Slate 800 Layer */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.capacity-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary, #94a3b8);
+    font-weight: 700;
+}
+
+.capacity-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--color-text-primary, #f8fafc);
+    font-family: var(--font-mono, monospace);
+    letter-spacing: -0.02em;
+}
+
+/* Ανάδειξη κατειλημμένων Slots με Primary Blue */
+.capacity-item:first-child .capacity-value {
+    color: #3b82f6;
+}
+
+/* Progress Bar & Track Optimization */
+.capacity-progress {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: rgba(15, 23, 42, 0.6); /* Deep dark background */
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%); /* Blue to Emerald */
+    border-radius: 20px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Dynamic Threshold Alerts βασισμένα στο inline width της PHP */
+[style*="width: 8"].progress-fill,
+[style*="width: 9"].progress-fill {
+    background: linear-gradient(90deg, #3b82f6, #f59e0b) !important; /* Warning State (Amber) */
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.4) !important;
+}
+
+[style*="width: 95"].progress-fill,
+[style*="width: 96"].progress-fill,
+[style*="width: 97"].progress-fill,
+[style*="width: 98"].progress-fill,
+[style*="width: 99"].progress-fill,
+[style*="width: 100"].progress-fill {
+    background: linear-gradient(90deg, #f59e0b, #ef4444) !important; /* Critical Capacity State (Red) */
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.6) !important;
+}
+
+/* Micro-labels Architecture */
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary, #94a3b8);
+    font-weight: 600;
+}
+
+.progress-labels span:nth-child(2) {
+    color: #f8fafc;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.78rem;
+}
+
+/* 8. Adaptive Mobile View Optimization Rules
+   ========================================================================== */
+
+@media (max-width: 1100px) {
     .main-grid {
         grid-template-columns: 1fr;
     }
+    .structural-equalizer {
+        height: auto;
+    }
+}
 
+@media (max-width: 768px) {
     .show-header {
         flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-lg);
     }
 
     .header-actions {
         width: 100%;
         justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .address-grid-block {
+        grid-template-columns: 1fr;
+    }
+
+    .full-width-item {
+        grid-column: span 1;
+    }
+
+    .header-with-filter {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .filter-controls-group {
+        width: 100%;
+    }
+
+    .filter-select-wrapper, .form-select-sm {
+        flex: 1;
+        min-width: calc(50% - var(--space-xs)) !important;
     }
 }

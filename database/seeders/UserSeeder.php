@@ -15,22 +15,35 @@
 	class UserSeeder extends ParentSeeder {
 
 		private int $rounds = 2;
+		private int $maxManagers;
+		private int $managers;
+
+		public function __construct() {
+			parent::__construct();
+			$this->maxManagers = 16;
+			$this->managers = 0;
+		}
 
 		/**
 		 * Run the database seeds.
 		 */
 		public function run(): void {
 			$user_data = $this->factory();
+
 			if ($user_data->isEmpty()) {
 				$this->command->error("No users to seed. Skipping...");
 				return;
 			}
 
 			$many_users = $user_data->count();
-			$adminIndex = rand(0, $user_data->count() - 1);
+			$adminIndex = mt_rand(0, $user_data->count() - 1);
 			$roles      = Role::all();
 
-			$user_data->each(function ($user, $index) use ($many_users, $adminIndex, $roles, $user_data) {
+			// Φιλτράρουμε τους ρόλους για τις τυχαίες αναθέσεις
+			// Εξαιρούμε τον admin (που μπαίνει καρφωτά) και τον warehouse_manager (που ελέγχεται με ακρίβεια)
+			$poolRoles = Role::whereNotIn('name', ['admin', 'warehouse_manager'])->get();
+
+			$user_data->shuffle()->each(function ($user, $index) use ($poolRoles, $adminIndex, $roles, $many_users) {
 				// 1. Fixed Date Logic: Use ->copy() to prevent the base date from drifting every loop
 				$createdAt = Carbon::now(config('app.timezone'))->subDays(rand(1, Carbon::today()->daysInMonth))->subHours(rand(1, 59))->subMinutes(rand(1, 59));
 
@@ -47,6 +60,18 @@
 					'created_at'        => $createdAt->toDateTimeString(),
 					'updated_at'        => $createdAt->addDays(mt_rand(1, 8))->toDateTimeString(),
 				]);
+
+				if ($index === $adminIndex) {
+					// 1. Ένας τυχαίος χρήστης γίνεται ο κεντρικός Admin
+					$that_user->assignRole('admin');
+				} elseif ($this->managers < $this->maxManagers) {
+					// 2. Οι επόμενοι 16 χρήστες γίνονται αυστηρά Warehouse Managers
+					$that_user->assignRole('warehouse_manager');
+					$this->managers++;
+				} else {
+					// 3. Όλοι οι υπόλοιποι 1.983 χρήστες μοιράζονται τυχαία στους άλλους 5 ρόλους
+					$that_user->assignRole($poolRoles->random()->name);
+				}
 
 				// 4. Role Assignment Logic
 				// Make the first user an Admin, otherwise pick a random role
@@ -72,6 +97,20 @@
 				$percent = number_format(100 * ($index + 1) / $many_users, 3);
 				print("[" . $percent . "% done] Created User ID: " . $that_user->id . " (" . $user['username'] . ")........\r");
 			});
+
+			// 1. Fetch only the users who have the specific role
+			$warehouseManagers = User::role('warehouse_manager')->get();
+
+			// 2. Loop through and update their passwords
+			foreach ($warehouseManagers as $manager) {
+				$password = 'WarehouseManager' . Str::padLeft($manager->id, 4, '0');
+				$manager->update([
+					'password' => Hash::make($password),
+				]);
+				print("Changed password for manager " . $manager->account->full_name . " to ".$password."....\r");
+			}
+
+			$this->command->info("Successfully updated passwords for " . $warehouseManagers->count() . " warehouse managers");
 
 			print("\nSeeding completed successfully.\n");
 			$users = User::query()->get();
@@ -99,7 +138,7 @@
 				'avatar'        => 'https://robohash.org/' . Str::lower(Str::random(32)) . '.png?size=256x256&set=set' . fake()->randomElement([1, 2, 3, 4, 5]),
 				'is_active'     => true,
 				'last_login_at' => fake()->boolean() ? Carbon::yesterday()->setHours(mt_rand(0, 23))->setMinutes(mt_rand(0, 59))->setSeconds(mt_rand(0, 59))->toDateTimeString() : null,
-				'created_at'    => $birthday->copy()->timezone(config('app.timezone')),
+				'created_at'    => $birthday->copy()->timezone(config('app.timezone', 'Europe/Athens')),
 				'updated_at'    => now(),
 			]);
 

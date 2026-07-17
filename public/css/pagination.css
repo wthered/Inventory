@@ -1,33 +1,137 @@
+/* ==========================================================================
+   Pagination Layout System
+   ========================================================================== */
+:root {
+    /* Fallback variables αν δεν υπάρχουν στο γενικό project */
+    --color-border: rgba(0, 0, 0, 0.12);
+    --radius-md: 6px;
+    --space-xl: 2rem;
+    --space-md: 1rem;
+}
+
+/* Base Nav Container */
 .pagination {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	gap: 0.5rem;
-	margin-top: 1rem;
-	flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 0 !important;   /* Το margin πλέον ελέγχεται από το footer wrapper */
+    padding-top: 0 !important;  /* Το padding πλέον ελέγχεται από το footer wrapper */
 }
 
-.page-item {
-	padding: 0.5rem 0.75rem;
-	background-color: #f8f8f8;
-	border: 1px solid #ddd;
-	border-radius: 0.3rem;
-	text-decoration: none;
-	color: #333;
-	cursor: pointer;
+/* Pagination Buttons (Previous / Next) */
+.pagination-btn {
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
 }
 
-.page-item:hover {
-	background-color: #eee;
+.pagination-btn:hover:not(.disabled) {
+    background: rgba(0, 0, 0, 0.04); /* Light-theme hover fallback */
+    border-color: rgba(0, 0, 0, 0.2);
+    color: var(--color-text-primary);
 }
 
-.page-item.active {
-	background-color: #007bff;
-	color: white;
-	font-weight: bold;
+.pagination-btn.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
 }
 
-.page-item.disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
+.pagination-icon {
+    font-size: 0.85rem;
+}
+
+/* Pages Container */
+.pagination-pages {
+    display: flex;
+    gap: 4px;
+}
+
+/* Page Numbers Style */
+.pagination-page {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.pagination-page:hover:not(.active) {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--color-text-primary);
+}
+
+.pagination-page.active {
+    background: var(--color-text-primary);
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.pagination-dots {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+}
+
+/* ==========================================================================
+   Pagination Footer Wrapper & Info Elements
+   ========================================================================== */
+.pagination-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 1rem 1.25rem;
+    background-color: #ffffff;
+    border-top: 1px solid var(--color-border, #e2e8f0);
+    gap: 1.5rem;
+}
+
+/* Πληροφορίες Σελίδων (π.χ., Εμφάνιση 1 έως 10...) */
+.pagination-info {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary, #64748b);
+    font-weight: 500;
+}
+
+/* Container για το nav block */
+.pagination-links {
+    display: flex;
+    align-items: center;
+}
+
+/* Responsive σχεδιασμός για μικρότερες οθόνες */
+@media (max-width: 768px) {
+    .pagination-footer {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+        padding: 1.25rem 1rem;
+    }
+
+    .pagination-links {
+        width: 100%;
+        justify-content: center;
+    }
 }

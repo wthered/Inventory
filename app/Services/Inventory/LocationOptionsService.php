@@ -61,8 +61,8 @@
 		private function createZoneOptions(?WarehouseLocation $location, Warehouse $warehouse): string {
 			$options = Collection::range(1, $warehouse->zones)->map(function ($zone) use ($location) {
 				$zoneName = 'Z' . $zone;
-				$selected = $location && $location->zone == $zoneName ? 'selected' : 'disabled';
-				return "<option value='" . e($zoneName) . "' " . $selected . ">Zone " . $zone . "</option>";
+				$selected = $location && $location->zone == $zone ? 'selected' : 'disabled';
+				return "<option value='" . $zoneName . "' " . $selected . ">Zone " . $zone . "</option>";
 			});
 			return $this->wrapWithDefaultOption($options->implode(''), 'Select Zone');
 		}
@@ -72,10 +72,9 @@
 		 */
 		private function createAisleOptions(?WarehouseLocation $location, Warehouse $warehouse): string {
 			$options = Collection::range(1, $warehouse->aisles)->map(function ($aisle) use ($location) {
-				$aisleName = 'A' . $aisle;
-				$selected  = $location && $location->aisle == $aisleName ? 'selected' : 'disabled';
+				$selected  = $location && $location->aisle == $aisle ? 'selected' : 'disabled';
 
-				return sprintf('<option value="%s" %s>Aisle %d</option>', e($aisleName), $selected, $aisle);
+				return sprintf('<option value="%s" %s>Aisle %d</option>', e($aisle), $selected, $aisle);
 			});
 
 			return $this->wrapWithDefaultOption($options->implode(''), 'Select Aisle');
@@ -97,12 +96,11 @@
 		 * Create shelf dropdown options
 		 */
 		private function createShelfOptions(?WarehouseLocation $location, Warehouse $warehouse): string {
-			$options = Collection::range(1, $warehouse->shelves)
-				->map(function ($shelf) use ($location) {
-					$selected = $location && $location->shelf == $shelf ? 'selected' : 'disabled';
+			$options = Collection::range(1, $warehouse->shelves)->map(function ($shelf) use ($location) {
+				$selected = $location && $location->shelf == $shelf ? 'selected' : 'disabled';
 
-					return sprintf('<option value="%d" %s>Shelf %d</option>', $shelf, $selected, $shelf);
-				});
+				return sprintf('<option value="%d" %s>Shelf %d</option>', $shelf, $selected, $shelf);
+			});
 
 			return $this->wrapWithDefaultOption($options->implode(''), 'Select Shelf');
 		}

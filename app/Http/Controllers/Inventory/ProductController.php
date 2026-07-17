@@ -7,6 +7,7 @@
 	use App\Enums\Inventory\AdjustmentReason;
 	use App\Http\Controllers\Controller;
 	use App\Http\Requests\Products\ProductInformationRequest;
+	use App\Http\Requests\Products\ProductSearchRequest;
 	use App\Http\Requests\Products\ProductStoreRequest;
 	use App\Http\Requests\Products\UpdateProductRequest;
 	use App\Models\Brand;
@@ -15,6 +16,7 @@
 	use App\Models\Product;
 	use App\Models\Supplier;
 	use App\Services\Inventory\InventoryLevelService;
+	use App\Services\Search\ProductSearchService;
 	use Exception;
 	use Illuminate\Contracts\View\Factory;
 	use Illuminate\Contracts\View\View;
@@ -27,9 +29,11 @@
 	class ProductController extends Controller {
 
 		private InventoryLevelService $service;
+		private ProductSearchService $searchService;
 
-		public function __construct(InventoryLevelService $inventoryLevelService) {
+		public function __construct(InventoryLevelService $inventoryLevelService, ProductSearchService $productSearchService) {
 			$this->service = $inventoryLevelService;
+			$this->searchService = $productSearchService;
 		}
 
 		/**
@@ -84,7 +88,23 @@
 			$entry->inventories->each(function (Inventory $inventory) use (&$stock, &$status, $entry) {
 				$stock['available']                                        += $inventory->quantity;
 				$stock['reserved']                                         += $inventory->reserved_quantity;
-				$status[$inventory->warehouse_id][$inventory->location_id] = $this->service->getInventoryAnalysis($entry->id);
+
+				$status[$inventory->warehouse_id][$inventory->location_id] = $this->service->getInventoryAnalysis($entry);
+
+				// Test Action
+				$tier = mt_rand(0, 4);
+//				$status[$inventory->warehouse_id][$inventory->location_id] = [
+//					'product_id' => $entry->id,
+//					'product_name' => $entry->name,
+//					'current_quantity' => mt_rand(8, 64),
+//					'min_stock' => 8,
+//					'max_stock' => 64,
+//					'tier' => $tier,
+//					'tier_label' => 'Tier Label',
+//					'percentage_of_max' => 60,
+//					'status' => 'UNKNOWN',
+//					'suggested_action' => 'Suggested Action'
+//				];
 			});
 			$stock['total'] = $stock['available'] + $stock['reserved'];
 
@@ -105,7 +125,7 @@
 				'brand'        => $entry->brand,
 				'suppliers'    => $entry->suppliers,
 				'warehouses'   => $entry->warehouses,
-				'reasons'      => AdjustmentReason::forDropdown(),
+				'reasons'      => AdjustmentReason::forDropdown()->toArray(),
 				'inventories'  => $entry->inventories->where('quantity', '>', 0),
 				'user'         => UserDTO::fromModel($request->user()),
 			]);
@@ -198,5 +218,16 @@
 		public function getInformation(ProductInformationRequest $request): JsonResponse {
 			$input = $request->validated();
 			return response()->json(['product' => $input->get('product')]);
+		}
+
+		public function search(ProductSearchRequest $request): JsonResponse {
+			// Retrieve only safely validated data from the request rules
+			$filters = $request->validated();
+
+			// Execute search via your dedicated service layer
+			$results = $this->searchService->search($filters);
+
+			// Return lightweight payload back to your vanilla JS
+			return response()->json($results);
 		}
 	}

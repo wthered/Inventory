@@ -2,11 +2,10 @@
 
 	namespace App\Http\Controllers;
 
-	use App\DataTransferObjects\ProductDTO;
 	use App\Http\Requests\Products\FilterProductsRequest;
-	use App\Models\Product;
 	use App\Services\Filters\ProductFilterService;
 	use Illuminate\Http\JsonResponse;
+	use Illuminate\Http\Request;
 
 	class FilterController extends Controller {
 		public function products(FilterProductsRequest $request, ProductFilterService $service): JsonResponse {
@@ -23,5 +22,9 @@
 				'products' => $html,
 				'pagination' => (string) $products->links('vendor.pagination.default_custom')
 			]);
+		}
+
+		public function getFilters(Request $request) {
+			dd($request->all());
 		}
 	}

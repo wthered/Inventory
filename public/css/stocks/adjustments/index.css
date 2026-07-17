@@ -1,0 +1,38 @@
+/* Διαφοροποίηση θετικής/αρνητικής αυξομείωσης αποθέματος */
+.adjustment-qty {
+    font-weight: bold;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+}
+.qty-positive {
+    color: #155724;
+    background-color: #d4edda;
+}
+.qty-negative {
+    color: #721c24;
+    background-color: #f8d7da;
+}
+
+/* Επιπλέον βελτιώσεις για την εμφάνιση πολλαπλών προϊόντων */
+.products-list-cell {
+    max-height: 120px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.product-item-badge {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+}
+.badge-count {
+    background: #4e73df;
+    color: white;
+    padding: 0.1rem 0.4rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}

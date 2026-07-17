@@ -8,6 +8,7 @@
 	use App\DataTransferObjects\Warehouse\WarehouseDTO;
 	use App\Http\Controllers\Controller;
 	use App\Http\Requests\Inventories\FetchProductLocationOptionsRequest;
+	use App\Http\Requests\Stocks\StockAdjustments\StockAdjustmentItemRequest;
 	use App\Http\Requests\Warehouses\IndexWarehouseAislesRequest;
 	use App\Http\Requests\Warehouses\IndexWarehouseBinsRequest;
 	use App\Http\Requests\Warehouses\IndexWarehouseRacksRequest;
@@ -30,15 +31,19 @@
 	use Throwable;
 
 	class WarehouseController extends Controller {
-		public function __construct(protected WarehouseLayoutService $layoutService, protected WarehouseAnalyticsService $analyticsService, protected WarehouseFilterService $filterService) {}
+		public function __construct(
+			protected WarehouseLayoutService $layoutService,
+			protected WarehouseAnalyticsService $analyticsService,
+			protected WarehouseFilterService $filterService
+		) {}
 
 		/**
 		 * Display a listing of the resource.
 		 */
-		public function index(): Factory|View {
+		public function index(Request $request): Factory|View {
 			return view('warehouses.index', [
-				'warehouses' => Warehouse::paginate(15),
-				'user'       => Auth::user()
+				'warehouses' => Warehouse::with(['manager.account'])->withCount('locations')->paginate($request->session()->get('per_page', 25)),
+				'user'       => UserDTO::fromModel(Auth::user())
 			]);
 		}
 
@@ -59,18 +64,27 @@
 		/**
 		 * Display the specified resource.
 		 */
+		/**
+		 * Display the specified resource.
+		 */
+		/**
+		 * Display the specified resource.
+		 */
 		public function show(Request $request, int $id): View {
-			$warehouseModel = Warehouse::with(['manager'])
-				->withCount('inventories')
-				->findOrFail($id);
+			// 1. Eager load manager account and pre-aggregate relational counts in 1 query
+			$warehouseModel = Warehouse::with(['manager.account'])
+			                           ->withCount(['locations', 'inventories'])
+			                           ->findOrFail($id);
 
-			// .getQuery() converts the HasMany relationship into a Builder instance
-			$locationsQuery = $warehouseModel
-				->locations()
-				->getQuery()
-				->with(['inventories.product']);
+			// 2. Build the optimized base query for locations
+			$locationsQuery = $warehouseModel->locations()
+			                                 ->getQuery()
+			                                 ->with([
+				                                 'inventories.product',
+				                                 'inventories.warehouse' // Prevents N+1 lookup inside DTO conversions
+			                                 ]);
 
-			// Now this matches the Builder type-hint in WarehouseFilterService
+			// 3. Apply standard layouts
 			$locationsQuery = $this->filterService->applyFilters($locationsQuery, $request->only([
 				'zone',
 				'aisle',
@@ -78,32 +92,39 @@
 				'shelf'
 			]));
 
-			$locationsPagination = $locationsQuery->paginate($request
-				->session()
-				->get('per_page', 25));
+			// 4. Tighten pagination chunks to prevent high memory hydration leaks
+			$perPage = $request->session()->get('per_page', 24); // Changed to 24 (even divisor for grid view layout alignment)
+			$locationsPagination = $locationsQuery->paginate($perPage);
 
-			$locationCollection = $locationsPagination
-				->getCollection()
-				->map(function (WarehouseLocation $location) {
-					return LocationDTO::fromModel($location);
-				});
+			// 5. Transform collection in-place safely without duplicating array offsets
+			$locationsPagination->through(function (WarehouseLocation $location) {
+				return LocationDTO::fromModel($location);
+			});
+
+			// 6. DEFER HEAVY LEDGER CALCULATION: Cache heavy calculations for 10 minutes
+			$analytics = cache()->remember("warehouse:{$id}:analytics", now()->addMinutes(10), function () use (
+				$warehouseModel,
+				$id
+			) {
+				return [
+					'recentActivities'  => $this->analyticsService->getRecentActivities($id),
+					'totalValue'        => $this->analyticsService->calculateWarehouseValue($id),
+					'latestInventories' => $this->analyticsService->getLatestInventories($warehouseModel),
+					'transfersCount'    => $this->analyticsService->getMonthlyTransferCount($warehouseModel),
+				];
+			});
 
 			return view('warehouses.show', [
 				'warehouse'         => WarehouseDTO::fromModel($warehouseModel),
-				'locations'         => $locationsPagination->setCollection($locationCollection),
-
-				// Use the new service methods here
-				'recentActivities'  => $this->analyticsService->getRecentActivities($id),
-				'totalValue'        => $this->analyticsService->calculateWarehouseValue($id),
-				'latestInventories' => $this->analyticsService->getLatestInventories($warehouseModel),
-				'transfersCount'    => $this->analyticsService->getMonthlyTransferCount($warehouseModel),
-
-				// Provide filter options to the view
+				'locations'         => $locationsPagination,
+				'recentActivities'  => $analytics['recentActivities'],
+				'totalValue'        => $analytics['totalValue'],
+				'latestInventories' => $analytics['latestInventories'],
+				'transfersCount'    => $analytics['transfersCount'],
 				'filterOptions'     => $this->filterService->getFilterOptions($warehouseModel),
-
-				'staffCount'       => $warehouseModel->manager_id ? 1 : 0,
-				'user'             => Auth::check() ? UserDTO::fromModel(Auth::user()) : null,
-				'inventoriesCount' => $warehouseModel->inventories_count,
+				'staffCount'        => $warehouseModel->manager_id ? 1 : 0,
+				'user'              => Auth::check() ? UserDTO::fromModel(Auth::user()) : null,
+				'inventoriesCount'  => $warehouseModel->inventories_count,
 			]);
 		}
 
@@ -134,7 +155,7 @@
 		 * Returns: a list of source and destination (target) warehouses
 		 *****************************************************/
 		public function getWarehouseList(IndexWarehousesRequest $request): JsonResponse {
-			$input   = $request->validated();
+			$input = $request->validated();
 			$product = new ProductDTO(intval($input->get('product_id')));
 
 			$inventories = $product->inventories->where('warehouse_id', $input['warehouse_id']);
@@ -142,37 +163,21 @@
 			$warehouses = $inventories->map(function ($inventory) use ($input) {
 				return [
 					'value'    => $inventory->location->id,
-					'text'     => $inventory->warehouse->name . " (aka " . $inventory->location->name . ")",
+					'text'     => $inventory->warehouse->name." (aka ".$inventory->location->name.")",
 					'selected' => $inventory->location->id === $input['location_id'],
 				];
 			});
 
 			return response()->json([
-				'source'    => $warehouses
-					->values()
-					->all(),
-				'target'    => Warehouse::query()
-					->orderBy('name')
-					->get(),
-				'inventory' => $inventories
-					->where('location_id', $input['location_id'])
-					->values(),
+				'source'    => $warehouses->values()->all(),
+				'target'    => Warehouse::query()->orderBy('name')->get(),
+				'inventory' => $inventories->where('location_id', $input['location_id'])->values(),
 			]);
 		}
 
 		public function getLocations(FetchProductLocationOptionsRequest $request): JsonResponse {
-			$input     = $request->validated();
+			$input = $request->validated();
 			$warehouse = Warehouse::query()->find($input['warehouse']);
-
-			$shelves = "<option value='' disabled>Select Shelf</option>";
-			Collection::range(1, $warehouse['shelves'])->each(function ($shelf) use (&$shelves) {
-				$shelves .= "<option value='" . $shelf . "'>Shelf " . $shelf . "</option>";
-			});
-
-			$bins = "<option value='' disabled>Select Bin</option>";
-			Collection::range(1, $warehouse['bins'])->each(function ($bin) use (&$bins) {
-				$bins .= "<option value='" . $bin . "'>Bin " . $bin . "</option>";
-			});
 
 			return response()->json([
 				'zone'  => $this->createZoneOptions($warehouse),
@@ -184,55 +189,49 @@
 		}
 
 		private function createZoneOptions(Warehouse $warehouse): Collection {
-			return Collection::range(1, $warehouse['zones'])
-				->map(function ($zone) {
-					return [
-						'value' => "Z" . $zone,
-						'text'  => "Z" . $zone
-					];
-				});
+			return Collection::range(1, $warehouse['zones'])->map(function ($zone) {
+				return [
+					'value' => "Z".$zone,
+					'text'  => "Zone ".$zone
+				];
+			});
 		}
 
 		private function createAisleOptions(Warehouse $warehouse): array {
-			$options = Collection::range(1, $warehouse['aisles'])
-				->map(function (int $aisle) {
-					return "<option value='" . $aisle . "'>Aisle " . $aisle . "</option>";
-				})
-				->implode('');
+			$options = Collection::range(1, $warehouse['aisles'])->map(function (int $aisle) {
+				return "<option value='".$aisle."'>Aisle ".$aisle."</option>";
+			})->implode('');
 			return [
 				'options'   => $options,
-				'locations' => 5,
+				'locations' => $warehouse['aisles'],
 			];
 		}
 
 		private function createRackOptions(Warehouse $warehouse): Collection {
-			return Collection::range(1, $warehouse['racks'])
-				->map(function ($rack) {
-					return [
-						'value' => $rack,
-						'text'  => $rack
-					];
-				});
+			return Collection::range(1, $warehouse['racks'])->map(function ($rack) {
+				return [
+					'value' => $rack,
+					'text'  => $rack
+				];
+			});
 		}
 
 		private function createShelfOptions(Warehouse $warehouse): Collection {
-			return Collection::range(1, $warehouse['shelves'])
-				->map(function ($shelf) {
-					return [
-						'value' => $shelf,
-						'text'  => $shelf
-					];
-				});
+			return Collection::range(1, $warehouse['shelves'])->map(function ($shelf) {
+				return [
+					'value' => $shelf,
+					'text'  => $shelf
+				];
+			});
 		}
 
 		private function createBinOptions(Warehouse $warehouse): Collection {
-			return Collection::range(1, $warehouse['bins'])
-				->map(function ($bin) {
-					return [
-						'value' => $bin,
-						'text'  => $bin
-					];
-				});
+			return Collection::range(1, $warehouse['bins'])->map(function ($bin) {
+				return [
+					'value' => $bin,
+					'text'  => $bin
+				];
+			});
 		}
 
 		/**
@@ -243,8 +242,7 @@
 			$input = $request->validated();
 
 			return response()->json([
-				'success' => Collection::make($input)
-					->isNotEmpty(),
+				'success' => Collection::make($input)->isNotEmpty(),
 				'zone'    => $this->createZoneOptions($warehouse),
 			]);
 		}
@@ -253,19 +251,16 @@
 			$input = $request->validated();
 
 			return response()->json([
-				'success' => Collection::make($input)
-					->isNotEmpty(),
-				'aisle'   => $this->createAisleOptions($warehouse),
+				'success' => Collection::make($input)->isNotEmpty(),
+				'aisles'  => $this->createAisleOptions($warehouse),
 			]);
 		}
 
 		public function getRacks(IndexWarehouseRacksRequest $request, Warehouse $warehouse): JsonResponse {
-			$input = $request->validated();
 
 			return response()->json([
-				'success' => Collection::make($input)
-					->isNotEmpty(),
-				'rack'    => $this->createRackOptions($warehouse),
+				'success' => Collection::make($request->validated())->isNotEmpty(),
+				'options' => $this->createRackOptions($warehouse),
 			]);
 		}
 
@@ -273,9 +268,8 @@
 			$input = $request->validated();
 
 			return response()->json([
-				'success' => Collection::make($input)
-					->isNotEmpty(),
-				'shelf'   => $this->createShelfOptions($warehouse),
+				'success' => Collection::make($input)->isNotEmpty(),
+				'options' => $this->createShelfOptions($warehouse),
 			]);
 		}
 
@@ -283,9 +277,8 @@
 			$input = $request->validated();
 
 			return response()->json([
-				'success' => Collection::make($input)
-					->isNotEmpty(),
-				'bin'     => $this->createBinOptions($warehouse),
+				'success' => Collection::make($input)->isNotEmpty(),
+				'options' => $this->createBinOptions($warehouse),
 			]);
 		}
 
@@ -301,6 +294,8 @@
 		 * @throws Throwable
 		 */
 		public function filter(WarehouseFilterRequest $request, int $id) {
+//			dd($request->validated());
+
 			// SYNTAX: Warehouse::query() is already a Builder, so this works as-is
 			$warehouse = Warehouse::query()->find($id);
 			$locationsQuery = $warehouse->locations()->getQuery()->with(['inventories.product']);
@@ -315,14 +310,139 @@
 			});
 
 			$options = $this->filterService->getFilterOptions($warehouse);
+
+//			dd($options);
+
 			// Pass the Builder to your service
 			return response()->json([
 				'options'   => Collection::make($options[Str::plural($request->validated('type'))])->map(function ($option) {
-					return "<option value='" . $option['value'] . "'>".$option['text']."</option>";
+					return "<option value='".$option['value']."'>".$option['text']."</option>";
 				})->implode(''),
 				'locations' => $locationCollection->map(function (LocationDTO $location) {
 					return view('partials.location_card', ['location' => $location])->render();
 				})->implode(''),
+			]);
+		}
+
+		/**
+		 * Ανακτά τα στοιχεία μιας θέσης βάσει του StockAdjustmentItem ID (πραγματικό PK),
+		 * ή απευθείας Location ID αν πρόκειται για νέα γραμμή.
+		 *
+		 * @param  StockAdjustmentItemRequest  $request
+		 *
+		 * @return JsonResponse
+		 */
+		public function getLocationDetails(StockAdjustmentItemRequest $request): JsonResponse {
+			$inputLocation = $request->validated('location_id');
+
+//			dd($inputLocation);
+
+			// Εύρεση της θέσης μαζί με την αποθήκη της
+			$location = WarehouseLocation::query()->with('warehouse')->findOrFail($inputLocation);
+//			dd($location);
+			$warehouse = $location->warehouse;
+
+			// Έλεγχος των ενεργών επιπέδων της αποθήκης
+			$levelsConfig = [
+				'zone'  => $warehouse->zones > 0,
+				'aisle' => $warehouse->aisles > 0,
+				'rack'  => $warehouse->racks > 0,
+				'shelf' => $warehouse->shelves > 0,
+				'bin'   => $warehouse->bins > 0,
+			];
+
+			// 5. Ανάκτηση όλων των θέσεων της αποθήκης για το client-side cascade filtering
+			$rawLocations = WarehouseLocation::where('warehouse_id', $warehouse->id)->get()->map(function ($loc) use ($levelsConfig) {
+				$codeParts = [];
+				if ($levelsConfig['zone'] && $loc->zone !== null) {
+					$codeParts[] = $loc->zone;
+				}
+				if ($levelsConfig['aisle'] && $loc->aisle !== null) {
+					$codeParts[] = $loc->aisle;
+				}
+				if ($levelsConfig['rack'] && $loc->rack !== null) {
+					$codeParts[] = $loc->rack;
+				}
+				if ($levelsConfig['shelf'] && $loc->shelf !== null) {
+					$codeParts[] = $loc->shelf;
+				}
+				if ($levelsConfig['bin'] && $loc->bin !== null) {
+					$codeParts[] = $loc->bin;
+				}
+
+				return [
+					'id'   => $loc->id,
+					'code' => implode('-', $codeParts),
+				];
+			});
+
+			// 6. Δημιουργία των έτοιμων HTML Options
+			$levels = [];
+
+			// --- ZONE ---
+			if ($levelsConfig['zone']) {
+				$zoneHtml = Collection::range(1, $warehouse->zones)->map(function (int $val) use ($location) {
+					$selected = ($location->zone == $val) ? 'selected' : '';
+					return "<option value='$val' $selected>".__('warehouse.levels.zone')." ".sprintf('%02d', $val)."</option>";
+				})->prepend("<option value=''>".__('warehouse.levels_plural.zone')."</option>")->join('');
+
+				$levels['zone'] = ['html' => $zoneHtml, 'disabled' => false, 'visible' => true];
+			} else {
+				$levels['zone'] = ['html' => '', 'disabled' => true, 'visible' => false];
+			}
+
+			// --- AISLE ---
+			if ($levelsConfig['aisle']) {
+				$aisleHtml = Collection::range(1, $warehouse->aisles)->map(function (int $val) use ($location) {
+					$selected = ($location->aisle == $val) ? 'selected' : '';
+					return "<option value='$val' $selected>".__('warehouse.levels.aisle')." ".sprintf('%02d', $val)."</option>";
+				})->prepend("<option value=''>".__('warehouse.levels_plural.aisle')."</option>")->join('');
+
+				$levels['aisle'] = ['html' => $aisleHtml, 'disabled' => false, 'visible' => true];
+			} else {
+				$levels['aisle'] = ['html' => '', 'disabled' => true, 'visible' => false];
+			}
+
+			// --- RACK ---
+			if ($levelsConfig['rack']) {
+				$rackHtml = Collection::range(1, $warehouse->racks)->map(function (int $val) use ($location) {
+					$selected = ($location->rack == $val) ? 'selected' : '';
+					return "<option value='$val' $selected>".__('warehouse.levels.rack')." ".sprintf('%02d', $val)."</option>";
+				})->prepend("<option value=''>".__('warehouse.levels_plural.rack')."</option>")->join('');
+
+				$levels['rack'] = ['html' => $rackHtml, 'disabled' => false, 'visible' => true];
+			} else {
+				$levels['rack'] = ['html' => '', 'disabled' => true, 'visible' => false];
+			}
+
+			// --- SHELF ---
+			if ($levelsConfig['shelf']) {
+				$shelfHtml = Collection::range(1, $warehouse->shelves)->map(function (int $val) use ($location) {
+					$selected = ($location->shelf == $val) ? 'selected' : '';
+					return "<option value='$val' $selected>".__('warehouse.levels.shelf')." ".sprintf('%02d', $val)."</option>";
+				})->prepend("<option value=''>".__('warehouse.levels_plural.shelf')."</option>")->join('');
+
+				$levels['shelf'] = ['html' => $shelfHtml, 'disabled' => false, 'visible' => true];
+			} else {
+				$levels['shelf'] = ['html' => '', 'disabled' => true, 'visible' => false];
+			}
+
+			// --- BIN ---
+			if ($levelsConfig['bin']) {
+				$binHtml = Collection::range(1, $warehouse->bins)->map(function (int $val) use ($location) {
+					$selected = ($location->bin == $val) ? 'selected' : '';
+					return "<option value='$val' $selected>".__('warehouse.levels.bin')." ".sprintf('%02d', $val)."</option>";
+				})->prepend("<option value=''>".__('warehouse.levels_plural.bin')."</option>")->join('');
+
+				$levels['bin'] = ['html' => $binHtml, 'disabled' => false, 'visible' => true];
+			} else {
+				$levels['bin'] = ['html' => '', 'disabled' => true, 'visible' => false];
+			}
+
+			return response()->json([
+				'current_location_id' => $location->id,
+				'levels'              => $levels,
+				'raw_locations'       => $rawLocations,
 			]);
 		}
 	}

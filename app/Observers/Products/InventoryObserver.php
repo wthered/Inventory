@@ -29,10 +29,10 @@
 		 * @throws Exception
 		 */
 		private function validateWarehouseLocation(Inventory $inventory): void {
-			$warehouseId = $inventory->warehouse_id;
-			$locationId  = $inventory->location_id;
+			$warehouse = $inventory->warehouse_id;
+			$location  = $inventory->location_id;
 
-			if ($warehouseId === null || $locationId === null) {
+			if ($warehouse === null || $location === null) {
 				// Nulls are allowed by your migration but validation should prevent partial data save
 				// unless you have specific business logic to handle this.
 				return;
@@ -40,13 +40,10 @@
 
 			// Check if a record exists in the warehouse_locations table
 			// that matches BOTH the warehouse_id AND the location_id (the PK of warehouse_locations).
-			$validLocation = DB::table('warehouse_locations')
-				->where('id', $locationId)
-				->where('warehouse_id', $warehouseId)
-				->exists();
+			$validLocation = DB::table('warehouse_locations')->where('id', $location)->where('warehouse_id', $warehouse);
 
-			if (!$validLocation) {
-				throw new Exception("Integrity Error: Location ID $locationId (the bin/shelf) does not belong to Warehouse ID {$warehouseId}. Inventory move aborted.");
+			if (!$validLocation->exists()) {
+				throw new Exception("Integrity Error: Location ID $location (the bin/shelf) does not belong to Warehouse ID ".$warehouse.". Inventory move aborted.");
 			}
 		}
 

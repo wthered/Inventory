@@ -8,8 +8,10 @@
 
 	class StockTransferItem extends Model implements StockMoveable {
 		protected $fillable = [
-			'stock_transfer_id',
 			'product_id',
+			'batch_number',
+			'source_location_id',
+			'target_location_id',
 			'quantity_requested',
 			'quantity_delivered',
 			'quantity_received',
@@ -17,6 +19,20 @@
 			'processed_at',
 			'notes',
 		];
+
+		protected $casts = [
+			'quantity_requested' => 'integer',
+			'quantity_delivered' => 'integer',
+			'quantity_received'  => 'integer',
+			'processed_at'       => 'datetime',
+		];
+
+		/**
+		 * Dynamic fallback for the generic stock movement service
+		 */
+		public function getQuantityAttribute(): int {
+			return $this->quantity_requested;
+		}
 
 		public function movement(): BelongsTo {
 			return $this->belongsTo(StockTransfer::class, 'stock_transfer_id');

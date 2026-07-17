@@ -1,0 +1,40 @@
+/* Custom Vanilla CSS ειδικά για τη σελίδα Show */
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.info-box {
+    background: #f8f9fa;
+    border: 1px solid #e3e6f0;
+    border-radius: 6px;
+    padding: 1.25rem;
+}
+.info-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #858796;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+.info-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2e59d9;
+}
+.notes-box {
+    background: #fffdf5;
+    border: 1px solid #ffeeba;
+    border-radius: 6px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+}
+.notes-text {
+    font-style: italic;
+    color: #6c757d;
+    white-space: pre-line;
+}
+.back-action {
+    margin-bottom: 1.5rem;
+}

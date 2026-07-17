@@ -14,7 +14,7 @@
 		case PENDING = 'pending';
 
 		public function label(): string {
-			return __("inventory.types." . $this->name);
+			return __("inventory.types." . $this->value);
 		}
 
 		/**

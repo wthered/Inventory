@@ -42,28 +42,12 @@
 			'type'            => TransactionType::class,
 			'reason'          => TransactionReason::class,
 			'quantity'        => 'decimal:2',
-			'quantity_before' => 'decimal:2',
-			'quantity_after'  => 'decimal:2',
+			'quantity_before' => 'integer',
+			'quantity_after'  => 'integer',
 			'unit_cost'       => 'decimal:2',
 			'total_cost'      => 'decimal:2',
 			'created_at'      => 'datetime',
 		];
-
-		/**
-		 * Αυτόματη παραγωγή αριθμού κατά τη δημιουργία
-		 */
-		protected static function boot(): void {
-			parent::boot();
-
-			static::creating(function ($model) {
-				// Αλλάζουμε το transaction_number σε batch_number
-				if (!$model->batch_number) {
-					$prefix = $model->type === TransactionType::IN ? 'IN' : ($model->type === TransactionType::OUT ? 'OUT' : 'TRX');
-
-					$model->batch_number = self::generateTransactionNumber($prefix);
-				}
-			});
-		}
 
 		public static function generateTransactionNumber(string $prefix = 'TRX'): string {
 			$date   = now()->format('Ymd');
@@ -114,16 +98,6 @@
 					'class' => 'pill-generic'
 				],
 			};
-		}
-
-		public function getResponsibleAccountAttribute() {
-			// Επιστρέφει το account αν υπάρχει, αλλιώς null
-			return $this->creator?->account;
-		}
-
-		public function getCreatorDisplayNameAttribute(): string {
-			// Χρήση του fullName accessor από το Account model
-			return $this->responsible_account?->full_name ?? 'System';
 		}
 
 		/** Relationships **/

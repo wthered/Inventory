@@ -3,10 +3,12 @@
 	namespace App\Http\Controllers\Inventory;
 
 	use App\Http\Controllers\Controller;
+	use App\Http\Requests\Transactions\FilterBrandsRequest;
 	use App\Models\Brand;
 	use App\Models\Category;
 	use Illuminate\Http\JsonResponse;
 	use Illuminate\Http\Request;
+	use Illuminate\Support\Collection;
 
 
 	class CategoryController extends Controller {
@@ -59,22 +61,14 @@
 			//
 		}
 
-		/****
-		 * Get all the Level 2 Categories
-		 */
-		public function filter(Request $request, Category $category): JsonResponse {
-			$children = Category::query()->where(['parent_id' => $category->id])->get()->map(function ($child) {
-				return "<option value='" . $child->id . "'>" . $child->name . "</option>";
+		public function filterBrands(FilterBrandsRequest $request) {
+			$input = $request->validated();
+			$options = Collection::make(["<option value='' selected>Επιλέξτε Μάρκα...</option>"]);
+
+			Category::find($input['category_id'])->brands()->pluck('name', 'id')->each(function ($name, $id) use (&$options) {
+				$options->push("<option value='".$id."'>".$name."</option>");
 			});
 
-			$brands = Brand::query()->where('category_id', $category->id)->get()->map(function ($brand) {
-				return "<option value='" . $brand->id . "'>" . $brand->name . "</option>";
-			});
-
-			return response()->json([
-				'success'  => true,
-				'children' => "<option value=''>-- Select ".$category->name." Subcategory --</option>" . $children->implode(''),
-				'brands'   => "<option value = ''>-- Select Brand --</option>" . $brands->implode(''),
-			]);
+			return $options->join('');
 		}
 	}

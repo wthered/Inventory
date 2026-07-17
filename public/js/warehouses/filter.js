@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // 3. If there is a next level in the hierarchy, fetch the new options
             if (nextType && routeSuffixes[nextType]) {
-                fetchChildData(`/warehouses/warehouse/${warehouseId}/filter`, nextType, selectedValue);
+                fetchChildData(`/warehouses/${warehouseId}/filter`, nextType, selectedValue);
             } else {
                 // If it's the last dropdown (Shelf), submit the form to filter the view
                 // form.submit();

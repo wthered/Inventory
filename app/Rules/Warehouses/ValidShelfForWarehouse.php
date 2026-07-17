@@ -41,28 +41,44 @@
 		public function validate(string $attribute, mixed $value, Closure $fail): void {
 			// First, check if the shelf value is an integer
 			if (!filter_var($value, FILTER_VALIDATE_INT)) {
-				$fail("The {$attribute} must be an integer.");
+				$fail("The ".$attribute." must be an integer.");
 				return;
 			}
 
-			// Get warehouse ID
-			$warehouseId = data_get($this->data, 'targetLocation.warehouse') ?? data_get($this->data, 'warehouse') ?? request()->input('targetLocation.warehouse') ?? request()->input('warehouse');
+			// Δυναμικός εντοπισμός του prefix (sourceLocation ή targetLocation)
+			// Αν το $attribute είναι "sourceLocation.shelf", το $prefix θα γίνει "sourceLocation"
+			$attributeParts = explode('.', $attribute);
+			$prefix         = $attributeParts[0] ?? null;
+
+			if (!$prefix) {
+				$fail("Unable to determine location context for validation.");
+				return;
+			}
+
+			// Get warehouse ID δυναμικά ανάλογα με το ποιο location ελέγχουμε
+			$warehouseId = data_get($this->data, $prefix.".warehouse")
+			               ?? data_get($this->data, 'warehouse')
+			                  ?? request()->input($prefix.".warehouse")
+			                     ?? request()->input('warehouse');
 
 			if (!$warehouseId) {
 				$fail("Warehouse ID is required to validate the shelf number.");
 				return;
 			}
 
-			// Get rack number
-			$rackNumber = data_get($this->data, 'targetLocation.rack') ?? data_get($this->data, 'rack') ?? request()->input('targetLocation.rack') ?? request()->input('rack');
+			// Get rack number δυναμικά από το αντίστοιχο location block
+			$rackNumber = data_get($this->data, $prefix.".rack")
+			              ?? data_get($this->data, 'rack')
+			                 ?? request()->input($prefix.".rack")
+			                    ?? request()->input('rack');
 
 			if (!$rackNumber) {
 				$fail("Rack number is required to validate the shelf number.");
 				return;
 			}
 
-			// Get warehouse configuration (assuming warehouses table has 'shelves_per_rack' column)
-			$warehouse = DB::table('warehouses')->where('id', $this->warehouse)->select([
+			// Χρήση του $warehouseId αντί για το ανύπαρκτο $this->warehouse
+			$warehouse = DB::table('warehouses')->where('id', $warehouseId)->select([
 				'racks',
 				'shelves'
 			])->first();
@@ -73,8 +89,8 @@
 			}
 
 			// Validate rack exists
-			if ($rackNumber < 1 || $rackNumber > (int) $warehouse->racks) {
-				$fail("Invalid rack number for this warehouse.");
+			if ($rackNumber < 1 || $rackNumber > intval($warehouse->racks)) {
+				$fail("Invalid rack number (".$rackNumber.") for warehouse #".$warehouseId);
 				return;
 			}
 
@@ -83,7 +99,7 @@
 
 			// Validate shelf number
 			if ($shelfNumber < 1) {
-				$fail("The {$attribute} must be at least 1.");
+				$fail("The ".$attribute." must be at least 1.");
 				return;
 			}
 

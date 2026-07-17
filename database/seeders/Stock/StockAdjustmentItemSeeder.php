@@ -3,13 +3,11 @@
 	namespace Database\Seeders\Stock;
 
 	use App\Enums\Inventory\AdjustmentReason;
-	use App\Enums\Inventory\TransactionType;
+	use App\Enums\Inventory\AdjustmentType;
 	use App\Models\Product;
 	use App\Models\StockAdjustment;
-	use App\Models\StockAdjustmentItem;
 	use Carbon\Carbon;
 	use Database\Seeders\ParentSeeder;
-	use Illuminate\Database\Seeder;
 	use Illuminate\Support\Collection;
 	use Illuminate\Support\Facades\DB;
 
@@ -18,7 +16,8 @@
 		 * Run the database seeds.
 		 */
 		public function run(): void {
-			DB::connection()->disableQueryLog();
+			DB::connection()
+				->disableQueryLog();
 
 			// 1. Μετατροπή σε Array για ελάχιστη χρήση μνήμης
 			$products = Product::select('id', 'current_stock', 'cost_price')->get()->toArray();
@@ -27,9 +26,11 @@
 			$batchList = [];
 
 			// 2. Χρήση chunkById για καλύτερο memory management
-			StockAdjustment::with(['warehouse.locations' => function($q) {
-				$q->select('id', 'warehouse_id'); // Παίρνουμε μόνο τα απαραίτητα
-			}])->chunkById(128, function ($adjustments) use (&$products, &$batchList) {
+			StockAdjustment::with([
+				'warehouse.locations' => function ($q) {
+					$q->select('id', 'warehouse_id'); // Παίρνουμε μόνο τα απαραίτητα
+				}
+			])->chunk(self::BATCH_SIZE, function ($adjustments) use (&$products, &$batchList) {
 				foreach ($adjustments as $adjustment) {
 					$locations = $adjustment->warehouse->locations->pluck('id')->toArray();
 
@@ -41,28 +42,29 @@
 					for ($i = 0; $i < mt_rand(4, 12); $i++) {
 						$product = $products[array_rand($products)];
 
-						$creation = Carbon::yesterday()->subHours(mt_rand(1, 23));
-						$type = fake()->randomElement(TransactionType::cases());
+						$creation = Carbon::yesterday();
+						$type     = fake()->randomElement(AdjustmentType::cases());
+						$reason   = $type == AdjustmentType::INCREASE ? fake()->randomElement(AdjustmentReason::increaseReasons()) : fake()->randomElement(AdjustmentReason::decreaseReasons());
 						$quantity = mt_rand(1, 64);
-						$after = max($product['current_stock'] ?? 0, 0);
-						$before = $after - ($quantity * $type->sign());
+						$after    = max($product['current_stock'] ?? 0, 0);
+						$before   = $after - ($quantity * fake()->randomElement([1, -1]));
 
 						$batchList[] = [
 							'stock_adjustment_id' => $adjustment->id,
 							'product_id'          => $product['id'],
 							'location_id'         => $locations[array_rand($locations)],
-							'reason'              => Collection::make($type->validReasons())->random()->value,
+							'reason'              => $reason->value,
 							'type'                => $type->value,
 							'quantity'            => $quantity,
 							'quantity_before'     => $before,
 							'quantity_after'      => $after,
 							'unit_cost'           => $product['cost_price'] ?? mt_rand(24, 128),
 							'notes'               => 'Verified by floor supervisor',
-							'created_at'          => $creation,
-							'updated_at'          => $creation,
+							'created_at'          => $creation->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
+							'updated_at'          => $creation->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
 						];
 
-						if (count($batchList) >= self::BATCH_SIZE) {
+						if (count($batchList) >= __LINE__) {
 							DB::table('stock_adjustment_items')->insert($batchList);
 							$batchList = []; // Άμεση αποδέσμευση
 						}
@@ -73,7 +75,8 @@
 			});
 
 			if (!empty($batchList)) {
-				DB::table('stock_adjustment_items')->insert($batchList);
+				DB::table('stock_adjustment_items')
+					->insert($batchList);
 			}
 		}
 	}

@@ -19,6 +19,9 @@ class AdjustmentModal {
 		this.init().then(() => {
 			console.log('Adjustment Modal initialized.');
 		});
+
+		// Ένας απλός timer για το debounce
+		this.validationTimeout = 500;
 	}
 
 	async init() {
@@ -100,7 +103,8 @@ class AdjustmentModal {
 	}
 
 	async updateAdjustmentReasons() {
-		await this.postRequest(`/inventories/inventory/adjustment/reasons`).then(response => {
+		await this.postRequest(`/inventories/adjustment/reasons`).then(response => {
+			// console.log("[Line 107] Reasons:",response);
 			document.querySelector('#adjustmentReason').innerHTML = response;
 		});
 	}
@@ -222,7 +226,7 @@ class AdjustmentModal {
 		// Clear the error message from the previous validation
 		document.getElementById('adjustReason').addEventListener('change', (e) => {
 			const selectedReason = e.target.value;
-			console.log('[Line 225] Adjustment Reason changed to',selectedReason);
+			console.log('[Line 228] Adjustment Reason changed to',selectedReason);
 			document.getElementById('errors').innerHTML = "&nbsp;";
 		});
 	}
@@ -231,13 +235,56 @@ class AdjustmentModal {
 		const value = parseInt(input.value);
 		const min = parseInt(input.min) || 1;
 
-		console.log("[Line 215] The value of " + value + " is greater than " + min + " and less than " + input.max);
 		if (value < min) {
 			input.value = min;
 			this.showMessage(`Minimum quantity is ${min}`, 'warning');
+			return;
 		}
 
 		this.updatePreview();
+
+		// Ακύρωση του προηγούμενου request αν ο χρήστης συνεχίζει να πληκτρολογεί
+		clearTimeout(this.validationTimeout);
+
+		// Έλεγχος διαθεσιμότητας στον server μόνο αν σταματήσει να γράφει για 500ms
+		this.validationTimeout = setTimeout(async () => {
+			try {
+				// Παίρνουμε το CSRF token από το meta tag της σελίδας
+				const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+				const response = await fetch('/inventories/adjustment/validation', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'X-CSRF-TOKEN': csrfToken,
+						'X-Requested-With': 'XMLHttpRequest' // Ενημερώνει το Laravel ότι είναι AJAX request
+					},
+					body: JSON.stringify({
+						inputData: this.currentData,
+						quantity: value,
+						// Αν χρειάζεται να στείλεις και την τοποθεσία (π.χ. location_id ή warehouse_id) την προσθέτεις εδώ
+					})
+				});
+
+				// Μετατροπή της απάντησης σε JSON object
+				const data = await response.json();
+
+				// Αν το Laravel επιστρέψει 422 (Validation Error) ή response.success === false
+				if (!response.ok || (data && data.success === false)) {
+					// Αν είναι Laravel Validation Error, το μήνυμα βρίσκεται συνήθως στο data.message ή στα data.errors
+					const errorMessage = data.message || (data.errors && Object.values(data.errors)[0][0]) || 'Invalid quantity';
+
+					this.showMessage(errorMessage, 'danger');
+					input.classList.add('is-invalid');
+				} else {
+					input.classList.remove('is-invalid');
+					// Αν έχεις κάποιο container για επιτυχία, μπορείς να καθαρίσεις τυχόν παλιά μηνύματα λάθους
+				}
+
+			} catch (error) {
+				console.error('Validation error:', error);
+			}
+		}, 500);
 	}
 
 	async handleSubmit(e) {

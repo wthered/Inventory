@@ -1,0 +1,138 @@
+/* ==========================================================================
+   0. Global Variables & Fallbacks (PhpStorm Fix)
+   ========================================================================== */
+:root {
+    --badge-color: #94a3b8;
+}
+
+/* ==========================================================================
+   1. Header Enhancements
+   ========================================================================== */
+.header-with-badge {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Δυναμικό Badge (Αντιγραφή από index.css για self-containment) */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 0.025em;
+    color: var(--badge-color);
+    background-color: color-mix(in srgb, var(--badge-color) 15%, white);
+    border: 1px solid color-mix(in srgb, var(--badge-color) 30%, white);
+}
+
+/* ==========================================================================
+   2. Route Panel Layout (Source -> Destination)
+   ========================================================================== */
+.transfer-route-panel {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    background: white;
+    border: 1px solid #e3e6f0;
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.route-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 1rem;
+    border-left: 4px solid #cbd5e1;
+}
+
+.source-box {
+    border-left-color: #4e73df; /* Μπλε για την πηγή */
+}
+
+.target-box {
+    border-left-color: #1cc88a; /* Πράσινο για τον προορισμό */
+}
+
+.route-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.05em;
+}
+
+.route-warehouse-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.route-arrow-connector {
+    font-size: 2rem;
+    color: #94a3b8;
+    font-weight: 300;
+}
+
+/* ==========================================================================
+   3. Table Details
+   ========================================================================== */
+.table-header-title {
+    padding: 1rem 1rem 0 1rem;
+    background: #f8f9fa;
+}
+
+.table-header-title h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #334155;
+    font-weight: 600;
+}
+
+.product-name {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.text-muted {
+    color: #64748b;
+    font-size: 0.8rem;
+}
+
+.batch-code {
+    background: #f1f5f9;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   4. Media Queries (Responsive)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .transfer-route-panel {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .route-arrow-connector {
+        transform: rotate(90deg);
+        align-self: center;
+        margin: -0.5rem 0;
+    }
+
+    .route-box {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}

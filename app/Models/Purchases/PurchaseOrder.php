@@ -2,8 +2,7 @@
 
 	namespace App\Models\Purchases;
 
-	use App\Enums\Financial\PaymentStatus;
-	use App\Enums\Sales\SalesOrderStatus;
+	use App\Enums\Purchases\PurchaseOrderStatus;
 	use App\Models\Supplier;
 	use App\Models\User;
 	use App\Models\Warehouse;
@@ -16,38 +15,27 @@
 		use SoftDeletes;
 
 		protected $fillable = [
+			'po_number',
 			'supplier_id',
 			'warehouse_id',
-			'order_number',
+			'status_id',
 			'order_date',
-			'expected_delivery_date',
-			'actual_delivery_date',
-			'status',
-			'payment_status',
+			'expected_date',
+			'received_at',
 			'subtotal',
 			'tax_amount',
 			'discount_amount',
-			'shipping_cost',
-			'total_amount',
-			'notes',
-			'reference_number',
+			'grand_total',
 			'created_by',
-			'approved_by',
-			'approved_at',
+			'notes',
 		];
 
 		protected $casts = [
-			'status'                 => SalesOrderStatus::class,
-			'payment_status'         => PaymentStatus::class,
-			'order_date'             => 'date',
-			'expected_delivery_date' => 'date',
-			'actual_delivery_date'   => 'date',
-			'approved_at'            => 'datetime',
+			'status_id'     => PurchaseOrderStatus::class,
+			'order_date'    => 'date',
+			'expected_date' => 'date',
+			'received_at'   => 'datetime',
 		];
-
-		/**
-		 * Relationships
-		 */
 
 		public function supplier(): BelongsTo {
 			return $this->belongsTo(Supplier::class);
@@ -63,5 +51,17 @@
 
 		public function items(): HasMany {
 			return $this->hasMany(PurchaseOrderItem::class);
+		}
+
+		/**
+		 * Get all history audit logs for the purchase order.
+		 */
+		public function history(): HasMany {
+			return $this->hasMany(PurchaseOrderHistory::class, 'purchase_order_id');
+		}
+
+		// Used by Show View File
+		public function isEditable(): bool {
+			return in_array($this->status_id, [PurchaseOrderStatus::DRAFT, PurchaseOrderStatus::AWAITING_APPROVAL]);
 		}
 	}

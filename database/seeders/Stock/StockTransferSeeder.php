@@ -2,13 +2,14 @@
 
 	namespace Database\Seeders\Stock;
 
-	use App\Enums\TransferStatus;
+	use App\Enums\Inventory\TransferStatus;
 	use App\Models\StockTransfer;
 	use App\Models\User;
 	use App\Models\Warehouse;
 	use Carbon\Carbon;
 	use Illuminate\Database\Seeder;
 	use Illuminate\Support\Collection;
+	use Illuminate\Support\Facades\Auth;
 
 	class StockTransferSeeder extends Seeder {
 		/**
@@ -58,7 +59,7 @@
 					'received_at'            => $receivedAt,
 					'received_by'            => $receivedAt ? $users->random() : null,
 					'created_by'             => $users->random(),
-					'notes'                  => fake()->optional(0.7)->sentence(), // 70% πιθανότητα για note
+					'notes'                  => fake()->optional(0.75)->sentence(), // 75% πιθανότητα για note
 					'created_at'             => $createdAt,
 					'updated_at'             => $receivedAt ?? $approvedAt ?? $createdAt,
 				]);

@@ -32,7 +32,7 @@
 			'status_id'     => TransferStatus::class,
 			'approved_at'   => 'datetime',
 			'received_at'   => 'datetime',
-			'transfer_date' => 'date',
+			'transfer_date' => 'date:Y-m-d',
 		];
 
 		public static function generateTransferNumber(): string {

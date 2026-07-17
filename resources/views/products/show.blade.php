@@ -31,11 +31,11 @@
 
 					<div class="dropdown-menu" aria-labelledby="moreOptionsButton">
 
-						<a href="{{route('inventory.products.clone', ['product' => $product->id])}}"
+						<a href="{{route('inventory.product.clone', ['product' => $product->id])}}"
 						   class="dropdown-item">
 							<i class="fas fa-copy"></i> Duplicate Product
 						</a>
-						<a href="{{route('inventory.products.history', ['product' => $product->id])}}"
+						<a href="{{route('inventory.product.history', ['product' => $product->id])}}"
 						   class="dropdown-item">
 							<i class="fas fa-history"></i> View History
 						</a>
@@ -227,15 +227,15 @@
 							<td>
 								<div class="warehouse-info">
 									<i class="fas fa-warehouse"></i>
-									<a href="{{ route('inventory.warehouses.warehouse.show', ['warehouse' => $inventory['warehouse_id']]) }}" class="warehouse-link">{{ $inventory['warehouse']['name'] }}</a>
+									<a href="{{ route('inventory.warehouses.show', ['warehouse' => $inventory['warehouse_id']]) }}" class="warehouse-link">{{ $inventory['warehouse']['name'] }}</a>
 								</div>
 							</td>
 							<td>
 								<p>{{ $inventory['warehouse']['city'] }}</p>
 								<p>{{ $inventory['warehouse']['address'] }}</p>
 							</td>
-							<td>{{ $inventory['location']['name'] }}</td>
-							<td>{{ $inventory['available_quantity'] }} {{ $product->unit }}</td>
+							<td title="{{ $inventory['location']['description'] }}">{{ $inventory['location']['name'] }}</td>
+							<td title="Batch Number {{ $inventory->batch_number }}">{{ $inventory['available_quantity'] }} {{ $product->unit }}</td>
 							<td>{{ $inventory['reserved_quantity'] }} {{ $product->unit }}</td>
 							<td><strong>{{ $inventory['quantity'] }} {{ $product->unit }}</strong></td>
 							<td>
@@ -442,13 +442,13 @@
 							</div>
 						</div>
 
-						<hr style="margin: 1.5rem 0; border-color: #e9ecef;">
+						<hr style="margin: 1.5rem 0; border-color: transparent; height: 1.25rem; border-radius: 1rem; background-color: transparent;">
 
 						<!-- Adjustment Controls -->
 						<div class="form-row">
 							<div class="form-group">
-								<label>Adjustment Type *</label>
-								<div class="adjustment-type-selector" style="margin-top: 0.25rem;">
+								<label for="adjustmentType">Adjustment Type *</label>
+								<div class="adjustment-type-selector" id="adjustmentType" style="margin-top: 0.25rem;">
 									<div class="type-radio-group">
 										<input type="radio" id="typeIncrease" name="type" value="increase" checked class="type-radio">
 										<label for="typeIncrease" class="type-label increase">
@@ -567,7 +567,7 @@
 									@if($transaction->type->value === 'transfer' || $transaction->type === 'transfer')
 										<span class="text-muted"><i class="fas fa-exchange-alt"></i> {{ $transaction->notes }}</span>
 									@else
-										<a href="{{ route('inventory.warehouses.warehouse.show', ['warehouse' => $transaction->warehouse_id]) }}" class="warehouse-link">
+										<a href="{{ route('inventory.warehouses.show', ['warehouse' => $transaction->warehouse_id]) }}" class="warehouse-link">
 											<i class="fas fa-warehouse"></i> {{ $transaction->warehouse->name ?? 'Unknown' }}
 										</a>
 									@endif

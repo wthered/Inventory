@@ -68,7 +68,7 @@
 			}
 
 			if ($rackNumber > $maxRacks) {
-				$fail("The ".$attribute." must not be greater than ".$maxRacks." for the selected warehouse.");
+				$fail("The ".$attribute." must not be greater than ".$maxRacks." for the selected warehouse #".$warehouse->id." aka ".$warehouse->name.".");
 			}
 		}
 	}

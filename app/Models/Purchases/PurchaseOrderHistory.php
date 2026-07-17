@@ -22,19 +22,25 @@
 	 * @property Carbon $updated_at
 	 */
 	class PurchaseOrderHistory extends Model {
-		use HasFactory, softDeletes;
+		use SoftDeletes;
 
 		protected $fillable = [
 			'purchase_order_id',
+			'action',
 			'event',
+			'details',
 			'description',
 			'user_id',
+		];
+
+		protected $casts = [
+			'details' => 'array',
 		];
 
 		/**
 		 * Get the purchase order this history entry belongs to.
 		 */
-		public function purchaseOrder(): BelongsTo {
+		public function order(): BelongsTo {
 			return $this->belongsTo(PurchaseOrder::class);
 		}
 

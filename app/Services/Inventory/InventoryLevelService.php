@@ -2,6 +2,7 @@
 
 	namespace App\Services\Inventory;
 
+	use App\DataTransferObjects\ProductDTO;
 	use App\Models\Product;
 	use Illuminate\Support\Collection;
 
@@ -10,8 +11,7 @@
 		 * Get all products with their inventory tiers
 		 */
 		public function getAllProductsInventory(): Collection {
-			$products = Product::query()
-				->pluck('id');
+			$products = Product::query()->pluck('id');
 			$result   = Collection::empty();
 
 			foreach ($products as $product) {
@@ -24,29 +24,29 @@
 		/**
 		 * Get detailed inventory level analysis
 		 */
-		public function getInventoryAnalysis(int $productId): array {
-			$product         = Product::findOrFail($productId);
-			$currentQuantity = $this->getCurrentQuantity($product);
+		public function getInventoryAnalysis(ProductDTO $product): array {
+			$currentQuantity = $this->getCurrentQuantity($product->product);
 			$tier = $this->calculateTierForQuantity($currentQuantity['available_quantity'], $product->min_stock_level, $product->max_stock_level);
 
+			$inventoryStatus = ($currentQuantity['available_quantity'] / $product->max_stock_level) * 100;
 			return [
-				'product_id'        => $productId,
+				'product_id'        => $product->id,
 				'product_name'      => $product->name,
 				'current_quantity'  => $currentQuantity,
 				'min_stock'         => $product->min_stock_level,
 				'max_stock'         => $product->max_stock_level,
 				'tier'              => $tier,
 				'tier_label'        => $this->getTierLabel($tier),
-				'percentage_of_max' => $product->max_stock_level > 0 ? ($currentQuantity['available_quantity'] / $product->max_stock_level) * 100 : 0,
-				'status'            => $this->getStatus($tier, $currentQuantity['available_quantity'], $product),
-				'suggested_action'  => $this->getSuggestedAction($tier, $currentQuantity['available_quantity'], $product),
+				'percentage_of_max' => $product->max_stock_level > 0 ? $inventoryStatus : 0,
+				'status'            => $this->getStatus($tier, $inventoryStatus, $product->product),
+				'suggested_action'  => $this->getSuggestedAction($tier, $currentQuantity['available_quantity'], $product->product),
 			];
 		}
 
 		/**
 		 * Get current total inventory quantity for product
 		 */
-		public function getCurrentQuantity(Product $product): Collection {
+		protected function getCurrentQuantity(Product $product): Collection {
 			$inventories = Collection::empty();
 			$quantity    = 0;
 			$available   = 0;
@@ -66,7 +66,7 @@
 		/**
 		 * Calculate tier for specific quantity
 		 */
-		public function calculateTierForQuantity(float $currentQuantity, float $minStock, ?float $maxStock): int {
+		protected function calculateTierForQuantity(float $currentQuantity, float $minStock, ?float $maxStock): int {
 			// Prevent division by zero
 			if ($maxStock <= 0 || is_null($maxStock)) {
 				return 0;
@@ -170,14 +170,13 @@
 		 * Tier 4: Overstock (above max)
 		 */
 		public function calculateTier(int $productId): int {
-			$product = Product::with('inventories')
-				->findOrFail($productId);
+			$product = Product::with('inventories')->findOrFail($productId);
 
 			// Get current total quantity
 			$currentQuantity = $this->getCurrentQuantity($product);
 
 			// Calculate tiers
-			return $this->calculateTierForQuantity($currentQuantity, $product->min_stock_level, $product->max_stock_level);
+			return $this->calculateTierForQuantity($currentQuantity->get('quantity'), $product->min_stock_level, $product->max_stock_level);
 		}
 
 		/**
