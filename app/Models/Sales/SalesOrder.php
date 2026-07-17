@@ -28,7 +28,11 @@
 			'tax_amount',
 			'total_amount',
 			'notes',
-			'created_by'
+			'created_by',
+			'status_id',
+			'payment_status_id',
+			'discount_amount',
+			'grand_total',
 		];
 
 		/**
@@ -76,9 +80,15 @@
 		/**
 		 * Helpers για τον Observer (για να ξέρει τι να αφαιρέσει)
 		 */
-		public function getMovementItems() { return $this->items; }
+		public function getMovementItems() {
+			return $this->items;
+		}
 
-		public function getAffectedWarehouseId() { return $this->warehouse_id; }
+		public function getAffectedWarehouseId() {
+			return $this->warehouse_id;
+		}
 
-		public function getMovementType(): string { return 'out'; }
+		public function getMovementType(): string {
+			return 'out';
+		}
 	}

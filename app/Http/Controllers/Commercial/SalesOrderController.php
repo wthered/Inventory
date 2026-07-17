@@ -8,9 +8,12 @@
 	use App\Models\Sales\SalesOrder;
 	use App\Models\User;
 	use App\Models\Warehouse;
+	use Exception;
 	use Illuminate\Http\Request;
+	use Illuminate\Support\Facades\Auth;
 	use Illuminate\Support\Facades\DB;
 	use Illuminate\Support\Str;
+	use Throwable;
 
 	// Using User table for creating employee links as per migration
 
@@ -30,11 +33,11 @@
 		 * Show the form for creating a new sales order.
 		 */
 		public function create() {
-			$customers = Customer::orderBy('name')->get();
-			$warehouses = Warehouse::orderBy('name')->get();
+			$customers = Customer::query()->orderBy('name')->get();
+			$warehouses = Warehouse::query()->orderBy('name')->get();
 
 			// Sorting users acting as registering staff / employees
-			$employees = User::orderBy('name')->get();
+			$employees = User::query()->orderBy('name')->get();
 
 			return view('sales.create', compact('customers', 'warehouses', 'employees'));
 		}
@@ -62,8 +65,8 @@
 					return $item['quantity'] * $item['unit_price'];
 				});
 
-				$salesOrder = SalesOrder::create([
-					'order_number'      => 'SO-'.date('Y').'-'.strtoupper(Str::random(6)),
+				$salesOrder = SalesOrder::query()->create([
+					'order_number'      => 'SALE-'.date('Y-m-d').'-'.Str::upper(Str::random(6)),
 					'customer_id'       => $validated['customer_id'],
 					'warehouse_id'      => $validated['warehouse_id'],
 					'order_date'        => $validated['order_date'],
@@ -73,7 +76,7 @@
 					'tax_amount'        => 0, // Calculations can be modified here
 					'discount_amount'   => 0,
 					'grand_total'       => $subtotal,
-					'created_by'        => auth()->id() ?? 1, // Fallback safe authentication binding
+					'created_by'        => Auth::id() ?? 1, // Fallback safe authentication binding
 					'notes'             => $validated['notes'] ?? null,
 				]);
 
@@ -91,11 +94,13 @@
 				return redirect()->route('inventory.sales.index')
 				                 ->with('success', 'Sales order created successfully.');
 
-			} catch (\Exception $e) {
+			} catch (Exception $e) {
 				DB::rollBack();
 				return redirect()->back()
 				                 ->withInput()
 				                 ->with('error', 'Failed to create sales order: '.$e->getMessage());
+			} catch (Throwable $e) {
+				dd($e->getMessage());
 			}
 		}
 
@@ -103,9 +108,9 @@
 		 * Show the form for editing the specified sales order.
 		 */
 		public function edit(SalesOrder $sale) {
-			$customers = Customer::orderBy('name')->get();
-			$warehouses = Warehouse::orderBy('name')->get();
-			$employees = User::orderBy('name')->get();
+			$customers = Customer::query()->orderBy('name')->get();
+			$warehouses = Warehouse::query()->orderBy('name')->get();
+			$employees = User::query()->orderBy('name')->get();
 
 			$sale->load('items');
 
@@ -132,7 +137,7 @@
 				return redirect()->route('inventory.sales.index')
 				                 ->with('success', 'Sales order updated successfully.');
 
-			} catch (\Exception $e) {
+			} catch (Exception $e) {
 				return redirect()->back()
 				                 ->withInput()
 				                 ->with('error', 'Failed to update sales order.');
@@ -151,9 +156,11 @@
 
 				return redirect()->route('inventory.sales.index')
 				                 ->with('success', 'Sales order deleted successfully.');
-			} catch (\Exception $e) {
+			} catch (Exception $e) {
 				return redirect()->back()
 				                 ->with('error', 'Failed to delete sales order.');
+			} catch (Throwable $e) {
+				dd($e->getMessage());
 			}
 		}
 	}
