@@ -12,149 +12,68 @@
 		 * Run the database seeds.
 		 */
 		public function run(): void {
-			$application = app(PermissionRegistrar::class);
 			// Reset cached roles and permissions
-//			app()[PermissionRegistrar::class]->forgetCachedPermissions();
-			$application->forgetCachedPermissions();
+			app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
 			// Create permissions
 			$permissions = [
 				// Product permissions
-				'product.view',
-				'product.create',
-				'product.update',
-				'product.delete',
-
+				'product.view', 'product.create', 'product.update', 'product.delete',
 				// Category permissions
-				'category.view',
-				'category.create',
-				'category.update',
-				'category.delete',
-
+				'category.view', 'category.create', 'category.update', 'category.delete',
 				// Brand permissions
-				'brand.view',
-				'brand.create',
-				'brand.update',
-				'brand.delete',
-
+				'brand.view', 'brand.create', 'brand.update', 'brand.delete',
 				// Inventory permissions
-				'inventory.view',
-				'inventory.create',
-				'inventory.update',
-				'inventory.delete',
-				'inventory.adjust',
-
+				'inventory.view', 'inventory.create', 'inventory.update', 'inventory.delete', 'inventory.adjust',
 				// Warehouse permissions
-				'warehouse.view',
-				'warehouse.create',
-				'warehouse.update',
-				'warehouse.delete',
-				'warehouse.manage',
-
+				'warehouse.view', 'warehouse.create', 'warehouse.update', 'warehouse.delete', 'warehouse.manage',
 				// Purchase Order permissions
-				'purchase_order.view',
-				'purchase_order.create',
-				'purchase_order.update',
-				'purchase_order.delete',
-				'purchase_order.approve',
-				'purchase_order.receive',
-
+				'purchase_order.view', 'purchase_order.create', 'purchase_order.update', 'purchase_order.delete',
+				'purchase_order.approve', 'purchase_order.receive',
 				// Sales Order permissions
-				'sales_order.view',
-				'sales_order.create',
-				'sales_order.update',
-				'sales_order.delete',
-				'sales_order.approve',
-				'sales_order.ship',
-
+				'sales_order.view', 'sales_order.create', 'sales_order.update', 'sales_order.delete',
+				'sales_order.approve', 'sales_order.ship',
 				// Supplier permissions
-				'supplier.view',
-				'supplier.create',
-				'supplier.update',
-				'supplier.delete',
-
+				'supplier.view', 'supplier.create', 'supplier.update', 'supplier.delete',
 				// Customer permissions
-				'customer.view',
-				'customer.create',
-				'customer.update',
-				'customer.delete',
-
+				'customer.view', 'customer.create', 'customer.update', 'customer.delete',
 				// Stock Transfer permissions
-				'stock_transfer.view',
-				'stock_transfer.create',
-				'stock_transfer.update',
-				'stock_transfer.delete',
-				'stock_transfer.approve',
-				'stock_transfer.receive',
-
+				'stock_transfer.view', 'stock_transfer.create', 'stock_transfer.update', 'stock_transfer.delete',
+				'stock_transfer.approve', 'stock_transfer.receive',
 				// Stock Adjustment permissions
-				'stock_adjustment.view',
-				'stock_adjustment.create',
-				'stock_adjustment.update',
-				'stock_adjustment.delete',
-				'stock_adjustment.approve',
-
+				'stock_adjustment.view', 'stock_adjustment.create', 'stock_adjustment.update',
+				'stock_adjustment.delete', 'stock_adjustment.approve',
 				// Stock Count permissions
-				'stock_count.view',
-				'stock_count.create',
-				'stock_count.update',
-				'stock_count.delete',
+				'stock_count.view', 'stock_count.create', 'stock_count.update', 'stock_count.delete',
 				'stock_count.complete',
-
 				// Return permissions
-				'return.view',
-				'return.create',
-				'return.update',
-				'return.delete',
-				'return.approve',
-
+				'return.view', 'return.create', 'return.update', 'return.delete', 'return.approve',
 				// Payment permissions
-				'payment.view',
-				'payment.create',
-				'payment.update',
-				'payment.delete',
-
+				'payment.view', 'payment.create', 'payment.update', 'payment.delete',
 				// Report permissions
-				'report.view',
-				'report.financial',
-				'report.inventory',
-				'report.sales',
-				'report.purchase',
-
+				'report.view', 'report.financial', 'report.inventory', 'report.sales', 'report.purchase',
 				// User management permissions
-				'user.view',
-				'user.create',
-				'user.update',
-				'user.delete',
-
+				'user.view', 'user.create', 'user.update', 'user.delete',
 				// Role management permissions
-				'role.view',
-				'role.create',
-				'role.update',
-				'role.delete',
-
+				'role.view', 'role.create', 'role.update', 'role.delete',
 				// Settings permissions
-				'settings.view',
-				'settings.update',
-
+				'settings.view', 'settings.update',
 				// Activity Log permissions
-				'activity_log.view',
-				'activity_log.delete',
+				'activity_log.view', 'activity_log.delete',
 			];
 
+			// Ασφαλής δημιουργία με firstOrCreate και ρητό guard
 			foreach ($permissions as $permission) {
-				Permission::create(['name' => $permission]);
+				Permission::query()->firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
 			}
 
-			// Create roles and assign permissions
-
 			// 1. Admin Role - Full access
-			$adminRole = Role::create(['name' => 'admin']);
-			$adminRole->givePermissionTo(Permission::all());
+			$adminRole = Role::query()->firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+			$adminRole->syncPermissions(Permission::all()); // Χρήση syncPermissions αντί για givePermissionTo
 
 			// 2. Warehouse Manager Role
-			$warehouseManager = Role::create(['name' => 'warehouse_manager']);
-			$warehouseManager->givePermissionTo([
+			$warehouseManager = Role::query()->firstOrCreate(['name' => 'warehouse_manager', 'guard_name' => 'web']);
+			$warehouseManager->syncPermissions([
 				'product.view',
 				'inventory.view',
 				'inventory.create',
@@ -163,6 +82,8 @@
 				'warehouse.view',
 				'warehouse.update',
 				'warehouse.manage',
+				'purchase_order.receive', // Προσθήκη: για να επιβεβαιώνει παραλαβές στην αποθήκη
+				'sales_order.ship',       // Προσθήκη: για την τελική έξοδο από την αποθήκη
 				'stock_transfer.view',
 				'stock_transfer.create',
 				'stock_transfer.approve',
@@ -179,8 +100,8 @@
 			]);
 
 			// 3. Sales Manager Role
-			$salesManager = Role::create(['name' => 'sales_manager']);
-			$salesManager->givePermissionTo([
+			$salesManager = Role::query()->firstOrCreate(['name' => 'sales_manager', 'guard_name' => 'web']);
+			$salesManager->syncPermissions([
 				'product.view',
 				'inventory.view',
 				'customer.view',
@@ -202,8 +123,8 @@
 			]);
 
 			// 4. Purchase Manager Role
-			$purchaseManager = Role::create(['name' => 'purchase_manager']);
-			$purchaseManager->givePermissionTo([
+			$purchaseManager = Role::query()->firstOrCreate(['name' => 'purchase_manager', 'guard_name' => 'web']);
+			$purchaseManager->syncPermissions([
 				'product.view',
 				'product.create',
 				'product.update',
@@ -226,21 +147,24 @@
 			]);
 
 			// 5. Inventory Clerk Role
-			$inventoryClerk = Role::create(['name' => 'inventory_clerk']);
-			$inventoryClerk->givePermissionTo([
+			$inventoryClerk = Role::query()->firstOrCreate(['name' => 'inventory_clerk', 'guard_name' => 'web']);
+			$inventoryClerk->syncPermissions([
 				'product.view',
 				'inventory.view',
 				'warehouse.view',
+				'purchase_order.receive', // Προσθήκη: Ο υπάλληλος παραλαμβάνει το inbound φορτίο
+				'sales_order.ship',       // Προσθήκη: Ο υπάλληλος κάνει το pack & ship
 				'stock_count.view',
 				'stock_count.create',
 				'stock_adjustment.view',
 				'stock_transfer.view',
+				'stock_transfer.receive',
 				'activity_log.view',
 			]);
 
 			// 6. Accountant Role
-			$accountant = Role::create(['name' => 'accountant']);
-			$accountant->givePermissionTo([
+			$accountant = Role::query()->firstOrCreate(['name' => 'accountant', 'guard_name' => 'web']);
+			$accountant->syncPermissions([
 				'purchase_order.view',
 				'sales_order.view',
 				'payment.view',
@@ -256,8 +180,8 @@
 			]);
 
 			// 7. Sales Representative Role
-			$salesRep = Role::create(['name' => 'sales_representative']);
-			$salesRep->givePermissionTo([
+			$salesRep = Role::query()->firstOrCreate(['name' => 'sales_representative', 'guard_name' => 'web']);
+			$salesRep->syncPermissions([
 				'product.view',
 				'inventory.view',
 				'customer.view',

@@ -2,84 +2,351 @@
 /* --- Root Variables (DARK THEME - UNIFIED) --- */
 :root {
 	/* --- COLOR PALETTE (DARK THEME) --- */
-	--color-bg: #0f172a;
-	--color-surface: #1f2937;
-	--color-bg-alt: #111827;
-	--color-bg-dark: var(--color-bg-alt);
+	--color-bg             : #0f172a;
+	--color-surface        : #1f2937;
+	--color-bg-alt         : #111827;
+	--color-bg-dark        : var(--color-bg-alt);
 
-	--color-text-primary: #f9fafb;
-	--color-text-secondary: #e5e7eb;
-	--color-text-muted: #9ca3af;
+	--color-text-primary   : #f9fafb;
+	--color-text-secondary : #e5e7eb;
+	--color-text-muted     : #9ca3af;
 
-	--color-accent: #10b981;
-	--color-primary: #3b82f6;
+	--color-accent         : #10b981;
+	--color-primary        : #3b82f6;
 	/* RGB version for transparency (used in notifications) */
-	--color-primary-rgb: 59, 130, 246;
+	--color-primary-rgb    : 59, 130, 246;
 
-	--color-error: #ef4444;
-	--color-warning: #f59e0b;
-	--color-border: #374151;
-	--color-input-bg: var(--color-surface);
-	--color-input-text: var(--color-text-primary);
+	--color-error          : #ef4444;
+	--color-warning        : #f59e0b;
+	--color-border         : #374151;
+	--color-input-bg       : var(--color-surface);
+	--color-input-text     : var(--color-text-primary);
 
 	/* --- BORDER RADIUS --- */
-	--radius-sm: 0.25rem;
-	--radius-md: 0.5rem;
-	--radius-lg: 0.75rem;
-	--radius-full: 9999px;
+	--radius-sm            : 0.25rem;
+	--radius-md            : 0.5rem;
+	--radius-lg            : 0.75rem;
+	--radius-full          : 9999px;
 
 	/* --- SPACING SCALE --- */
-	--space-xs: 0.25rem;  /* Η προσθήκη που χρειαζόμασταν */
-	--space-sm: 0.5rem;
-	--space-md: 1rem;
-	--space-lg: 1.5rem;
-	--space-xl: 2rem;
+	--space-xs             : 0.25rem; /* Η προσθήκη που χρειαζόμασταν */
+	--space-sm             : 0.5rem;
+	--space-md             : 1rem;
+	--space-lg             : 1.5rem;
+	--space-xl             : 2rem;
 
 	/* --- SHADOWS --- */
-	--shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.15);
-	--shadow-md: 0 4px 10px rgba(0, 0, 0, 0.25);
-	--shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.3);
+	--shadow-sm            : 0 2px 5px rgba(0, 0, 0, 0.15);
+	--shadow-md            : 0 4px 10px rgba(0, 0, 0, 0.25);
+	--shadow-lg            : 0 6px 20px rgba(0, 0, 0, 0.3);
 
 	/* --- FONT --- */
-	--font-family: 'Inter';
+	--font-family          : 'Inter';
 }
 
 /* --- Base Reset & Global Layout --- */
 * {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-	font-family: var(--font-family), sans-serif;
+	margin      : 0;
+	padding     : 0;
+	box-sizing  : border-box;
+	font-family : var(--font-family), sans-serif;
 }
 
 body {
-	display: flex;
-	flex-direction: column;
-	min-height: 100vh;
-	background-color: var(--color-bg);
-	color: var(--color-text-primary);
-	padding-top: 60px; /* Space for fixed navbar */
+	display          : flex;
+	flex-direction   : column;
+	min-height       : 100vh;
+	background-color : var(--color-bg);
+	color            : var(--color-text-primary);
+	padding-top      : 60px; /* Space for fixed navbar */
 }
 
 body.sidebar-open #box {
-	width: calc(100% - 16rem);
-    left: 16rem;
+	width : calc(100% - 16rem);
+	left  : 16rem;
 }
 
 body #box {
-	padding: var(--space-xl);
-	transition: margin-left 0.3s ease; /* Αλλαγή από left σε margin-left */
-	min-height: calc(100vh - 60px);
+	padding    : var(--space-xl);
+	transition : margin-left 0.3s ease; /* Αλλαγή από left σε margin-left */
+	min-height : calc(100vh - 60px);
 }
 
 #box {
-	flex: 1 0 auto; /* Σπρώχνει το footer κάτω αν το περιεχόμενο είναι λίγο */
+	flex : 1 0 auto; /* Σπρώχνει το footer κάτω αν το περιεχόμενο είναι λίγο */
+}
+
+/* ==========================================================================
+   SHARED WMS COMPONENT UTILITIES (Move to main app/layout.css)
+   ========================================================================== */
+
+/* Layout & Structure */
+.page-container {
+	display        : flex;
+	flex-direction : column;
+	gap            : var(--space-lg);
+}
+
+.page-header {
+	display         : flex;
+	justify-content : space-between;
+	align-items     : center;
+	flex-wrap       : wrap;
+	gap             : var(--space-md);
+}
+
+.header-title-group h1 {
+	font-size   : 1.75rem;
+	font-weight : 600;
+	color       : var(--color-text-primary);
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-sm);
+}
+
+.header-title-group .subtitle {
+	font-size  : 0.875rem;
+	color      : var(--color-text-muted);
+	margin-top : var(--space-xs);
+}
+
+.icon-accent {
+	color : var(--color-primary);
+}
+
+.text-right {
+	text-align : right;
+}
+
+/* Buttons & Triggers */
+.btn-primary {
+	display          : inline-flex;
+	align-items      : center;
+	gap              : var(--space-sm);
+	background-color : var(--color-primary);
+	color            : #ffffff;
+	padding          : 0.625rem 1.25rem;
+	border-radius    : var(--radius-md);
+	text-decoration  : none;
+	font-weight      : 500;
+	font-size        : 0.875rem;
+	border           : none;
+	cursor           : pointer;
+	transition       : background-color 0.2s ease, transform 0.1s ease;
+	box-shadow       : var(--shadow-sm);
+}
+
+.btn-primary:hover {
+	background-color : #2563eb;
+}
+
+.btn-primary:active {
+	transform : scale(0.98);
+}
+
+.btn-primary.btn-sm {
+	padding   : 0.4rem 0.875rem;
+	font-size : 0.8125rem;
+}
+
+/* Action Buttons Group */
+.action-buttons-group {
+	display         : inline-flex;
+	gap             : var(--space-sm);
+	justify-content : flex-end;
+}
+
+.inline-form {
+	display : inline;
+}
+
+.btn-action {
+	display          : inline-flex;
+	align-items      : center;
+	justify-content  : center;
+	width            : 32px;
+	height           : 32px;
+	border-radius    : var(--radius-md);
+	border           : 1px solid var(--color-border);
+	background-color : var(--color-bg-alt);
+	cursor           : pointer;
+	font-size        : 0.875rem;
+	transition       : all 0.2s ease;
+	text-decoration  : none;
+}
+
+.btn-show {
+	color : var(--color-text-muted);
+}
+
+.btn-show:hover {
+	color            : var(--color-accent);
+	border-color     : var(--color-accent);
+	background-color : rgba(16, 185, 129, 0.1);
+}
+
+.btn-edit {
+	color : var(--color-text-muted);
+}
+
+.btn-edit:hover {
+	color            : var(--color-primary);
+	border-color     : var(--color-primary);
+	background-color : rgba(59, 130, 246, 0.1);
+}
+
+.btn-delete {
+	color : var(--color-error);
+}
+
+.btn-delete:hover {
+	background-color : rgba(239, 68, 68, 0.1);
+	border-color     : var(--color-error);
+}
+
+/* System Feedback UI */
+.alert {
+	display       : flex;
+	align-items   : center;
+	gap           : var(--space-sm);
+	padding       : var(--space-md);
+	border-radius : var(--radius-md);
+	font-size     : 0.9rem;
+	box-shadow    : var(--shadow-sm);
+}
+
+.alert-success {
+	background-color : rgba(16, 185, 129, 0.1);
+	border           : 1px solid var(--color-accent);
+	color            : var(--color-accent);
+}
+
+/* Data Tables Structure */
+.table-card {
+	background-color : var(--color-surface);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-lg);
+	box-shadow       : var(--shadow-md);
+	overflow         : hidden;
+}
+
+.table-wrapper {
+	width      : 100%;
+	overflow-x : auto;
+}
+
+.data-table {
+	width           : 100%;
+	border-collapse : collapse;
+	text-align      : left;
+	font-size       : 0.925rem;
+}
+
+.data-table th {
+	background-color : var(--color-bg-alt);
+	color            : var(--color-text-muted);
+	font-weight      : 600;
+	text-transform   : uppercase;
+	font-size        : 0.75rem;
+	letter-spacing   : 0.05em;
+	padding          : var(--space-md);
+	border-bottom    : 1px solid var(--color-border);
+}
+
+.data-table td {
+	padding        : var(--space-md);
+	border-bottom  : 1px solid var(--color-border);
+	color          : var(--color-text-secondary);
+	vertical-align : middle;
+}
+
+.data-table tbody tr:hover {
+	background-color : rgba(255, 255, 255, 0.02);
+}
+
+/* Common Table Cell Modifiers */
+.td-id {
+	font-weight : 500;
+	color       : var(--color-text-muted);
+}
+
+.td-name {
+	font-weight : 600;
+	color       : var(--color-text-primary);
+}
+
+.td-description {
+	color     : var(--color-text-muted);
+	font-size : 0.875rem;
+}
+
+.badge-count {
+	display          : inline-block;
+	background-color : var(--color-bg-alt);
+	color            : var(--color-text-secondary);
+	padding          : 0.25rem 0.625rem;
+	border-radius    : var(--radius-full);
+	font-size        : 0.775rem;
+	border           : 1px solid var(--color-border);
+}
+
+a.badge-count {
+	text-decoration : none;
+	transition      : all 0.15s ease;
+}
+
+a.badge-count:hover {
+	background-color : rgba(59, 130, 246, 0.15);
+	color            : var(--color-primary);
+	border-color     : var(--color-primary);
+}
+
+/* Trashed/Archived Indicator Badge */
+.badge-trashed {
+	font-size        : 0.75rem;
+	font-weight      : 700;
+	text-transform   : uppercase;
+	letter-spacing   : 0.05em;
+	background-color : rgba(239, 68, 68, 0.15); /* Απαλό error tint */
+	color            : var(--color-error);
+	border           : 1px solid var(--color-error);
+	padding          : 0.25rem 0.625rem;
+	border-radius    : var(--radius-full);
+	display          : inline-flex;
+	align-items      : center;
+	gap              : var(--space-xs);
+	vertical-align   : middle;
+}
+
+/* Empty States & Pagination */
+.table-empty-state {
+	text-align : center !important;
+	padding    : var(--space-xl) !important;
+	color      : var(--color-text-muted);
+}
+
+.empty-icon {
+	font-size     : 2.5rem;
+	color         : var(--color-border);
+	margin-bottom : var(--space-md);
+	display       : block;
+}
+
+.table-empty-state p {
+	margin-bottom : var(--space-md);
+	font-size     : 0.95rem;
+}
+
+.table-pagination {
+	padding          : var(--space-md);
+	background-color : var(--color-bg-alt);
+	border-top       : 1px solid var(--color-border);
 }
 
 /* Desktop: Όταν είναι ανοιχτή η sidebar, σπρώξε το περιεχόμενο */
-@media (min-width: 768px) {
+@media (min-width : 768px) {
 	body.sidebar-open #box {
-		margin-left: 16rem;
-		width: auto; /* Αφήνουμε το browser να υπολογίσει το πλάτος */
+		margin-left : 16rem;
+		width       : auto; /* Αφήνουμε το browser να υπολογίσει το πλάτος */
 	}
 }

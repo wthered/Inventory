@@ -3,7 +3,6 @@
 	namespace App\Http\Controllers\Inventory;
 
 	use App\DataTransferObjects\ProductDTO;
-	use App\DataTransferObjects\UserDTO;
 	use App\Enums\Inventory\AdjustmentReason;
 	use App\Http\Controllers\Controller;
 	use App\Http\Requests\Products\ProductInformationRequest;
@@ -15,7 +14,9 @@
 	use App\Models\Inventories\Inventory;
 	use App\Models\Product;
 	use App\Models\Supplier;
+	use App\Models\Warehouse;
 	use App\Services\Inventory\InventoryLevelService;
+	use App\Services\Inventory\LocationOptionsService;
 	use App\Services\Search\ProductSearchService;
 	use Exception;
 	use Illuminate\Contracts\View\Factory;
@@ -24,16 +25,21 @@
 	use Illuminate\Http\RedirectResponse;
 	use Illuminate\Http\Request;
 	use Illuminate\Support\Collection;
-	use Illuminate\Support\Facades\Auth;
 
 	class ProductController extends Controller {
 
-		private InventoryLevelService $service;
-		private ProductSearchService $searchService;
+		private InventoryLevelService  $service;
+		private ProductSearchService   $searchService;
+		private LocationOptionsService $locationService;
 
-		public function __construct(InventoryLevelService $inventoryLevelService, ProductSearchService $productSearchService) {
+		public function __construct(
+			InventoryLevelService $inventoryLevelService,
+			ProductSearchService $productSearchService,
+			LocationOptionsService $locationOptionsService,
+		) {
 			$this->service = $inventoryLevelService;
 			$this->searchService = $productSearchService;
+			$this->locationService = $locationOptionsService;
 		}
 
 		/**
@@ -41,24 +47,25 @@
 		 */
 		public function index(): Factory|View {
 			return view('products.index', [
-				'user'          => UserDTO::fromModel(Auth::user()),
-				'categories'    => Category::whereNull('parent_id')->get(),
-				'suppliers'     => Supplier::all(),
+				'categories' => Category::query()->whereNull('parent_id')->get(),
+				'suppliers'  => Supplier::all(),
 
 				// 1. Counts - Χρησιμοποιούμε τη λογική των inventories
-				'low_stock'     => Product::whereHas('inventories', function ($q) {
+				'low_stock'  => Product::query()->whereHas('inventories', function ($q) {
 					$q->havingRaw('SUM(available_quantity) <= products.reorder_point');
 				})->count(),
 
-				'out_of_stock'  => Product::whereDoesntHave('inventories', function ($q) {
+				'out_of_stock' => Product::query()->whereDoesntHave('inventories', function ($q) {
 					$q->where('available_quantity', '>', 0);
 				})->count(),
 
-				'product_count' => Product::count(),
-				'product_list'  => Product::with(['images', 'category', 'brand', 'inventories'])->latest()->paginate(25),
+				'product_count' => Product::query()->count(),
+				'product_list'  => Product::with([
+					'images', 'category', 'brand', 'inventories'
+				])->latest()->paginate(25),
 
 				// 2. Συνολική Αξία Αποθέματος
-				'total_value'   => Product::join('inventories', 'products.id', '=', 'inventories.product_id')->selectRaw('SUM(inventories.available_quantity * products.selling_price) as total')->value('total') ?? 0,
+				'total_value'   => Product::query()->join('inventories', 'products.id', '=', 'inventories.product_id')->selectRaw('SUM(inventories.available_quantity * products.selling_price) as total')->value('total') ?? 0,
 			]);
 		}
 
@@ -74,44 +81,25 @@
 		 *
 		 * @throws Exception
 		 */
-		public function show(Request $request, int $product): Factory|View {
-			$entry  = new ProductDTO($product);
+		public function show(Request $request, Product $product): Factory|View {
+			$entry = new ProductDTO($product->id);
 			$profit = $entry->selling_price - $entry->cost_price;
-			$stock  = Collection::make([
-				'total'     => 0,
-				'available' => 0,
-				'reserved'  => 0,
+
+			$inventoryItems = Collection::make($entry->inventories->items());
+			$stock = Collection::make([
+				'available' => $inventoryItems->sum('available_quantity'),
+				'reserved'  => $inventoryItems->sum('reserved_quantity'),
 			]);
 
-			$status = [];
-
-			$entry->inventories->each(function (Inventory $inventory) use (&$stock, &$status, $entry) {
-				$stock['available']                                        += $inventory->quantity;
-				$stock['reserved']                                         += $inventory->reserved_quantity;
-
-				$status[$inventory->warehouse_id][$inventory->location_id] = $this->service->getInventoryAnalysis($entry);
-
-				// Test Action
-				$tier = mt_rand(0, 4);
-//				$status[$inventory->warehouse_id][$inventory->location_id] = [
-//					'product_id' => $entry->id,
-//					'product_name' => $entry->name,
-//					'current_quantity' => mt_rand(8, 64),
-//					'min_stock' => 8,
-//					'max_stock' => 64,
-//					'tier' => $tier,
-//					'tier_label' => 'Tier Label',
-//					'percentage_of_max' => 60,
-//					'status' => 'UNKNOWN',
-//					'suggested_action' => 'Suggested Action'
-//				];
+			$inventoryStatuses = [];
+			$entry->inventories->each(function (Inventory $item) use (&$inventoryStatuses, $entry) {
+				$inventoryStatuses[$item->warehouse_id][$item->location_id] = $this->service->getInventoryAnalysis($entry);
 			});
-			$stock['total'] = $stock['available'] + $stock['reserved'];
 
 			return view('products.show', [
 				'product'      => $entry,
 				'stock'        => $stock,
-				'status'       => Collection::make($status),
+				'statuses'     => $inventoryStatuses,
 				'active_image' => $entry->images->where('is_default', 1)->first(),
 				'thumbnails'   => $entry->images->where('is_default', 0)->all(),
 				'profit'       => [
@@ -122,12 +110,7 @@
 					'parent' => $entry->parent,
 					'child'  => $entry->category,
 				],
-				'brand'        => $entry->brand,
-				'suppliers'    => $entry->suppliers,
-				'warehouses'   => $entry->warehouses,
 				'reasons'      => AdjustmentReason::forDropdown()->toArray(),
-				'inventories'  => $entry->inventories->where('quantity', '>', 0),
-				'user'         => UserDTO::fromModel($request->user()),
 			]);
 		}
 
@@ -139,14 +122,11 @@
 			$object = new ProductDTO($product);
 
 			return view('products.edit', [
-				'user'             => UserDTO::fromModel($request->user()),
 				'categories'       => Category::query()->whereNull('parent_id')->orderBy('sort_order')->get(),
 				'parent_category'  => Category::query()->find($object->category['parent_id']),
 				'child_categories' => Category::query()->where('parent_id', $object->category['parent_id'])->get(),
 				'brands'           => Brand::query()->get(),
 				'product'          => $object,
-				'images'           => $object->images,
-				'suppliers'        => $object->suppliers,
 			]);
 		}
 
@@ -172,8 +152,8 @@
 		public function update(UpdateProductRequest $request, Product $product): RedirectResponse {
 			$input = $request->input();
 			dd($input);
-			$product->update($input->toArray());
-			return redirect()->route('inventory.products.index')->with('success', 'Product updated successfully!');
+			$product->update($input);
+			return redirect()->route('inventory.products.show', ['product' => $product->id])->with('success', 'Product updated successfully!');
 		}
 
 		/**
@@ -184,7 +164,7 @@
 			$newProduct = $product->replicate();
 
 			// 2. Τροποποιούμε το όνομα για να δηλώσουμε ότι είναι αντίγραφο
-			$newProduct->name = $product->name . ' (COPY)';
+			$newProduct->name = $product->name.' (COPY)';
 
 			// 3. Καθαρίζουμε τα timestamps για να θεωρηθεί ως νέο record
 			$newProduct->created_at = now();
@@ -216,8 +196,10 @@
 		}
 
 		public function getInformation(ProductInformationRequest $request): JsonResponse {
-			$input = $request->validated();
-			return response()->json(['product' => $input->get('product')]);
+			$input = Collection::make($request->validated());
+			return response()->json([
+				'product' => $input->get('product'),
+			]);
 		}
 
 		public function search(ProductSearchRequest $request): JsonResponse {
@@ -229,5 +211,25 @@
 
 			// Return lightweight payload back to your vanilla JS
 			return response()->json($results);
+		}
+
+		public function getInventory(Request $request, Product $product) {
+			$inventory = Collection::empty();
+			$product->inventories()->get()->each(function ($item) use (&$inventory, $product) {
+				$options = $this->locationService->getLocationOptions($product->id, $item->warehouse_id, $item->location_id);
+				$inventory->push([
+					'warehouse' => Warehouse::query()->find($item->warehouse_id),
+					'location'  => $item->location_id,
+					'zone'      => $options['zone'],
+					'aisle'     => $options['aisle'],
+					'rack'      => $options['rack'],
+					'shelf'     => $options['shelf'],
+					'bin'       => $options['bin'],
+				]);
+			});
+
+			return response()->json([
+				'inventory' => $inventory->first(),
+			]);
 		}
 	}

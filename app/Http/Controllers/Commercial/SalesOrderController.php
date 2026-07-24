@@ -30,6 +30,16 @@
 		}
 
 		/**
+		 * Display the specified sales order.
+		 */
+		public function show(SalesOrder $sale) {
+			// Φορτώνουμε τις σχέσεις για να μην έχουμε N+1 query ζητήματα στο view
+			$sale->load(['customer', 'warehouse', 'items.product', 'history.user']);
+
+			return view('sales.show', compact('sale'));
+		}
+
+		/**
 		 * Show the form for creating a new sales order.
 		 */
 		public function create() {
@@ -112,7 +122,7 @@
 			$warehouses = Warehouse::query()->orderBy('name')->get();
 			$employees = User::query()->orderBy('name')->get();
 
-			$sale->load('items');
+			$sale->load(['items', 'creator', 'warehouse']);
 
 			return view('sales.edit', compact('sale', 'customers', 'warehouses', 'employees'));
 		}

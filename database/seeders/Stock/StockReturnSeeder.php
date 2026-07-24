@@ -17,13 +17,15 @@
 		 * Run the database seeds.
 		 */
 		public function run(): void {
-			$warehouses = Warehouse::pluck('id');
-			$users      = User::pluck('id');
-			$customers  = Customer::pluck('id');
-			$suppliers  = Supplier::pluck('id');
+			$warehouses = Warehouse::query()->pluck('id');
+			$users = User::query()->pluck('id');
+			$customers = Customer::query()->pluck('id');
+			$suppliers = Supplier::query()->pluck('id');
 
 			if ($customers->isEmpty() || $suppliers->isEmpty()) {
-				$this->command->error('Missing Customers or Suppliers! Seed them first.');
+				$this->command->error('Customers Found:'.$customers->count());
+				$this->command->error('Suppliers Found:'.$suppliers->count());
+				$this->command->error('Missing Customers and / or Suppliers! Seed them first.');
 				return;
 			}
 
@@ -40,7 +42,7 @@
 					'warehouse_id'    => $warehouses->random(),
 					'status'          => fake()->randomElement(StockReturnStatus::cases())->value,
 					'return_date'     => $date->format('Y-m-d'),
-					'tracking_number' => 'TRK-' . Str::upper(fake()->regexify('[A-Z]{2}[0-9]{9}GR')),
+					'tracking_number' => 'TRK-'.Str::upper(fake()->regexify('[A-Z]{2}[0-9]{9}GR')),
 					'carrier'         => fake()->randomElement(['FedEx', 'UPS', 'DHL', 'ΕΛΤΑ']),
 					'created_by'      => $users->random(),
 				]);

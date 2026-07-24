@@ -22,29 +22,62 @@
 	|--------------------------------------------------------------------------
 	*/
 
-	// Products & Categories Resource Operations
+	// Products Resource Operations
 	Route::resource('products', ProductController::class);
+
+	/*
+	|--------------------------------------------------------------------------
+	| Categories Protected Resource Operations
+	|--------------------------------------------------------------------------
+	*/
+	// 1. Place fixed explicit paths FIRST
+	Route::middleware('permission:category.create')->group(function () {
+		Route::get('categories/create', [CategoryController::class, 'create'])->name('categories.create');
+		Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
+	});
+
+	// 2. Place wildcard evaluation parameters LAST
+	Route::middleware('permission:category.view')->group(function () {
+		Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
+		Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+	});
+
+	Route::middleware('permission:category.update')->group(function () {
+		Route::get('categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+		Route::put('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+		Route::patch('categories/{category}', [CategoryController::class, 'update']);
+	});
+
+	Route::middleware('permission:category.delete')->group(function () {
+		Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+	});
 
 	// Search products for adjustments or other dropdown autocompletes
 	Route::post('/products/search', [ProductController::class, 'search'])->name('products.search');
 
 	Route::prefix('products')->group(function () {
-		Route::post('/{product}/upload-images', [
+		Route::post('/{product}/images/attach', [
 			ProductImageController::class, 'store'
 		])->name('products.image.upload');
-		Route::delete('/image/{image}', [ProductImageController::class, 'destroy'])->name('products.image.destroy');
 
-		Route::resource('categories', CategoryController::class);
+		Route::delete('{product}/images/detach', [
+			ProductImageController::class, 'destroy'
+		])->name('products.image.destroy');
 
 		Route::post('/{product}/clone', [ProductController::class, 'clone'])->name('product.clone');
 		Route::post('/{product}/history', [ProductController::class, 'history'])->name('product.history');
 		Route::post('/{product}/information', [
 			ProductController::class, 'getInformation'
 		])->name('product.information');
+
+		Route::post('/{product}/locations', [ProductController::class, 'getInventory'])->name('product.inventories');
 	});
 
 	// Suppliers Resource Operations
 	Route::resource('suppliers', SupplierController::class);
+
+	// Brands Resource Operations
+	Route::resource('brands', BrandController::class)->withTrashed(['edit', 'update']);
 
 	// Single-Action Structural View Resources
 	Route::resource('customers', CustomerController::class)->only(['index']);
@@ -62,6 +95,9 @@
 
 	// Advanced Warehouse Structural AJAX Filters and Status Actions
 	Route::prefix('warehouses')->name('warehouses.')->controller(WarehouseController::class)->group(function () {
+
+		Route::post('/', 'getWarehouseList')->name('getWarehouseList');
+
 		// Custom Warehouse Node Operational Upstream Toggles
 		Route::patch('/{warehouse}/toggle-status', 'toggleStatus')->name('toggle-status');
 		Route::get('/{warehouse}/activity', 'activity')->name('activity');

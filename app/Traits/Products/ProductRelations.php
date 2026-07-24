@@ -29,7 +29,9 @@
 		 */
 		public function warehouses(): BelongsToMany {
 			return $this->belongsToMany(Warehouse::class, 'inventories')
-				->withPivot(['quantity', 'reserved_quantity', 'available_quantity', 'location_id', 'batch_number']);
+			            ->withPivot([
+				            'quantity', 'reserved_quantity', 'available_quantity', 'location_id', 'batch_number'
+			            ]);
 		}
 
 		/**
@@ -57,8 +59,8 @@
 		 * Suppliers that provide this product with pricing and lead times.
 		 */
 		public function suppliers(): BelongsToMany {
-			return $this->belongsToMany(Supplier::class, 'suppliers_products')
-				->withPivot(['price', 'lead_time_days', 'is_preferred', 'moq']);
+			return $this->belongsToMany(Supplier::class, 'product_supplier', 'product_id', 'supplier_id')
+			            ->withPivot(['price', 'lead_time_days', 'is_preferred', 'moq']);
 		}
 
 		/**
@@ -87,6 +89,6 @@
 		 */
 		public function locations(): BelongsToMany {
 			return $this->belongsToMany(WarehouseLocation::class, 'inventories', 'product_id', 'location_id')
-				->withPivot(['warehouse_id']);
+			            ->withPivot(['warehouse_id']);
 		}
 	}

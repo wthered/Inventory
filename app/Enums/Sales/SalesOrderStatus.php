@@ -16,14 +16,14 @@
 		case RETURNED   = 100;
 
 		public function label(): string {
-			return __("enums.sales_order_status." . Str::lower($this->name));
+			return __("enums.sales_order_status.".Str::lower($this->name));
 		}
 
 		/**
 		 * Επιστρέφει Hex Color Codes για χρήση σε Inline CSS ή Charts.
 		 */
 		public function color(): string {
-			return match($this) {
+			return match ($this) {
 				self::DRAFT      => '#94a3b8', // Blue-gray
 				self::PENDING    => '#f59e0b', // Amber
 				self::CONFIRMED  => '#0ea5e9', // Sky blue
@@ -40,13 +40,13 @@
 		 * Ποια statuses επηρεάζουν το απόθεμα.
 		 */
 		public function shouldAffectStock(): bool {
-			return match($this) {
+			return match ($this) {
 				self::CONFIRMED,
 				self::PROCESSING,
 				self::SHIPPED,
 				self::DELIVERED,
 				self::COMPLETED => true,
-				default => false,
+				default         => false,
 			};
 		}
 
@@ -54,8 +54,18 @@
 		 * Επιστρέφει όλα τα διαθέσιμα statuses σε μορφή array για χρήση σε <select>.
 		 */
 		public static function options(): array {
-			return collect(self::cases())->mapWithKeys(fn ($status) => [
+			return collect(self::cases())->mapWithKeys(fn($status) => [
 				$status->value => $status->label()
 			])->toArray();
+		}
+
+		/**
+		 * Ελέγχει αν η παραγγελία είναι ακόμα επεξεργάσιμη
+		 */
+		public function isEditable(): bool {
+			return match ($this) {
+				self::DRAFT, self::PENDING => true,
+				default                    => false,
+			};
 		}
 	}

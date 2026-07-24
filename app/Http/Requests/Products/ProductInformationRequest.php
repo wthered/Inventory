@@ -31,8 +31,8 @@
 			];
 		}
 
-		public function validated($key = null, $default = null): Collection {
-			$data = Collection::make(parent::validated());
+		public function passedValidation(): Collection {
+			$data = Collection::make($this->validated());
 
 			$product = intval($data->get('product'));
 

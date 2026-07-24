@@ -1,0 +1,93 @@
+/* ==========================================================================
+   MODULE COMPONENT: Hierarchical Tree View (Categories Specific)
+   ========================================================================== */
+
+/* --- Parent Row Operational Interactions --- */
+.root-row.has-children {
+	cursor : pointer;
+}
+
+.td-toggle {
+	text-align   : center;
+	padding-left : var(--space-md) !important;
+}
+
+.toggle-icon {
+	color      : var(--color-text-muted);
+	font-size  : 0.8rem;
+	transition : transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+}
+
+/* Dynamic State: Animated Upstream Toggles */
+.root-row.expanded .toggle-icon {
+	transform : rotate(90deg);
+	color     : var(--color-primary);
+}
+
+/* --- Child Row Layout Modifications --- */
+.child-row {
+	background-color : rgba(0, 0, 0, 0.15); /* Tinting for dark-theme depth separation */
+}
+
+.child-row.hidden {
+	display : none;
+}
+
+.child-indent {
+	padding-left : var(--space-xl) !important;
+	font-weight  : 500;
+}
+
+.tree-line {
+	color        : var(--color-border);
+	margin-right : var(--space-xs);
+	user-select  : none;
+}
+
+/* Base Row Types */
+.root-row {
+	background-color : var(--color-surface);
+	font-weight      : 500;
+}
+
+.root-row.has-children {
+	cursor : pointer;
+}
+
+/* Subcategory Row Styling — Dimmed background to create nested depth */
+.child-row {
+	background-color : rgba(0, 0, 0, 0.02); /* Slight tint difference */
+}
+
+.child-row:hover {
+	background-color : rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Tree Structure Indentation */
+.child-indent {
+	padding-left : var(--space-lg) !important;
+	display      : flex;
+	align-items  : center;
+	gap          : var(--space-xs);
+}
+
+.tree-line {
+	color       : var(--color-text-muted);
+	font-weight : bold;
+	user-select : none;
+}
+
+/* Interaction States */
+.toggle-icon {
+	transition : transform 0.2s ease;
+	color      : var(--color-text-secondary);
+}
+
+.root-row.is-expanded .toggle-icon {
+	transform : rotate(90deg);
+}
+
+/* Hidden Utility Handler */
+.hidden {
+	display : none !important;
+}

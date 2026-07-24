@@ -3,7 +3,6 @@
 	namespace Database\Factories;
 
 	use App\Models\Supplier;
-	use Carbon\Carbon;
 	use Illuminate\Database\Eloquent\Factories\Factory;
 	use Illuminate\Support\Str;
 
@@ -17,11 +16,10 @@
 		 * Define the model's default state.
 		 */
 		public function definition(): array {
-			$this_time = now();
 			return [
-				'code'           => 'SUPP-' . Str::upper(fake()->unique()->lexify('?????')) . mt_rand(100, 999),
+				'code'           => 'SUPP-'.Str::upper(fake()->unique()->lexify('?????')).mt_rand(100, 999),
 				'name'           => fake()->company(),
-				'company_name'   => fake()->company() . ' LTD',
+				'company_name'   => fake()->company().' LTD',
 				'email'          => fake()->unique()->companyEmail(),
 				'phone'          => fake()->phoneNumber(),
 				'website'        => fake()->url(),
@@ -44,8 +42,8 @@
 				]),
 				'notes'          => fake()->optional(0.33)->paragraph(),
 				'is_active'      => fake()->boolean(0.75),
-				'created_at'     => $this_time->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
-				'updated_at'     => $this_time->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
+				'created_at'     => now()->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
+				'updated_at'     => now()->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
 			];
 		}
 	}

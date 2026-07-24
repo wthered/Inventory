@@ -1,0 +1,297 @@
+/* ==========================================================================
+   Page Header Base Styling (Dark Background Variant)
+   ========================================================================== */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #1e293b;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.header-title h1 {
+    font-size: 1.75rem;
+    color: #f8fafc; /* Καθαρό, ανοιχτό contrast */
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+}
+
+.subtitle {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 0.95rem;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+}
+
+/* ==========================================================================
+   Two-Column Grid Layout
+   ========================================================================== */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+    .form-grid {
+        grid-template-columns: 2fr 1fr;
+        align-items: start;
+    }
+}
+
+/* ==========================================================================
+   Card Components
+   ========================================================================== */
+.card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+}
+
+.card-header h2,
+.card-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #1e293b;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* Accent Card Variant for Sidebar Action */
+.HTML-card-accent {
+    border-top: 4px solid #2563eb;
+}
+
+/* ==========================================================================
+   Form Controls & Row Management
+   ========================================================================== */
+.input-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+@media (min-width: 640px) {
+    .input-row {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.form-control,
+.form-select {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.95rem;
+    color: #1e293b;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    transition: border-color 0.15s ease;
+    box-sizing: border-box;
+}
+
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+    background-color: #f1f5f9;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+textarea.form-control {
+    resize: vertical;
+}
+
+/* Validation Styling */
+.is-invalid {
+    border-color: #ef4444;
+}
+
+.error-text {
+    font-size: 0.8rem;
+    color: #ef4444;
+}
+
+.alert-danger {
+    background-color: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+}
+
+/* ==========================================================================
+   Static Items Table View
+   ========================================================================== */
+.edit-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.edit-table th {
+    background-color: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 2px solid #e2e8f0;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.edit-table td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #edf2f7;
+    color: #334155;
+}
+
+.item-meta {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* ==========================================================================
+   Sidebar Totals & Buttons
+   ========================================================================== */
+.form-divider {
+    border: 0;
+    border-top: 1px dashed #e2e8f0;
+    margin: 1.25rem 0;
+}
+
+.sidebar-totals {
+    margin-bottom: 1.25rem;
+}
+
+.total-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.total-row span:first-child {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.price-tag {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.btn-block {
+    width: 100%;
+    justify-content: center;
+}
+
+.font-numeric {
+    font-variant-numeric: tabular-nums;
+}
+
+.margin-0 {
+    margin: 0;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: #64748b;
+}
+
+/* ==========================================================================
+   Buttons Styling
+   ========================================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+    box-sizing: border-box;
+}
+
+.btn-primary {
+    background-color: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+.btn-secondary {
+    background-color: #ffffff;
+    color: #475569;
+    border-color: #cbd5e1;
+}
+
+.btn-secondary:hover {
+    background-color: #f8fafc;
+    color: #1e293b;
+}
+
+/* Full Width Utility for Sidebar Submit */
+.btn-block {
+    width: 100%;
+    justify-content: center;
+}

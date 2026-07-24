@@ -17,15 +17,15 @@
 
 	class SalesOrderSeeder extends Seeder {
 		public function run(): void {
-			$customers      = Customer::query()->pluck('id');
+			$customers = Customer::query()->pluck('id');
 
-			if($customers->isEmpty()) {
+			if ($customers->isEmpty()) {
 				$this->command->error("No customers found. Run CustomerSeeder first.");
 				return;
 			}
 
-			$warehouses     = Warehouse::query()->pluck('id');
-			$products       = Product::all();
+			$warehouses = Warehouse::query()->pluck('id');
+			$products = Product::all();
 			$administrators = User::role('admin')->pluck('id');
 
 			if ($products->isEmpty()) {
@@ -33,10 +33,10 @@
 				return;
 			}
 
-			foreach (Collection::range(1, 16)->shuffle() as $index) {
+			foreach (Collection::range(1, 1024 * 4)->shuffle() as $index) {
 				$warehouse = $warehouses->random();
 				$order = SalesOrder::query()->create([
-					'order_number'      => 'SALE-' . now()->format('Y-m-d') . '-' . $index . '-' . Str::upper(Str::random(6)),
+					'order_number'      => 'SALE-'.now()->format('Y-m-d').'-'.$index.'-'.Str::upper(Str::random(6)),
 					'customer_id'       => $customers->random(),
 					'warehouse_id'      => $warehouse,
 					'order_date'        => Carbon::now()->subDays(rand(1, 30)),
@@ -48,12 +48,12 @@
 				]);
 
 				$orderSubtotal = 0;
-				$orderTax      = 0;
+				$orderTax = 0;
 
 				$locations = WarehouseLocation::query()->where('warehouse_id', $warehouse)->pluck('id');
 				foreach ($products->random(rand(2, 6)) as $product) {
 					$quantity = mt_rand(1, 8);
-					$unitPrice  = $product->price ?? mt_rand(32, 512);
+					$unitPrice = $product->price ?? mt_rand(32, 512);
 
 					// --- Realistic Calculations ---
 					$taxPercent = 24.00; // Τυπικός ΦΠΑ
@@ -62,29 +62,29 @@
 					$discPercent = fake()->boolean(20) ? fake()->randomElement([5, 10, 15]) : 0;
 
 					$subtotalBeforeDisc = $quantity * $unitPrice;
-					$discAmount         = round($subtotalBeforeDisc * ($discPercent / 100), 2);
-					$subtotalAfterDisc  = $subtotalBeforeDisc - $discAmount;
-					$taxAmount          = round($subtotalAfterDisc * ($taxPercent / 100), 2);
+					$discAmount = round($subtotalBeforeDisc * ($discPercent / 100), 2);
+					$subtotalAfterDisc = $subtotalBeforeDisc - $discAmount;
+					$taxAmount = round($subtotalAfterDisc * ($taxPercent / 100), 2);
 
 					$order->items()->create([
-						'product_id'        => $product->id,
-						'batch_number'      => fake()->boolean(70) ? 'BAT-' . Str::upper(Str::random(5)) : null,
-						'location_id'       => $locations->random(),
-						'quantity_ordered'  => $quantity,
-						'quantity_shipped'  => 0,
-						'unit_price'        => $unitPrice,
-						'discount_rate'     => $discPercent,
+						'product_id'       => $product->id,
+						'batch_number'     => fake()->boolean(70) ? 'BAT-'.Str::upper(Str::random(5)) : null,
+						'location_id'      => $locations->random(),
+						'quantity_ordered' => $quantity,
+						'quantity_shipped' => 0,
+						'unit_price'       => $unitPrice,
+						'discount_rate'    => $discPercent,
 					]);
 
 					$orderSubtotal += $subtotalAfterDisc;
-					$orderTax      += $taxAmount;
+					$orderTax += $taxAmount;
 				}
 
 				// Ενημέρωση Header με τα σωστά σύνολα
 				$order->update([
-					'subtotal'     => $orderSubtotal,
-					'tax_amount'   => $orderTax,
-					'grand_total'  => $orderSubtotal + $orderTax,
+					'subtotal'    => $orderSubtotal,
+					'tax_amount'  => $orderTax,
+					'grand_total' => $orderSubtotal + $orderTax,
 				]);
 
 				// --- TEST OBSERVER & REALISTIC QUANTITIES ---

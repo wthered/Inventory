@@ -1,0 +1,49 @@
+/* ==========================================================================
+   BRANDS SPECIFIC TWEAKS (Extends global table utilities)
+   ========================================================================== */
+
+/* Accent background animation for brand rows on hover */
+.data-table tbody tr {
+    transition: background-color 0.15s ease, border-left 0.15s ease;
+    border-left: 3px solid transparent;
+}
+
+.data-table tbody tr:hover {
+    background-color: rgba(59, 130, 246, 0.04) !important; /* Πολύ απαλό primary tint */
+    border-left: 3px solid var(--color-primary); /* Μια κομψή γραμμή αριστερά στο hover */
+}
+
+/* Custom styling for Brand ID indicator */
+.td-id {
+    font-variant-numeric: tabular-nums; /* Στοίχιση αριθμών αν είναι πολυψήφιοι */
+    letter-spacing: 0.05em;
+}
+
+/* Brand Name specific visual layout */
+.td-name {
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+    /* Διασφάλιση ότι αν το όνομα είναι τεράστιο, δεν θα σπάσει το layout */
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Quick responsive adaptation for action buttons on mobile screens */
+@media (max-width: 576px) {
+    .data-table th:nth-child(1),
+    .data-table td:nth-child(1) {
+        width: 25% !important;
+    }
+
+    .action-buttons-group {
+        gap: var(--space-xs);
+    }
+
+    .btn-action {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+}

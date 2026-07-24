@@ -6,7 +6,6 @@
 	use Illuminate\Foundation\Http\FormRequest;
 	use Illuminate\Support\Facades\Auth;
 	use Illuminate\Validation\Rule;
-	use Illuminate\Validation\ValidationException;
 
 	/***********************************************
 	 * Input: Warehouse, Product, Location
@@ -30,14 +29,14 @@
 					'required',
 					'integer',
 					'min:1',
-					Rule::exists('warehouses', 'id')->whereNull('deleted_at'),
+					Rule::exists('warehouses', 'id'),
 				],
 				'location'  => [
 					'required',
 					'integer',
 					'min:1',
 					Rule::exists('warehouse_locations', 'id')->where(function ($query) {
-						$query->where('warehouse_id', $this->input('warehouse'))->whereNull('deleted_at');
+						$query->where('warehouse_id', $this->input('warehouse'));
 					}),
 				],
 			];

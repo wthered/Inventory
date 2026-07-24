@@ -30,6 +30,7 @@
 	use App\Models\Supplier;
 	use App\Models\Warehouse;
 	use App\Models\WarehouseLocation;
+	use App\Observers\Categories\CategoryObserver;
 	use App\Observers\Inventory\InventoryTransactionObserver;
 	use App\Observers\Products\InventoryObserver;
 	use App\Observers\Products\ProductObserver;
@@ -41,8 +42,8 @@
 	use App\Services\Inventory\InventoryReportService;
 	use App\Services\Inventory\LocationOptionsService;
 	use App\Services\Inventory\StockMovementService;
-	use Illuminate\Support\ServiceProvider;
 	use Illuminate\Support\Facades\Gate;
+	use Illuminate\Support\ServiceProvider;
 
 	class AppServiceProvider extends ServiceProvider {
 		/**
@@ -90,6 +91,9 @@
 
 			// --- Core Catalog ---
 			Product::observe(ProductObserver::class);
+
+			// Attach the observer to intercept Category saving lifecycles automatically
+			Category::observe(CategoryObserver::class);
 
 			// --- Inventory & Ledger ---
 			Inventory::observe(InventoryObserver::class);

@@ -55,7 +55,7 @@
 
 			Schema::create('product_history', function (Blueprint $table) {
 
-				// Κλειδί σύνδεσης με το προϊόν που αλλάχθηκε.
+				// Κλειδί σύνδεσης με το προϊόν που αλλάχτηκε.
 				// Αν το προϊόν διαγραφεί, διαγράφονται και τα ιστορικά του (cascade).
 				$table->unsignedInteger('product_id');
 				$table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');

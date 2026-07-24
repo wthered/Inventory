@@ -4,30 +4,29 @@
 
 	use App\Contracts\StockMoveable;
 	use App\Models\Product;
+	use App\Models\WarehouseLocation; // Προσθήκη για το Bin location
 	use Illuminate\Database\Eloquent\Model;
 	use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 	class SalesOrderItem extends Model implements StockMoveable {
+
 		protected $fillable = [
 			'sales_order_id',
 			'product_id',
+			'batch_number',
+			'location_id',
 			'quantity_ordered',
 			'quantity_shipped',
 			'unit_price',
-			'discount_percent',
+			'discount_rate',
 			'discount_amount',
-			'tax_percent',
-			'tax_amount',
-			'subtotal',
-			'total',
-			'notes',
 		];
 
 		/**
 		 * Επιστροφή στην παραγγελία (Header)
 		 */
-		public function salesOrder(): BelongsTo {
-			return $this->belongsTo(SalesOrder::class);
+		public function sale(): BelongsTo {
+			return $this->belongsTo(SalesOrder::class, 'sales_order_id');
 		}
 
 		/**
@@ -37,15 +36,19 @@
 			return $this->belongsTo(Product::class);
 		}
 
+		/**
+		 * Σύνδεση με τη Θέση/Bin της Αποθήκης (Picking Location)
+		 */
+		public function location(): BelongsTo {
+			return $this->belongsTo(WarehouseLocation::class, 'location_id');
+		}
+
 		public function getWarehouseId(): int {
-			// Χρησιμοποιούμε το null-safe operator (?->) για αποφυγή crash
-			// και βεβαιωνόμαστε ότι η σχέση υπάρχει.
 			return $this->salesOrder?->warehouse_id ?? 0;
 		}
 
 		/**
-		 * Accessor για ευκολία (προαιρετικό)
-		 * Αν ο Observer ψάχνει για 'quantity', του το δίνουμε εδώ
+		 * Accessor για τον Observer
 		 */
 		public function getQuantityAttribute() {
 			return $this->quantity_ordered;

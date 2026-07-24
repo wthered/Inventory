@@ -1,0 +1,107 @@
+/* ==========================================================================
+   Form Card & Structural Container Layout
+   ========================================================================== */
+.form-card {
+	background-color : var(--color-surface);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-lg);
+	box-shadow       : var(--shadow-md);
+	padding          : var(--space-xl);
+	width            : 100%;
+	margin           : 0 auto;
+}
+
+.form-group {
+	margin-bottom  : var(--space-lg);
+	display        : flex;
+	flex-direction : column;
+	gap            : var(--space-xs);
+}
+
+.form-group .brands-grid-container {
+	display               : grid;
+	grid-template-columns : repeat(auto-fill, minmax(200px, 1fr));
+	gap                   : var(--space-sm);
+	max-height            : 200px;
+	overflow-y            : auto;
+	padding               : var(--space-sm);
+	border                : 1px solid var(--color-border);
+	border-radius         : var(--radius-md);
+	background            : var(--color-input-bg);
+}
+
+.form-group .brands-grid-container .checkbox-item {
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-xs);
+	cursor      : pointer;
+	font-size   : 0.875rem;
+	color       : var(--color-input-text);
+}
+
+.form-label {
+	font-size   : 0.875rem;
+	font-weight : 600;
+	color       : var(--color-text-secondary);
+}
+
+/* ==========================================================================
+   Interactive Input Elements
+   ========================================================================== */
+.form-control, .form-select {
+	background-color : var(--color-input-bg);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-md);
+	color            : var(--color-input-text);
+	padding          : 0.75rem var(--space-md);
+	font-size        : 0.925rem;
+	outline          : none;
+	transition       : border-color 0.2s ease, box-shadow 0.2s ease;
+	width            : 100%;
+}
+
+.form-control:focus, .form-select:focus {
+	border-color : var(--color-primary);
+	box-shadow   : 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.form-control::placeholder {
+	color : var(--color-text-muted);
+}
+
+/* Invalid form boundary states */
+.form-control.is-invalid, .form-select.is-invalid {
+	border-color : var(--color-error);
+}
+
+/* ==========================================================================
+   Auditing Feedback & Row Form Actions
+   ========================================================================== */
+.text-error {
+	color      : var(--color-error);
+	font-size  : 0.8125rem;
+	margin-top : var(--space-xs);
+}
+
+.form-actions-row {
+	display         : flex;
+	justify-content : flex-end;
+	gap             : var(--space-md);
+	margin-top      : var(--space-xl);
+	border-top      : 1px solid var(--color-border);
+	padding-top     : var(--space-lg);
+}
+
+/* Append this structural block to categories/edit.css */
+.validation-error-space {
+	min-height  : 20px;
+	margin-top  : var(--space-xs);
+	display     : flex;
+	align-items : center;
+}
+
+.text-error {
+	color      : var(--color-error);
+	font-size  : 0.8125rem;
+	margin-top : 0 !important; /* Override standard relative top shifts */
+}
