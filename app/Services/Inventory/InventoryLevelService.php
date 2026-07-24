@@ -12,7 +12,7 @@
 		 */
 		public function getAllProductsInventory(): Collection {
 			$products = Product::query()->pluck('id');
-			$result   = Collection::empty();
+			$result = Collection::empty();
 
 			foreach ($products as $product) {
 				$result->push($this->getInventoryAnalysis($product->id));
@@ -30,16 +30,16 @@
 
 			$inventoryStatus = ($currentQuantity['available_quantity'] / $product->max_stock_level) * 100;
 			return [
-				'product_id'        => $product->id,
-				'product_name'      => $product->name,
-				'current_quantity'  => $currentQuantity,
-				'min_stock'         => $product->min_stock_level,
-				'max_stock'         => $product->max_stock_level,
-				'tier'              => $tier,
-				'tier_label'        => $this->getTierLabel($tier),
-				'percentage_of_max' => $product->max_stock_level > 0 ? $inventoryStatus : 0,
-				'status'            => $this->getStatus($tier, $inventoryStatus, $product->product),
-				'suggested_action'  => $this->getSuggestedAction($tier, $currentQuantity['available_quantity'], $product->product),
+//				'product_id'        => $product->id,
+//				'product_name'      => $product->name,
+'current_quantity'  => $currentQuantity,
+//				'min_stock'         => $product->min_stock_level,
+//				'max_stock'         => $product->max_stock_level,
+'tier'              => $tier,
+'tier_label'        => $this->getTierLabel($tier),
+'percentage_of_max' => $product->max_stock_level > 0 ? $inventoryStatus : 0,
+'status'            => $this->getStatus($tier, $inventoryStatus, $product->product),
+'suggested_action'  => $this->getSuggestedAction($tier, $currentQuantity['available_quantity'], $product->product),
 			];
 		}
 
@@ -48,9 +48,14 @@
 		 */
 		protected function getCurrentQuantity(Product $product): Collection {
 			$inventories = Collection::empty();
-			$quantity    = 0;
-			$available   = 0;
-			$product->inventories()->whereHas('location')->each(function ($inventory) use (&$inventories, &$quantity, &$available) {
+			$quantity = 0;
+			$available = 0;
+			$product->inventories()->whereHas('location')->each(function ($inventory) use (
+				&$inventories,
+				&$quantity,
+				&
+				$available
+			) {
 				$inventories->push([
 					'warehouse_id'       => $inventory->warehouse_id,
 					'location_id'        => $inventory->location_id,
@@ -73,7 +78,7 @@
 			}
 
 			// Calculate percentages
-			$criticalThreshold  = $minStock * 0.2;
+			$criticalThreshold = $minStock * 0.2;
 			$eightyPercentOfMax = $maxStock * 0.8;
 
 			// Determine tier
@@ -110,11 +115,11 @@
 		 */
 		protected function getStatus(int $tier, float $quantity, Product $product): string {
 			return match ($tier) {
-				0 => "CRITICAL: Only " . $quantity . " units left (below 20% of minimum)",
-				1 => "LOW: " . $quantity . " units (below minimum stock of " . $product->min_stock_level . ")",
-				2 => "NORMAL: " . $quantity . " units (between min and 80% of max)",
-				3 => "GOOD: " . $quantity . " units (between 80% and max)",
-				4 => "OVERSTOCK: " . $quantity . " units (exceeds max of " . $product->max_stock_level . ")",
+				0       => "CRITICAL: Only ".$quantity." units left (below 20% of minimum)",
+				1       => "LOW: ".$quantity." units (below minimum stock of ".$product->min_stock_level.")",
+				2       => "NORMAL: ".$quantity." units (between min and 80% of max)",
+				3       => "GOOD: ".$quantity." units (between 80% and max)",
+				4       => "OVERSTOCK: ".$quantity." units (exceeds max of ".$product->max_stock_level.")",
 				default => "UNKNOWN",
 			};
 		}
@@ -126,38 +131,20 @@
 			switch ($tier) {
 				case 0:
 					$needed = $product->min_stock_level - $quantity;
-					return "URGENT: Order " . $needed . " units immediately";
+					return "URGENT: Order ".$needed." units immediately";
 				case 1:
 					$needed = $product->min_stock_level - $quantity;
-					return "Order " . $needed . " units soon";
+					return "Order ".$needed." units soon";
 				case 2:
 					return "Monitor stock levels";
 				case 3:
 					return "Optimal stock level";
 				case 4:
 					$excess = $quantity - $product->max_stock_level;
-					return "Consider discounting or transferring " . $excess . " units";
+					return "Consider discounting or transferring ".$excess." units";
 				default:
 					return "Review stock levels";
 			}
-		}
-
-		/**
-		 * Get products by tier
-		 */
-		public function getProductsByTier(int $tier): Collection {
-			$products = Product::query()
-				->pluck('id');
-			$result   = Collection::empty();
-
-			foreach ($products as $product) {
-				$currentTier = $this->calculateTier($product->id);
-
-				if ($currentTier === $tier) {
-					$result->push($this->getInventoryAnalysis($product->id));
-				}
-			}
-			return $result;
 		}
 
 		/**
@@ -183,9 +170,9 @@
 		 * Check if product needs reorder
 		 */
 		public function needsReorder(int $productId): bool {
-			$product         = Product::findOrFail($productId);
+			$product = Product::query()->findOrFail($productId);
 			$currentQuantity = $this->getCurrentQuantity($product);
-			$reorderPoint    = $this->calculateReorderPoint($product);
+			$reorderPoint = $this->calculateReorderPoint($product);
 
 			return $currentQuantity <= $reorderPoint;
 		}

@@ -11,7 +11,7 @@
 
 		public function products(): BelongsToMany {
 			return $this
-				->belongsToMany(Product::class, 'suppliers_products')->withPivot([
+				->belongsToMany(Product::class, 'product_supplier')->withPivot([
 					'price',
 					'lead_time_days',
 					'is_preferred',

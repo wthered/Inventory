@@ -445,4 +445,8 @@
 				'raw_locations'       => $rawLocations,
 			]);
 		}
+
+		public function getWarehouses(Request $request){
+
+		}
 	}

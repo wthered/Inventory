@@ -9,29 +9,31 @@
 	use Illuminate\Database\Eloquent\SoftDeletes;
 
 	class Category extends Model {
-		use softDeletes;
+		use SoftDeletes;
+
+		protected $fillable = [
+			'name',
+			'slug',
+			'description',
+			'parent_id',
+			'image',
+			'sort_order',
+			'is_active',
+		];
 
 		public function products(): HasMany {
 			return $this->hasMany(Product::class);
 		}
 
-		/**
-		 * Οι μάρκες που ανήκουν σε αυτή την κατηγορία.
-		 */
 		public function brands(): BelongsToMany {
-			return $this->belongsToMany(Brand::class, 'brand_category', 'category_id', 'brand_id');
+			// ->withTimestamps() adds {created, updated}_at values in $category->brands()->sync(....)
+			return $this->belongsToMany(Brand::class, 'brand_category', 'category_id', 'brand_id')->withTimestamps();
 		}
 
-		/**
-		 * Οι υποκατηγορίες που ανήκουν σε αυτή την κατηγορία.
-		 */
 		public function children(): HasMany {
 			return $this->hasMany(Category::class, 'parent_id')->orderBy('sort_order');
 		}
 
-		/**
-		 * Η γονική κατηγορία στην οποία ανήκει αυτή.
-		 */
 		public function parent(): BelongsTo {
 			return $this->belongsTo(Category::class, 'parent_id');
 		}

@@ -1,5 +1,4 @@
 <!-- Sidebar -->
-<!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
     <ul class="sidebar-menu">
         <!-- Dashboard -->
@@ -18,6 +17,26 @@
                 <i class="fas fa-box"></i> Products
             </a>
         </li>
+
+        {{-- Έλεγχος άδειας για Categories --}}
+        @can('category.view')
+            <li>
+                <a href="{{ route('inventory.categories.index') }}"
+                   class="{{ Route::is('inventory.categories.*') ? 'active' : '' }}">
+                    <i class="fas fa-tags"></i> Categories
+                </a>
+            </li>
+        @endcan
+
+        {{-- Έλεγχος άδειας για Brands --}}
+        @can('brand.view')
+            <li>
+                <a href="{{ route('inventory.brands.index') }}"
+                   class="{{ Route::is('inventory.brands.*') ? 'active' : '' }}">
+                    <i class="fas fa-trademark"></i> Brands
+                </a>
+            </li>
+        @endcan
 
         <!-- Warehouses -->
         <li>
@@ -58,6 +77,14 @@
             <a href="{{ route('inventory.purchases.index') }}"
                class="{{ Route::is('inventory.purchases.*') ? 'active' : '' }}">
                 <i class="fas fa-shopping-cart"></i> Purchase Orders
+            </a>
+        </li>
+
+        <!-- Sales Orders -->
+        <li>
+            <a href="{{ route('inventory.sales.index') }}"
+               class="{{ Route::is('sales.*') ? 'active' : '' }}">
+                <i class="fas fa-shopping-bag"></i> Sales Orders
             </a>
         </li>
 

@@ -3,14 +3,12 @@
 	namespace Database\Seeders;
 
 	use App\Models\Product;
-	use App\Models\Supplier;
 	use Carbon\Carbon;
 	use Database\Factories\SupplierFactory;
 	use Illuminate\Http\Client\ConnectionException;
 	use Illuminate\Support\Collection;
 	use Illuminate\Support\Facades\DB;
 	use Illuminate\Support\Facades\Http;
-	use Illuminate\Support\Str;
 
 	class SupplierSeeder extends ParentSeeder {
 
@@ -24,7 +22,7 @@
 		/**
 		 * Run the database seeds.
 		 *
-		 * @throws ConnectionException
+		 * @throws ConnectionException|\Throwable
 		 */
 		public function run(): void {
 			$this->list = Collection::empty();
@@ -51,18 +49,16 @@
 					continue;
 				}
 
-				$apiSuppliers = Collection::make($response->json());
-
-				$formatted = $apiSuppliers->map(function ($supplier) use ($creation_time) {
-					// Χρήση του SupplierFactory::raw() για ασφαλή κατασκευή array δεδομένων
-					return SupplierFactory::new()->raw([
-						'code'           => $supplier['code'] ?? 'SUPP-' . Str::upper(Str::random(5)) . mt_rand(100, 999),
-						'name'           => $supplier['name'] ?? fake()->company(),
+				$formatted = Collection::make($response->json())->map(function ($supplier) use ($creation_time) {
+					// Filter out null/missing values from API response so Factory fallbacks kick in
+					$apiData = array_filter([
+						'code'           => $supplier['code'] ?? null,
+						'name'           => $supplier['name'] ?? null,
 						'company_name'   => $supplier['company_name'] ?? null,
 						'email'          => $supplier['email'] ?? null,
-						'phone'          => $supplier['phone'] ?? fake()->phoneNumber(),
+						'phone'          => $supplier['phone'] ?? null,
 						'website'        => $supplier['website'] ?? null,
-						'tax_number'     => $supplier['tax_number'] ?? null,
+						'tax_number'     => isset($supplier['tax_number']) ? (string) $supplier['tax_number'] : null,
 						'address'        => $supplier['address'] ?? null,
 						'city'           => $supplier['city'] ?? null,
 						'state'          => $supplier['state'] ?? null,
@@ -70,54 +66,64 @@
 						'postal_code'    => $supplier['postal_code'] ?? null,
 						'contact_person' => $supplier['contact_person'] ?? null,
 						'contact_phone'  => $supplier['contact_phone'] ?? null,
-						'credit_limit'   => $supplier['credit_limit'] ?? 0,
-						'payment_terms'  => $supplier['payment_terms'] ?? 'cash',
+						'credit_limit'   => $supplier['credit_limit'] ?? null,
+						'payment_terms'  => $supplier['payment_terms'] ?? null,
 						'notes'          => $supplier['notes'] ?? null,
-						'is_active'      => !isset($supplier['is_active']) || $supplier['is_active'],
-						'created_at'     => $creation_time->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
-						'updated_at'     => $creation_time->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
-					]);
+						'is_active'      => $supplier['is_active'] ?? fake()->boolean(),
+					], fn($value) => !is_null($value));
+
+					// Combine custom timestamps with filtered API data
+					return SupplierFactory::new()->raw(array_merge($apiData, [
+						'created_at' => $creation_time->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
+						'updated_at' => $creation_time->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
+					]));
 				});
 
-				$this->list = $this->list->merge($formatted);
+				$this->list = $this->list->concat($formatted);
 			}
 
 			// Ασφαλές Chunked Bulk Insert
-			$this->list->chunk(self::BATCH_SIZE)->each(function (Collection $chunk) {
-				Supplier::query()->insert($chunk->toArray());
-			});
+			if ($this->list->isNotEmpty()) {
+				$this->list->chunk(self::BATCH_SIZE)->each(function (Collection $chunk) {
+					DB::table('suppliers')->insert($chunk->values()->toArray());
+				});
+			}
 
 			$this->command->info('🔗 Linking suppliers to products via optimized pivot chunking...');
 
 			// Παίρνουμε ΜΟΝΟ τα IDs των προμηθευτών για να προστατεύσουμε τη RAM
-			$supplierIds = Supplier::pluck('id');
+			// Forces a direct query against the table
+			$suppliers = DB::table('suppliers')->pluck('id');
 
-			if ($supplierIds->isEmpty()) {
+			if ($suppliers->isEmpty()) {
 				$this->command->error('No suppliers available to link with products.');
 				return;
 			}
 
-			// Χρησιμοποιούμε chunk() στα προϊόντα για να μην κρασάρει ο Seeder (OOM Safe)
-			Product::chunk(self::BATCH_SIZE, function ($products) use ($supplierIds) {
-				DB::transaction(function () use ($products, $supplierIds) {
+			// Χρησιμοποιούμε chunk() στα προϊόντα για να μη σταματήσει ο Seeder (OOM Safe)
+			Product::query()->chunk(self::BATCH_SIZE, function ($products) use ($suppliers) {
+				DB::transaction(function () use ($products, $suppliers) {
 					$pivotBuffer = [];
 
 					foreach ($products as $product) {
-						// Επιλογή 1-3 τυχαίων IDs προμηθευτών
-						$randomIds = $supplierIds->random(mt_rand(1, min(3, $supplierIds->count())));
+						// Επιλογή 2 - 8 τυχαίων IDs προμηθευτών
+						$randomSuppliers = $suppliers->random(mt_rand(2, min(8, $suppliers->count())))->values();
 
-						foreach ($randomIds as $index => $id) {
+						foreach ($randomSuppliers as $index => $id) {
 							$pivotBuffer[] = [
 								'product_id'     => $product->id,
 								'supplier_id'    => $id,
 								'price'          => fake()->randomFloat(2, $product->cost_price * 0.9, $product->cost_price * 1.4),
 								'lead_time_days' => fake()->numberBetween(3, 21),
-								'is_preferred'   => ($index === 0),
+								'is_preferred'   => $index === 0,
 								'moq'            => fake()->numberBetween(1, 64),
 								'created_at'     => now()->subSeconds(mt_rand(64, 24 * 3600 * 30)),
 								'updated_at'     => now()->addSeconds(mt_rand(64, 24 * 3600 * 30)),
 							];
 						}
+
+						// Overwrites the same line on each iteration
+						$this->command->getOutput()->write("Finished product #".$product->id."...\r");
 					}
 
 					// Μαζικό Insert στον Pivot πίνακα για το συγκεκριμένο chunk

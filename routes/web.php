@@ -30,6 +30,6 @@
 	});
 
 	// Future ERP Modules can cleanly plug right in here:
-	Route::middleware(['web', 'auth'])->name('sales.')->prefix('sales')->group(function () {
+	Route::middleware(['web', 'auth'])->name('inventory.')->group(function () {
 		require base_path('routes/sales.php');
 	});

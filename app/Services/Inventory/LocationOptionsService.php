@@ -11,9 +11,9 @@
 		 * Get location options for a product
 		 */
 		public function getLocationOptions(int $productId, int $warehouseId, ?int $locationId = null): array {
-			$warehouse   = Warehouse::query()->findOrFail($warehouseId);
+			$warehouse = Warehouse::query()->findOrFail($warehouseId);
 			$inventories = $this->getProductInventories($productId, $warehouseId);
-			$location    = $locationId ? WarehouseLocation::find($locationId) : null;
+			$location = $locationId ? WarehouseLocation::query()->find($locationId) : null;
 
 			return [
 				'warehouse' => $this->createWarehouseOptions($inventories, $warehouse, $locationId),
@@ -36,12 +36,16 @@
 		/**
 		 * Create warehouse dropdown options
 		 */
-		private function createWarehouseOptions(Collection $inventories, Warehouse $warehouse, ?int $selectedLocationId): string {
+		private function createWarehouseOptions(
+			Collection $inventories,
+			Warehouse $warehouse,
+			?int $selectedLocationId
+		): string {
 			$options = $inventories->map(function ($inventory) use ($warehouse, $selectedLocationId) {
 				$selected = $inventory->location_id == $selectedLocationId ? 'selected' : '';
 				$disabled = $inventory->location_id != $selectedLocationId ? 'disabled' : '';
 
-				return "<option value='" . $inventory->id . "' $selected $disabled>".$warehouse->name."</option>";
+				return "<option value='".$inventory->id."' $selected $disabled>".$warehouse->name."</option>";
 			});
 
 			return $this->wrapWithDefaultOption($options->implode(''), 'Select Warehouse');
@@ -52,7 +56,7 @@
 		 */
 		private function wrapWithDefaultOption(string $options, string $defaultText): string {
 			$default = sprintf('<option value="0">%s</option>', e($defaultText));
-			return $default . $options;
+			return $default.$options;
 		}
 
 		/**
@@ -60,9 +64,9 @@
 		 */
 		private function createZoneOptions(?WarehouseLocation $location, Warehouse $warehouse): string {
 			$options = Collection::range(1, $warehouse->zones)->map(function ($zone) use ($location) {
-				$zoneName = 'Z' . $zone;
+				$zoneName = 'Z'.$zone;
 				$selected = $location && $location->zone == $zone ? 'selected' : 'disabled';
-				return "<option value='" . $zoneName . "' " . $selected . ">Zone " . $zone . "</option>";
+				return "<option value='".$zoneName."' ".$selected.">Zone ".$zone."</option>";
 			});
 			return $this->wrapWithDefaultOption($options->implode(''), 'Select Zone');
 		}
@@ -72,7 +76,7 @@
 		 */
 		private function createAisleOptions(?WarehouseLocation $location, Warehouse $warehouse): string {
 			$options = Collection::range(1, $warehouse->aisles)->map(function ($aisle) use ($location) {
-				$selected  = $location && $location->aisle == $aisle ? 'selected' : 'disabled';
+				$selected = $location && $location->aisle == $aisle ? 'selected' : 'disabled';
 
 				return sprintf('<option value="%s" %s>Aisle %d</option>', e($aisle), $selected, $aisle);
 			});
@@ -110,11 +114,11 @@
 		 */
 		private function createBinOptions(?WarehouseLocation $location, Warehouse $warehouse): string {
 			$options = Collection::range(1, $warehouse->bins)
-				->map(function ($bin) use ($location) {
-					$selected = $location && $location->bin == $bin ? 'selected' : 'disabled';
+			                     ->map(function ($bin) use ($location) {
+				                     $selected = $location && $location->bin == $bin ? 'selected' : 'disabled';
 
-					return sprintf('<option value="%d" %s>Bin %d</option>', $bin, $selected, $bin);
-				});
+				                     return sprintf('<option value="%d" %s>Bin %d</option>', $bin, $selected, $bin);
+			                     });
 
 			return $this->wrapWithDefaultOption($options->implode(''), 'Select Bin');
 		}
@@ -141,28 +145,28 @@
 		 */
 		public function getAvailableLocations(int $productId, int $warehouseId): Collection {
 			return WarehouseLocation::where('warehouse_id', $warehouseId)
-				->whereHas('inventories', function ($query) use ($productId) {
-					$query
-						->where('product_id', $productId)
-						->where('quantity', '>', 0);
-				})
-				->with([
-					'inventories' => function ($query) use ($productId) {
-						$query->where('product_id', $productId);
-					}
-				])
-				->get()
-				->map(function ($location) {
-					return [
-						'id'        => $location->id,
-						'zone'      => $location->zone,
-						'aisle'     => $location->aisle,
-						'rack'      => $location->rack,
-						'shelf'     => $location->shelf,
-						'bin'       => $location->bin,
-						'quantity'  => $location->inventories->sum('quantity'),
-						'available' => $location->inventories->sum('available_quantity'),
-					];
-				});
+			                        ->whereHas('inventories', function ($query) use ($productId) {
+				                        $query
+					                        ->where('product_id', $productId)
+					                        ->where('quantity', '>', 0);
+			                        })
+			                        ->with([
+				                        'inventories' => function ($query) use ($productId) {
+					                        $query->where('product_id', $productId);
+				                        }
+			                        ])
+			                        ->get()
+			                        ->map(function ($location) {
+				                        return [
+					                        'id'        => $location->id,
+					                        'zone'      => $location->zone,
+					                        'aisle'     => $location->aisle,
+					                        'rack'      => $location->rack,
+					                        'shelf'     => $location->shelf,
+					                        'bin'       => $location->bin,
+					                        'quantity'  => $location->inventories->sum('quantity'),
+					                        'available' => $location->inventories->sum('available_quantity'),
+				                        ];
+			                        });
 		}
 	}
