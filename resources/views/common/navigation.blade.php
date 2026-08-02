@@ -215,7 +215,7 @@
 
                     <div class="dropdown-divider"></div>
 
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form method="POST" action="{{ route('auth.sign.out') }}">
                         @csrf
                         <button type="submit" data-icon="✖" class="dropdown-logout-btn">Αποσύνδεση</button>
                     </form>

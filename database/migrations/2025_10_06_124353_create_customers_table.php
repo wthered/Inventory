@@ -18,12 +18,13 @@
 				$table->string('email')->nullable();
 				$table->string('phone');
 				$table->string('company_name')->nullable();
-				$table->string('tax_number')->nullable();
+				$table->string('tax_number')->nullable()->comment('ΑΦΜ πελάτη');
 				$table->text('billing_address')->nullable();
 				$table->text('shipping_address')->nullable();
 				$table->string('city')->nullable();
 				$table->string('state')->nullable();
-				$table->string('country')->nullable();
+				$table->unsignedInteger('country_id')->nullable();
+				$table->foreign('country_id')->references('id')->on('countries')->nullOnDelete();
 				$table->string('postal_code')->nullable();
 				$table->string('customer_type')->default(CustomerType::INDIVIDUAL->value);
 				$table->decimal('credit_limit', 12)->default(0);

@@ -381,7 +381,11 @@
                                 <span class="value">{{ $supplier['pivot']['moq'] }} units</span>
                             </div>
                         </div>
-                        <button class="btn-secondary btn-full">Contact Supplier</button>
+                        <a href="{{ route('inventory.suppliers.show', ['supplier' => $supplier['id']]) }}"
+                           class="btn-secondary btn-full text-center"
+                           style="display: block; text-decoration: none;">
+                            <i class="fas fa-external-link-alt"></i> Contact Supplier Page
+                        </a>
                     </div>
                 @endforeach
             </div>

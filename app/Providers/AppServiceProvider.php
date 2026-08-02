@@ -4,6 +4,7 @@
 
 	use App\Models\Brand;
 	use App\Models\Category;
+	use App\Models\Country;
 	use App\Models\Customer;
 	use App\Models\Inventories\Inventory;
 	use App\Models\Inventories\InventoryTransaction;
@@ -11,6 +12,7 @@
 	use App\Models\Purchases\PurchaseOrder;
 	use App\Models\Purchases\PurchaseOrderItem;
 	use App\Models\Sales\SalesOrder;
+	use App\Models\Scopes\CountryScope;
 	use App\Models\Scopes\InventoryTransactionScope;
 	use App\Models\Scopes\Products\BrandScope;
 	use App\Models\Scopes\Products\CategoryScope;
@@ -75,6 +77,7 @@
 
 			Product::addGlobalScope(new ProductScope());
 			Category::addGlobalScope(new CategoryScope());
+			Country::addGlobalScope(new CountryScope());
 			Brand::addGlobalScope(new BrandScope());
 			Customer::addGlobalScope(new CustomerScope());
 			Supplier::addGlobalScope(new SupplierScope());

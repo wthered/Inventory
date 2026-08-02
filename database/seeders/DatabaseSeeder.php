@@ -34,6 +34,8 @@
 			$this->call([
 				RoleAndPermissionSeeder::class,
 				UserSeeder::class,
+				CountrySeeder::class,
+				CitySeeder::class,
 				CustomerSeeder::class,
 				WarehouseSeeder::class,
 				CategorySeeder::class,

@@ -3,6 +3,7 @@
 	namespace App\Http\Controllers\Inventory;
 
 	use App\Http\Controllers\Controller;
+	use App\Http\Requests\Categories\CategoryFilterRequest;
 	use App\Http\Requests\Categories\CategoryStoreRequest;
 	use App\Http\Requests\Categories\CategoryUpdateRequest;
 	use App\Http\Requests\Transactions\FilterBrandsRequest;
@@ -109,16 +110,23 @@
 			return redirect()->route('inventory.categories.index');
 		}
 
-		public function filterBrands(FilterBrandsRequest $request) {
-			$input = $request->validated();
-			return Category::query()->find($input['category_id'])
-			               ->brands()
-			               ->pluck('name', 'id')
-			               ->map(function ($name, $id) {
-				               return "<option value='".$id."'>".$name."</option>";
-			               })
-			               ->prepend("<option value='' selected>Επιλέξτε Μάρκα...</option>")
-			               ->join('');
+		public function filterBrands(FilterBrandsRequest $request, Category $category) {
+			return $category->brands()
+			                ->pluck('name', 'id')
+			                ->map(function ($name, $id) {
+				                return "<option value='".$id."'>".$name."</option>";
+			                })
+			                ->prepend("<option value='' selected>Επιλέξτε Μάρκα...</option>")
+			                ->join('');
 
+		}
+
+		public function filter(CategoryFilterRequest $request, Category $category) {
+			$category->load(['brands', 'children']);
+			return response()->json([
+				'options' => $category->children()->orderBy('name')->get()->map(function (Category $category) {
+					return "<option value='".$category->id."'>".$category->name."</option>";
+				})->prepend("<option value=''>Select Sub Category</option>")->join(''),
+			]);
 		}
 	}

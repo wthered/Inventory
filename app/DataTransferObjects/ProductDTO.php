@@ -41,7 +41,7 @@
 
 		public function __construct(int $product) {
 			$this->product = Product::query()->findOrFail($product);
-			$this->id = $this->product['id'];
+			$this->id = $product;
 			$this->sku = $this->product['sku'];
 			$this->barcode = $this->product['barcode'] ?? null;
 			$this->name = $this->product['name'];
@@ -60,7 +60,8 @@
 			$this->reorder_point = $this->product['reorder_point'];
 			$this->track_inventory = $this->product['track_inventory'];
 			$this->is_active = $this->product['is_active'];
-			$this->specifications = $this->product['specifications'];
+
+			$this->specifications = json_decode($this->product['specifications'], true);
 			$this->images = $this->product->images()->get();
 			$this->brand = $this->product->brand()->first();
 			$this->suppliers = $this->product->suppliers()->get();
@@ -85,7 +86,22 @@
 				return null;
 			}
 
-			dd(new self($product));
+//			dd(new self($product));
 			return new self($product);
+		}
+
+		/**
+		 * Update an existing product and return a DTO instance.
+		 *
+		 * @param  Product  $product
+		 * @param  array    $data
+		 *
+		 * @return self
+		 */
+		public static function update(Product $product, array $data): self {
+			// $data['specifications'] is an array. Eloquent automatically encodes it as JSON on update.
+			$product->update($data);
+
+			return new self($product->id);
 		}
 	}

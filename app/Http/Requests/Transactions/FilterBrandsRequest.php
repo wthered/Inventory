@@ -5,6 +5,7 @@
 	use Illuminate\Contracts\Validation\ValidationRule;
 	use Illuminate\Foundation\Http\FormRequest;
 	use Illuminate\Support\Facades\Auth;
+	use Illuminate\Validation\Rule;
 
 	class FilterBrandsRequest extends FormRequest {
 		/**
@@ -21,7 +22,24 @@
 		 */
 		public function rules(): array {
 			return [
-				'category_id' => ['required','integer','exists:categories,id'],
+				'category'        => [
+					'required',
+					'integer',
+					Rule::exists('categories', 'id')->where(function ($query) {
+						return $query->where('parent_id', $this->input('parent_category'));
+					})
+				],
+				'parent_category' => [
+					'required',
+					'integer',
+					Rule::exists('categories', 'id')->whereNull('parent_id'),
+				]
 			];
+		}
+
+		public function prepareForValidation(): void {
+			$this->merge([
+				'category' => intval($this->route('category')->id),
+			]);
 		}
 	}

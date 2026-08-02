@@ -1,6 +1,7 @@
 <?php
 
 	use App\Http\Controllers\BrandController;
+	use App\Http\Controllers\CountryController;
 	use App\Http\Controllers\FilterController;
 	use App\Http\Controllers\Inventory\CategoryController;
 	use App\Http\Controllers\Inventory\CustomerController;
@@ -40,6 +41,7 @@
 	Route::middleware('permission:category.view')->group(function () {
 		Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
 		Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+		Route::get('categories/{category}/filter', [CategoryController::class, 'filter'])->name('categories.children');
 	});
 
 	Route::middleware('permission:category.update')->group(function () {
@@ -80,7 +82,7 @@
 	Route::resource('brands', BrandController::class)->withTrashed(['edit', 'update']);
 
 	// Single-Action Structural View Resources
-	Route::resource('customers', CustomerController::class)->only(['index']);
+	Route::resource('customers', CustomerController::class);
 	Route::resource('invoices', InvoiceController::class)->only(['index']);
 	Route::resource('purchases', PurchaseController::class);
 
@@ -164,7 +166,16 @@
 
 	/*
 	|--------------------------------------------------------------------------
-	| Global Framework Utilities
+	| Global Framework Utilities & Geographic Lookup
 	|--------------------------------------------------------------------------
 	*/
 	Route::get('/filters', [FilterController::class, 'getFilters'])->name('global');
+
+	// Sovereign Countries REST Resource
+	Route::resource('countries', CountryController::class);
+
+	// Cascading Geographic Data AJAX Routes
+	Route::prefix('countries')->name('countries.')->controller(CountryController::class)->group(function () {
+		Route::post('/{country}/cities', 'cities')->name('cities');
+		Route::post('/{country}/states', 'states')->name('states');
+	});

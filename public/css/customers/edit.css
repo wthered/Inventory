@@ -1,0 +1,142 @@
+/* --- Customer Edit Form Specific Styles --- */
+
+/* Form Wrapper Card */
+.form-card {
+	background-color : var(--color-surface);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-lg);
+	box-shadow       : var(--shadow-md);
+	overflow         : hidden;
+	display          : flex;
+	flex-direction   : column;
+	gap              : var(--space-xl);
+	padding          : var(--space-xl);
+}
+
+/* Form Section Header */
+.form-section {
+	display        : flex;
+	flex-direction : column;
+	gap            : var(--space-md);
+}
+
+.section-header {
+	padding-bottom : var(--space-sm);
+	border-bottom  : 1px solid var(--color-border);
+}
+
+.section-header h3 {
+	font-size   : 1.05rem;
+	font-weight : 600;
+	color       : var(--color-text-primary);
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-sm);
+}
+
+/* Grid Layout for Form Inputs */
+.form-grid {
+	display               : grid;
+	grid-template-columns : repeat(2, 1fr);
+	gap                   : var(--space-md);
+}
+
+.form-group {
+	display        : flex;
+	flex-direction : column;
+	gap            : var(--space-xs);
+}
+
+.form-group.full-width {
+	grid-column : 1 / -1;
+}
+
+/* Labels & Indicators */
+.form-label {
+	font-size   : 0.8125rem;
+	font-weight : 600;
+	color       : var(--color-text-muted);
+}
+
+.form-label.required::after {
+	content : " *";
+	color   : var(--color-error);
+}
+
+/* Form Controls (Inputs, Selects, Textareas) */
+.form-control,
+.form-select {
+	width            : 100%;
+	padding          : 0.625rem 0.875rem;
+	background-color : var(--color-bg-alt);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-md);
+	color            : var(--color-text-primary);
+	font-size        : 0.9rem;
+	transition       : border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+	outline      : none;
+	border-color : var(--color-primary);
+	box-shadow   : 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+}
+
+textarea.form-control {
+	resize     : vertical;
+	min-height : 80px;
+}
+
+/* Error Banner Extension */
+.alert-danger {
+	background-color : rgba(239, 68, 68, 0.1);
+	border           : 1px solid var(--color-error);
+	color            : var(--color-error);
+}
+
+.alert-danger ul {
+	margin-top   : var(--space-xs);
+	padding-left : var(--space-lg);
+	font-size    : 0.875rem;
+}
+
+/* Form Action Buttons Footer */
+.form-footer {
+	display         : flex;
+	justify-content : flex-end;
+	align-items     : center;
+	gap             : var(--space-md);
+	padding-top     : var(--space-md);
+	border-top      : 1px solid var(--color-border);
+}
+
+.btn-secondary {
+	display          : inline-flex;
+	align-items      : center;
+	padding          : 0.625rem 1.25rem;
+	border-radius    : var(--radius-md);
+	text-decoration  : none;
+	font-weight      : 500;
+	font-size        : 0.875rem;
+	color            : var(--color-text-muted);
+	background-color : transparent;
+	border           : 1px solid var(--color-border);
+	transition       : all 0.2s ease;
+}
+
+.btn-secondary:hover {
+	color            : var(--color-text-primary);
+	background-color : var(--color-bg-alt);
+}
+
+/* Responsive Grid adjustments */
+@media (max-width : 768px) {
+	.form-grid {
+		grid-template-columns : 1fr;
+	}
+
+	.form-card {
+		padding : var(--space-md);
+	}
+}

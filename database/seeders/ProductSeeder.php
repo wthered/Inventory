@@ -53,6 +53,6 @@
 				$this->command->line(""); // Αλλαγή γραμμής μετά το τέλος του chunk
 			});
 
-			$this->command->info("Products have been seeded in ".$initialTime->diffInSeconds(Carbon::now(config('app.timezone')))." seconds.");
+			$this->command->info(Product::query()->count()." products have been seeded in ".$initialTime->diffInSeconds(Carbon::now(config('app.timezone')))." seconds.");
 		}
 	}

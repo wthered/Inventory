@@ -20,7 +20,7 @@
 				$table->text('notes')->nullable();
 
 				// We can use an Enum class for this later too!
-
+				$table->unsignedTinyInteger('status');
 				$table->unsignedInteger('approved_by')->nullable();
 				$table->foreign('approved_by')->references('id')->on('users')->nullOnDelete();
 				$table->timestamp('approved_at')->nullable();
@@ -43,6 +43,7 @@
 				$table->foreign('location_id')->references('id')->on('warehouse_locations')->nullOnDelete()->cascadeOnUpdate();
 
 				// Type and Reason at the item level (In case one batch has different reasons)
+				$table->string('type');
 				$table->enum('reason', AdjustmentReason::cases());
 
 				$table->integer('quantity');

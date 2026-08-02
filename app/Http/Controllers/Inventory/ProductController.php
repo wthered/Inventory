@@ -8,8 +8,7 @@
 	use App\Http\Requests\Products\ProductInformationRequest;
 	use App\Http\Requests\Products\ProductSearchRequest;
 	use App\Http\Requests\Products\ProductStoreRequest;
-	use App\Http\Requests\Products\UpdateProductRequest;
-	use App\Models\Brand;
+	use App\Http\Requests\Products\ProductUpdateRequest;
 	use App\Models\Category;
 	use App\Models\Inventories\Inventory;
 	use App\Models\Product;
@@ -123,9 +122,8 @@
 
 			return view('products.edit', [
 				'categories'       => Category::query()->whereNull('parent_id')->orderBy('sort_order')->get(),
-				'parent_category'  => Category::query()->find($object->category['parent_id']),
 				'child_categories' => Category::query()->where('parent_id', $object->category['parent_id'])->get(),
-				'brands'           => Brand::query()->get(),
+				'brands'           => Category::query()->find($object->category['parent_id'])->brands()->get(),
 				'product'          => $object,
 			]);
 		}
@@ -149,11 +147,10 @@
 		/**
 		 * Update the specified resource in storage.
 		 */
-		public function update(UpdateProductRequest $request, Product $product): RedirectResponse {
-			$input = $request->input();
-			dd($input);
-			$product->update($input);
-			return redirect()->route('inventory.products.show', ['product' => $product->id])->with('success', 'Product updated successfully!');
+		public function update(ProductUpdateRequest $request, Product $product): RedirectResponse {
+			// $request->validated() contains $validated array modified in passedValidation()
+			$entry = ProductDTO::update($product, $request->validated());
+			return redirect()->route('inventory.products.show', ['product' => $entry->id])->with('success', 'Product updated successfully!');
 		}
 
 		/**

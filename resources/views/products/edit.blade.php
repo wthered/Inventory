@@ -1,6 +1,6 @@
 @extends('templates.general')
 
-@section('title', 'Product Edit')
+@section('title', 'Product Edit: ' . $product->name)
 
 @section('styles')
     <link rel="stylesheet" href="{{ asset('css/products/index.css') }}"/>
@@ -10,6 +10,7 @@
 
 @section('content')
     <main>
+        <input type="hidden" id="product_id" value="{{ $product->id }}">
         <!-- Product Edit Page Content -->
         <section class="products-page">
             <div class="header-actions">
@@ -69,12 +70,14 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="category_id">Parent Category is {{ $parent_category->id }} *</label>
+                            <label for="category_id">Parent Category *</label>
                             <select id="category_id" name="parent_category" required>
-                                <option value="" disabled>Select Category</option>
+                                <option value="">Select Category</option>
                                 @foreach($categories as $category)
                                     <option value="{{ $category->id }}"
-                                            @if(old('parent_category', $category->id) == $parent_category->id) selected @endif>{{ $category->name }}</option>
+                                            @if(old('parent_category', $category->id) == $product->category['parent_id']) selected @endif>
+                                        {{ $category->name }}
+                                    </option>
                                 @endforeach
                             </select>
                             @if($errors->has('parent_category'))
@@ -87,7 +90,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="sub_category">Child Category is {{ $product->category['id'] }} *</label>
+                            <label for="sub_category">Child Category *</label>
                             <select id="sub_category" name="child_category" required>
                                 <option value="">Select Sub Category</option>
                                 @foreach($child_categories as $child)
@@ -121,7 +124,6 @@
                                 <span class="text-muted">Manufacturer or brand association.</span>
                             @endif
                         </div>
-
 
                     </div>
 
@@ -171,7 +173,7 @@
                         <h2 class="form-section-title">Product Images</h2>
                         <div class="image-upload-container">
                             <div class="product-images-current-list" id="product-images">
-                                @foreach($images as $image)
+                                @foreach($product->images as $image)
                                     <div class="image-item">
                                         <img src="{{ $image->image_location }}" alt="Product Image {{ $product->id }}"
                                              title="Image {{ $product->id }}">
@@ -291,9 +293,8 @@
                         <div class="form-group">
                             <label for="supplier">Primary Supplier</label>
                             <select id="supplier" name="product_supplier">
-                                @foreach($suppliers as $supplier)
-                                    <option
-                                            value="{{ $supplier->id }}" @selected($supplier->pivot['is_preferred'])>{{ $supplier->name }}</option>
+                                @foreach($product->suppliers as $supplier)
+                                    <option value="{{ $supplier->id }}" @selected($supplier->pivot['is_preferred'])>{{ $supplier->name }}</option>
                                 @endforeach
                             </select>
                             @if($errors->has('description'))
@@ -331,7 +332,11 @@
 
                         <div class="form-group" style="grid-column: span 2;">
                             <label for="specifications">Specifications (JSON)</label>
-                            <textarea id="specifications" name="specifications" rows="6">&hellip;</textarea>
+                            <textarea id="specifications" name="specifications" rows="6"
+                                      placeholder='{"key": "value"}'>{{ old('specifications', is_array($product->specifications) ? json_encode($product->specifications, JSON_PRETTY_PRINT) : $product->specifications) }}</textarea>
+                            @error('specifications')
+                            <span class="error-message">{{ $message }}</span>
+                            @enderror
                             <span class="text-muted">Store additional attributes as a JSON string.</span>
                         </div>
                     </div>
@@ -344,6 +349,18 @@
                             Product
                         </button>
                     </div>
+
+                    @if ($errors->any())
+                        <div class="alert alert-danger"
+                             style="background-color: #ef4444; color: #fff; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                            <strong>Validation Failed:</strong>
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                 </form>
             </div>
         </section>
@@ -351,133 +368,5 @@
 @endsection
 
 @section('scripts')
-    <script>
-        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        document.addEventListener('DOMContentLoaded', function () {
-            attachDeleteListeners();
-        });
-
-        // Select all delete buttons and attach event listeners
-        function attachDeleteListeners() {
-            const deleteButtons = document.querySelectorAll('button.btn.small.delete');
-            deleteButtons.forEach(function (button) {
-                button.addEventListener('click', function () {
-                    const imageUrl = this.dataset.image;
-                    console.log("Clicked to delete/remove", imageUrl);
-                    refreshPreview(imageUrl);
-                });
-            });
-        }
-
-        function refreshPreview(imageUrl) {
-            fetch('{{ route('inventory.products.image.destroy', ['product' => $product->id])}}', {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': token,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({image: imageUrl})
-            }).then(function (response) {
-                // Convert response to JSON
-                return response.json();
-            }).then(function (data) {
-                if (data.success) {
-                    document.getElementById("product-images").innerHTML = data.code;
-                    attachDeleteListeners();
-                } else {
-                    alert('Failed to remove image.');
-                }
-            }).catch(function (err) {
-                console.error('Error removing image:', err);
-                alert('Error removing image.');
-            });
-        }
-
-        // Upload an Image and couple it with the selected product
-        // Upload an Image and couple it with the selected product
-        document.getElementById('image_upload').addEventListener('change', function (event) {
-            const fileInput = event.target;
-            const files = fileInput.files;
-
-            if (!files.length) {
-                alert('Please select at least one image.');
-                return;
-            }
-
-            const formData = new FormData();
-            for (let i = 0; i < files.length; i++) {
-                formData.append('images[]', files[i]);
-            }
-
-            // UI Feedback: Show spinner & disable file input / update button
-            const spinner = document.getElementById('upload-spinner');
-            const updateButton = document.getElementById('updateButton');
-
-            spinner.style.display = 'block';
-            fileInput.disabled = true;
-            if (updateButton) updateButton.disabled = true;
-
-            fetch('{{ route('inventory.products.image.upload', ['product' => $product->id]) }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': token,
-                    'Accept': 'application/json'
-                },
-                body: formData
-            }).then(async (response) => {
-                const data = await response.json();
-
-                if (!response.ok) {
-                    return Promise.reject(data);
-                }
-
-                return data;
-            }).then(data => {
-                if (data.success) {
-                    document.getElementById('product-images').innerHTML = data.code;
-                    attachDeleteListeners();
-                }
-            }).catch(error => {
-                console.error('Upload error details:', error);
-
-                if (error.errors) {
-                    const messages = Object.values(error.errors).flat().join('\n');
-                    alert('Validation Error:\n' + messages);
-                } else if (error.message) {
-                    alert('Error: ' + error.message);
-                } else {
-                    alert('Something went wrong while uploading.');
-                }
-            }).finally(() => {
-                // UI Cleanup: Re-enable elements & hide spinner
-                spinner.style.display = 'none';
-                fileInput.disabled = false;
-                fileInput.value = ''; // Reset input selection
-                if (updateButton) updateButton.disabled = false;
-            });
-        });
-
-        document.getElementById('category_id').addEventListener('change', function (event) {
-            const selectedCategory = event.target.value;
-
-            fetch(`/products/categories/${selectedCategory}/filter`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            }).then(response => {
-                return response.json();
-            }).then(data => {
-                // For example, update a product list or the subcategories list
-                document.getElementById('category_level').innerHTML = data['children'];
-                document.getElementById('brands').innerHTML = data['brands'];
-            }).catch(error => {
-                console.error('Error:', error);
-            });
-        });
-
-        // document.getElementById("updateButton").addEventListener('click', function (event) {
-        // 	event.preventDefault();
-        // });
-    </script>
+    <script src="{{ asset('js/products/edit.js') }}"></script>
 @endsection

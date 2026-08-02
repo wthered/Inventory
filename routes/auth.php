@@ -13,3 +13,5 @@
 	Route::post('/forgot-password', [PasswordController::class, 'emailPasswordReset'])->name('password.email');
 	Route::get('/reset-password/{token}', [PasswordController::class, 'resetPassword'])->name('password.reset');
 	Route::post('/reset-password', [PasswordController::class, 'updatePassword'])->name('password.update');
+
+	Route::post('/logout', [AuthController::class, 'logout'])->name('auth.sign.out');

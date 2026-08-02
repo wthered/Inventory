@@ -11,6 +11,7 @@
 	/**
 	 * @extends Factory<Customer>
 	 */
+
 	/**
 	 * @extends Factory<Customer>
 	 */
@@ -22,7 +23,7 @@
 		 */
 		public function definition(): array {
 			return [
-				'code'             => 'CUST-' . Str::upper(fake()->unique()->lexify('?????')) . mt_rand(100, 999),
+				'code'             => 'CUST-'.Str::upper(fake()->unique()->lexify('?????')).mt_rand(100, 999),
 				'name'             => fake()->name(),
 				'email'            => fake()->unique()->safeEmail(),
 				'phone'            => fake()->phoneNumber(),
@@ -32,7 +33,6 @@
 				'shipping_address' => fake()->address(),
 				'city'             => fake()->city(),
 				'state'            => fake()->state(),
-				'country'          => fake()->country(),
 				'postal_code'      => fake()->postcode(),
 				'customer_type'    => fake()->randomElement(CustomerType::cases())->value, // Individual ή Company
 				'credit_limit'     => fake()->randomFloat(2, 0, 50000),

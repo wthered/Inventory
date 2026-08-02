@@ -1,0 +1,260 @@
+/* ==========================================================================
+   Supplier Details (Show View) Stylesheet
+   ========================================================================== */
+
+/* Back Button & Secondary Actions */
+.btn-back {
+	display         : inline-flex;
+	align-items     : center;
+	gap             : var(--space-xs);
+	color           : var(--color-text-muted);
+	text-decoration : none;
+	font-size       : 0.875rem;
+	font-weight     : 500;
+	transition      : color 0.2s ease;
+}
+
+.btn-back:hover {
+	color : var(--color-primary);
+}
+
+.header-actions {
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-sm);
+}
+
+.btn-secondary-action {
+	display          : inline-flex;
+	align-items      : center;
+	gap              : var(--space-sm);
+	background-color : var(--color-surface);
+	border           : 1px solid var(--color-border);
+	color            : var(--color-text-primary);
+	padding          : 0.625rem 1.25rem;
+	border-radius    : var(--radius-md);
+	text-decoration  : none;
+	font-size        : 0.875rem;
+	font-weight      : 500;
+	transition       : all 0.2s ease;
+}
+
+.btn-secondary-action:hover {
+	background-color : var(--color-bg-alt);
+	border-color     : var(--color-primary);
+	color            : var(--color-primary);
+}
+
+/* Supplier Banner Card */
+.profile-banner {
+	background-color : var(--color-surface);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-lg);
+	padding          : var(--space-lg);
+	box-shadow       : var(--shadow-md);
+}
+
+.profile-main-info {
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-md);
+}
+
+.profile-avatar {
+	width            : 64px;
+	height           : 64px;
+	border-radius    : var(--radius-md);
+	background-color : rgba(var(--color-primary-rgb), 0.15);
+	border           : 1px solid var(--color-primary);
+	color            : var(--color-primary);
+	display          : flex;
+	align-items      : center;
+	justify-content  : center;
+	font-size        : 1.75rem;
+	flex-shrink      : 0;
+}
+
+.profile-title-stack {
+	display        : flex;
+	flex-direction : column;
+	gap            : var(--space-xs);
+}
+
+.title-with-badge {
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-md);
+	flex-wrap   : wrap;
+}
+
+.title-with-badge h1 {
+	font-size   : 1.5rem;
+	font-weight : 700;
+	color       : var(--color-text-primary);
+	margin      : 0;
+}
+
+.supplier-code-subtitle {
+	font-size : 0.875rem;
+	color     : var(--color-text-muted);
+}
+
+/* Two Column Details Grid */
+.supplier-grid {
+	display               : grid;
+	grid-template-columns : repeat(auto-fit, minmax(340px, 1fr));
+	gap                   : var(--space-lg);
+}
+
+.info-card {
+	background-color : var(--color-surface);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-lg);
+	padding          : var(--space-lg);
+	box-shadow       : var(--shadow-sm);
+	display          : flex;
+	flex-direction   : column;
+	gap              : var(--space-md);
+}
+
+.card-title {
+	font-size      : 1.1rem;
+	font-weight    : 600;
+	color          : var(--color-text-primary);
+	border-bottom  : 1px solid var(--color-border);
+	padding-bottom : var(--space-xs);
+	display        : flex;
+	align-items    : center;
+	gap            : var(--space-sm);
+}
+
+.detail-list {
+	display        : flex;
+	flex-direction : column;
+	gap            : var(--space-sm);
+}
+
+.detail-row {
+	display         : flex;
+	justify-content : space-between;
+	align-items     : center;
+	font-size       : 0.875rem;
+	gap             : var(--space-sm);
+}
+
+.detail-row.align-start {
+	align-items : flex-start;
+}
+
+.detail-row .label {
+	color       : var(--color-text-muted);
+	font-weight : 500;
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-xs);
+	min-width   : 140px;
+}
+
+.detail-row .value {
+	color       : var(--color-text-primary);
+	font-weight : 500;
+	text-align  : right;
+}
+
+.detail-row.align-start .value {
+	text-align : right;
+}
+
+.link-highlight {
+	color           : var(--color-primary);
+	text-decoration : none;
+	transition      : text-decoration 0.2s ease;
+}
+
+.link-highlight:hover {
+	text-decoration : underline;
+}
+
+.text-accent {
+	color       : var(--color-accent) !important;
+	font-weight : 700 !important;
+}
+
+.text-muted-custom {
+	color       : var(--color-text-muted);
+	font-size   : 0.825rem;
+	line-height : 1.4;
+}
+
+.term-pill {
+	background-color : var(--color-bg-alt);
+	border           : 1px solid var(--color-border);
+	padding          : 0.2rem 0.5rem;
+	border-radius    : var(--radius-sm);
+	font-size        : 0.75rem;
+	font-weight      : 600;
+	letter-spacing   : 0.03em;
+}
+
+/* Product Table Extensions */
+.table-header-bar {
+	padding          : var(--space-md) var(--space-lg);
+	background-color : var(--color-bg-alt);
+	border-bottom    : 1px solid var(--color-border);
+}
+
+.table-header-bar h2 {
+	font-size   : 1.1rem;
+	font-weight : 600;
+	color       : var(--color-text-primary);
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-sm);
+	margin      : 0;
+}
+
+.product-link {
+	color           : var(--color-text-primary);
+	text-decoration : none;
+	transition      : color 0.15s ease;
+}
+
+.product-link:hover {
+	color : var(--color-primary);
+}
+
+.td-price {
+	font-weight : 600;
+	color       : var(--color-accent);
+}
+
+.badge-preferred {
+	display          : inline-flex;
+	align-items      : center;
+	gap              : var(--space-xs);
+	background-color : rgba(245, 158, 11, 0.15);
+	border           : 1px solid var(--color-warning);
+	color            : var(--color-warning);
+	padding          : 0.2rem 0.5rem;
+	border-radius    : var(--radius-full);
+	font-size        : 0.75rem;
+	font-weight      : 600;
+}
+
+/* Responsive Tweaks */
+@media (max-width : 768px) {
+	.profile-main-info {
+		flex-direction : column;
+		align-items    : flex-start;
+	}
+
+	.detail-row {
+		flex-direction : column;
+		align-items    : flex-start;
+	}
+
+	.detail-row .value,
+	.detail-row.align-start .value {
+		text-align : left;
+	}
+}

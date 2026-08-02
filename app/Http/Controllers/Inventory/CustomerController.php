@@ -1,65 +1,139 @@
 <?php
 
-namespace App\Http\Controllers\Inventory;
+	namespace App\Http\Controllers\Inventory;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+	use App\Enums\Customers\CustomerType;
+	use App\Enums\Financial\PaymentTerms;
+	use App\Http\Controllers\Controller;
+	use App\Http\Requests\Customers\CustomerStoreRequest;
+	use App\Http\Requests\Customers\CustomerUpdateRequest;
+	use App\Models\Country;
+	use App\Models\Customer;
+	use Illuminate\Contracts\View\Factory;
+	use Illuminate\Contracts\View\View;
+	use Illuminate\Http\RedirectResponse;
+	use Illuminate\Http\Request;
+	use Illuminate\Support\Facades\Gate;
 
-class CustomerController extends Controller
-{
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+	class CustomerController extends Controller {
+		/**
+		 * Display a listing of customers with searching, filtering, and pagination.
+		 */
+		public function index(Request $request): Factory|View|\Illuminate\View\View {
+			// Check authorization using CustomerPolicy@viewAny ('customer.view')
+			Gate::authorize('viewAny', Customer::class);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+			$query = Customer::query();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+			// Search by name, company, email, phone, or code
+			if ($search = $request->input('search')) {
+				$query->where(function ($q) use ($search) {
+					$q->where('name', 'like', "%{$search}%")
+					  ->orWhere('company_name', 'like', "%{$search}%")
+					  ->orWhere('email', 'like', "%{$search}%")
+					  ->orWhere('phone', 'like', "%{$search}%")
+					  ->orWhere('code', 'like', "%{$search}%");
+				});
+			}
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+			// Filter by active status
+			if ($request->filled('status')) {
+				$query->where('is_active', $request->status === 'active');
+			}
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+			$customers = $query->latest()
+			                   ->paginate(25)
+			                   ->withQueryString();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+			return view('customers.index', compact('customers'));
+		}
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-}
+		/**
+		 * Show the form for creating a new customer.
+		 *
+		 * @param  Request  $request
+		 *
+		 * @return \Illuminate\View\View
+		 */
+		public function create(Request $request) {
+			return view('customers.create', [
+				'countries' => Country::query()->get(),
+				'terms'     => PaymentTerms::cases(),
+				'types'     => CustomerType::cases(),
+			]);
+		}
+
+		/**
+		 * Store a newly created customer in storage.
+		 *
+		 * @param  CustomerStoreRequest  $request
+		 *
+		 * @return RedirectResponse
+		 */
+		public function store(CustomerStoreRequest $request) {
+//			dd($request->validated());
+			$customer = Customer::query()->create($request->validated());
+
+			return redirect()
+				->route('inventory.customers.show', $customer->id)
+				->with('success', 'Customer profile created successfully.');
+		}
+
+		/**
+		 * Display the specified customer profile.
+		 *
+		 * @param  Request   $request
+		 * @param  Customer  $customer
+		 *
+		 * @return \Illuminate\View\View
+		 */
+		public function show(Request $request, Customer $customer) {
+			// Eager load sales_orders with creator, ordered by order_date descending
+			$customer->load([
+				'sales' => function ($query) {
+					$query->with('creator')->orderBy('order_date', 'desc');
+				}
+			]);
+
+			return view('customers.show', compact('customer'));
+		}
+
+		/**
+		 * Show the form for editing the specified customer.
+		 *
+		 * @param  Request   $request
+		 * @param  Customer  $customer
+		 *
+		 * @return \Illuminate\View\View
+		 */
+		public function edit(Request $request, Customer $customer) {
+			return view('customers.edit', [
+				'customer' => $customer,
+				'terms'    => PaymentTerms::cases(),
+				'types'    => CustomerType::cases(),
+			]);
+		}
+
+		/**
+		 * Update the specified customer in storage.
+		 *
+		 * @param  CustomerUpdateRequest  $request
+		 * @param  Customer               $customer
+		 *
+		 * @return RedirectResponse
+		 */
+		public function update(CustomerUpdateRequest $request, Customer $customer) {
+			$customer->update($request->validated());
+
+			return redirect()
+				->route('inventory.customers.show', $customer->id)
+				->with('success', 'Customer profile updated successfully.');
+		}
+
+		/**
+		 * Remove the specified resource from storage.
+		 */
+		public function destroy(string $id) {
+			//
+		}
+	}

@@ -1,0 +1,82 @@
+/* --- Customer Show Specific Styles --- */
+
+/* Grid Layout for Detail Cards */
+.customer-grid {
+	display               : grid;
+	grid-template-columns : repeat(auto-fit, minmax(320px, 1fr));
+	gap                   : var(--space-lg);
+}
+
+/* Card Base Structure */
+.info-card {
+	background-color : var(--color-surface);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-lg);
+	box-shadow       : var(--shadow-md);
+	overflow         : hidden;
+}
+
+.card-header {
+	padding          : var(--space-md) var(--space-lg);
+	background-color : var(--color-bg-alt);
+	border-bottom    : 1px solid var(--color-border);
+}
+
+.card-header h3 {
+	font-size   : 1rem;
+	font-weight : 600;
+	color       : var(--color-text-primary);
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-sm);
+}
+
+.card-body {
+	padding               : var(--space-lg);
+	display               : grid;
+	grid-template-columns : 1fr 1fr;
+	gap                   : var(--space-md);
+}
+
+/* Field Groups */
+.detail-group {
+	display        : flex;
+	flex-direction : column;
+	gap            : var(--space-xs);
+}
+
+.detail-group label {
+	font-size      : 0.75rem;
+	text-transform : uppercase;
+	letter-spacing : 0.05em;
+	color          : var(--color-text-muted);
+	font-weight    : 600;
+}
+
+.detail-group p {
+	font-size : 0.925rem;
+	color     : var(--color-text-secondary);
+}
+
+/* Table Card Custom Header */
+.table-card-header {
+	padding          : var(--space-md) var(--space-lg);
+	background-color : var(--color-bg-alt);
+	border-bottom    : 1px solid var(--color-border);
+}
+
+.table-card-header h3 {
+	font-size   : 1rem;
+	font-weight : 600;
+	color       : var(--color-text-primary);
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-sm);
+}
+
+/* Responsive adjustments */
+@media (max-width : 600px) {
+	.card-body {
+		grid-template-columns : 1fr;
+	}
+}
