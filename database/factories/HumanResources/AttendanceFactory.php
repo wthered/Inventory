@@ -31,7 +31,7 @@
 				'work_date'      => $workDate->format('Y-m-d'),
 				'check_in'       => $check_in,
 				'check_out'      => $check_out,
-				'overtime_hours' => round($totalHours - 8, 2),
+				'overtime_hours' => max(0, round($totalHours - 8, 2)),
 			];
 		}
 	}
