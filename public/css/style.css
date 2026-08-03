@@ -15,6 +15,7 @@
 	--color-primary        : #3b82f6;
 	/* RGB version for transparency (used in notifications) */
 	--color-primary-rgb    : 59, 130, 246;
+	--color-primary-hover  : #2563eb;
 
 	--color-error          : #ef4444;
 	--color-warning        : #f59e0b;
@@ -42,6 +43,7 @@
 
 	/* --- FONT --- */
 	--font-family          : 'Inter';
+	--font-mono            : monospace;
 }
 
 /* --- Base Reset & Global Layout --- */
