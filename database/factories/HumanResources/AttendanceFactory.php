@@ -1,0 +1,37 @@
+<?php
+
+	namespace Database\Factories\HumanResources;
+
+	use App\Models\HumanResources\Attendance;
+	use App\Models\HumanResources\Employee;
+	use App\Models\Warehouse;
+	use Carbon\Carbon;
+	use Illuminate\Database\Eloquent\Factories\Factory;
+
+	/**
+	 * @extends Factory<Attendance>
+	 */
+	class AttendanceFactory extends Factory {
+		/**
+		 * Define the model's default state.
+		 *
+		 * @return array<string, mixed>
+		 */
+		public function definition(): array {
+			$workDate = Carbon::now()->subMonth()->addSeconds(rand(0, 30 * 24 * 60 * 60));
+			$check_in = $workDate->copy()->setTime(8, mt_rand(0, 30));
+			$check_out = $workDate->copy()->setTime(16, mt_rand(0, 45));
+
+			// 1. Calculate total duration in hours as a decimal
+			$totalHours = $check_in->diffInMinutes($check_out) / 60;
+
+			return [
+				'employee_id'    => Employee::factory(),
+				'warehouse_id'   => Warehouse::query()->pluck('id')->random(),
+				'work_date'      => $workDate->format('Y-m-d'),
+				'check_in'       => $check_in,
+				'check_out'      => $check_out,
+				'overtime_hours' => round($totalHours - 8, 2),
+			];
+		}
+	}
