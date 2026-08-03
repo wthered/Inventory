@@ -2,6 +2,7 @@
 
 	namespace Database\Seeders;
 
+	use Database\Seeders\HumanResources\HumanResourcesSeeder;
 	use Database\Seeders\inventories\Audits\InventoryAuditSeeder;
 	use Database\Seeders\inventories\InventoryMovementLogSeeder;
 	use Database\Seeders\inventories\InventorySeeder;
@@ -44,6 +45,9 @@
 
 				// This seeder also does product_supplier seeding
 				SupplierSeeder::class,
+
+				// Human Resources
+				HumanResourcesSeeder::class,
 			]);
 
 			// --- 2. Locations & Αρχικό Απόθεμα ---

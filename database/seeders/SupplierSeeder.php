@@ -3,8 +3,8 @@
 	namespace Database\Seeders;
 
 	use App\Models\Product;
+	use App\Models\Supplier;
 	use Carbon\Carbon;
-	use Database\Factories\SupplierFactory;
 	use Illuminate\Http\Client\ConnectionException;
 	use Illuminate\Support\Collection;
 	use Illuminate\Support\Facades\DB;
@@ -41,7 +41,8 @@
 					$this->command->error('❌ Mockaroo API dropped connection. Generating fallback suppliers via Factory.');
 
 					// Fallback αν το API αποτύχει
-					$fallbackSuppliers = SupplierFactory::new()->count(32)->raw([
+					$fallbackSuppliers = Supplier::factory()->count(32)->raw([
+						'is_active'  => fake()->boolean(),
 						'created_at' => $creation_time->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
 						'updated_at' => $creation_time->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
 					]);
@@ -56,7 +57,7 @@
 						'name'           => $supplier['name'] ?? null,
 						'company_name'   => $supplier['company_name'] ?? null,
 						'email'          => $supplier['email'] ?? null,
-						'phone'          => $supplier['phone'] ?? null,
+						'phone'          => $supplier['phone'] ?? fake()->regexify('(2[0-9]{9}|69[0-9]{8})'),
 						'website'        => $supplier['website'] ?? null,
 						'tax_number'     => isset($supplier['tax_number']) ? (string) $supplier['tax_number'] : null,
 						'address'        => $supplier['address'] ?? null,
@@ -73,7 +74,7 @@
 					], fn($value) => !is_null($value));
 
 					// Combine custom timestamps with filtered API data
-					return SupplierFactory::new()->raw(array_merge($apiData, [
+					return Supplier::factory()->raw(array_merge($apiData, [
 						'created_at' => $creation_time->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
 						'updated_at' => $creation_time->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
 					]));

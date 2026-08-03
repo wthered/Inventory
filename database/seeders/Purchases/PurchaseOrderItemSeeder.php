@@ -20,7 +20,9 @@
 		 * @throws Throwable
 		 */
 		public function run(): void {
-			if (!PurchaseOrder::exists() || !Product::exists()) {
+			if (!PurchaseOrder::query()->exists() || !Product::query()->exists()) {
+				$this->command->warn("Purchase orders found:".PurchaseOrder::query()->count());
+				$this->command->warn("Products found:".Product::query()->count());
 				$this->command->warn('⚠️ Skipping PurchaseOrderItemSeeder: Missing data.');
 				return;
 			}

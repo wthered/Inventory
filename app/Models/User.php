@@ -3,6 +3,8 @@
 	namespace App\Models;
 
 	// use Illuminate\Contracts\Auth\MustVerifyEmail;
+	use App\Models\HumanResources\Employee;
+	use App\Models\Inventories\InventoryAudit;
 	use Illuminate\Database\Eloquent\Factories\HasFactory;
 	use Illuminate\Database\Eloquent\Relations\HasMany;
 	use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -42,6 +44,23 @@
 
 		public function warehouses(): HasMany {
 			return $this->hasMany(Warehouse::class, 'manager_id');
+		}
+
+		// Σύνδεση User -> Employee
+		// Account έχουν μόνο όσοι μπορούν να κάνουν login στο σύστημα
+		// Employees είναι όλοι τους
+		public function employee(): HasOne {
+			return $this->hasOne(Employee::class);
+		}
+
+		// Transfers που δημιούργησε ο χρήστης
+		public function createdTransfers(): HasMany {
+			return $this->hasMany(StockTransfer::class, 'created_by');
+		}
+
+		// Audits που δημιούργησε ο χρήστης
+		public function createdAudits(): HasMany {
+			return $this->hasMany(InventoryAudit::class, 'created_by');
 		}
 
 		/**

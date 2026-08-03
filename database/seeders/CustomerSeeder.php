@@ -7,7 +7,6 @@
 	use App\Models\Country;
 	use App\Models\Customer;
 	use Carbon\Carbon;
-	use Database\Factories\CustomerFactory;
 	use Illuminate\Database\QueryException;
 	use Illuminate\Http\Client\ConnectionException;
 	use Illuminate\Support\Collection;
@@ -47,7 +46,7 @@
 					$this->command->error('❌ Mockaroo API dropped connection. Using fallback CustomerFactory state.');
 
 					// Fallback: Αν πέσει το API, παράγουμε 64 records από το Factory απευθείας για να μη σταματήσει το build
-					$fallbackData = CustomerFactory::new()->count(64)->raw([
+					$fallbackData = Customer::factory()->count(64)->raw([
 						'country_id' => $countries->random(),
 						'created_at' => $creation_time,
 						'updated_at' => $creation_time,
@@ -62,7 +61,7 @@
 				$formatted = $apiCustomers->map(function ($customer) use ($creation_time, $countries) {
 					// Χρήση του factory ->raw() για να εξασφαλίσουμε ομοιομορφία
 					// και συμπλήρωση τυχόν πεδίων που λείπουν από το API payload
-					return CustomerFactory::new()->raw([
+					return Customer::factory()->raw([
 						'code'             => $customer['code'] ?? 'CUST-'.Str::upper(Str::random(5)).mt_rand(100, 999),
 						'name'             => $customer['name'] ?? fake()->name(),
 						'email'            => $customer['email'] ?? null,
@@ -88,10 +87,18 @@
 				$this->list = $this->list->merge($formatted);
 			}
 
+			$processed = 0;
+			$chunkCount = ceil($this->list->count() / self::BATCH_SIZE);
+
 			// Chunked Upsert για προστασία μνήμης και αποφυγή Integrity Constraint Violations
-			$this->list->chunk(self::BATCH_SIZE)->each(function (Collection $customers) {
+			$this->list->chunk(self::BATCH_SIZE)->each(function (Collection $customers, $index) use (
+				$processed,
+				$chunkCount
+			) {
 				try {
 					Customer::query()->insert($customers->toArray());
+					$processed += $customers->count();
+					$this->command->info("  ✅ Chunk ".($index + 1)."/".$chunkCount.": Inserted ".$customers->count()." customers (Total Processed: ".$processed.")");
 				} catch (QueryException $e) {
 					Log::error('Failed to process customer chunk: '.$e->getMessage());
 				}

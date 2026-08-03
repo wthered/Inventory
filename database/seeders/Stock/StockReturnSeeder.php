@@ -33,7 +33,7 @@
 				$type = fake()->randomElement([Customer::class, Supplier::class]);
 				$targetId = ($type === Customer::class) ? $customers->random() : $suppliers->random();
 
-				// Χρήση copy() για να μην "εκτοξευθεί" η ημερομηνία στο μέλλον
+				// Χρήση copy() για να μη "εκτοξευθεί" η ημερομηνία στο μέλλον
 				$date = now()->subDays(mt_rand(1, 30));
 
 				StockReturn::query()->create([

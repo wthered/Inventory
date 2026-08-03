@@ -24,7 +24,7 @@
 				return;
 			}
 
-			$warehouses = Warehouse::query()->pluck('id');
+			$warehouses = Warehouse::query()->whereHas('locations')->pluck('id');
 			$products = Product::all();
 			$administrators = User::role('admin')->pluck('id');
 
@@ -33,10 +33,11 @@
 				return;
 			}
 
+			$initial_date = Carbon::parse('1st January last year');
 			foreach (Collection::range(1, 1024 * 4)->shuffle() as $index) {
 				$warehouse = $warehouses->random();
 				$order = SalesOrder::query()->create([
-					'order_number'      => 'SALE-'.now()->format('Y-m-d').'-'.$index.'-'.Str::upper(Str::random(6)),
+					'order_number'      => 'SALE-'.$initial_date->addDays(mt_rand(1, 7))->format('Y-m-d').'-'.$index.'-'.Str::upper(Str::random(6)),
 					'customer_id'       => $customers->random(),
 					'warehouse_id'      => $warehouse,
 					'order_date'        => Carbon::now()->subDays(rand(1, 30)),
@@ -50,7 +51,9 @@
 				$orderSubtotal = 0;
 				$orderTax = 0;
 
+				// Getting Warehouse locations for successful seeding
 				$locations = WarehouseLocation::query()->where('warehouse_id', $warehouse)->pluck('id');
+
 				foreach ($products->random(rand(2, 6)) as $product) {
 					$quantity = mt_rand(1, 8);
 					$unitPrice = $product->price ?? mt_rand(32, 512);
@@ -110,7 +113,7 @@
 						$order->update(['payment_status_id' => PaymentStatus::PAID]);
 					}
 
-					$this->command->info("Order ".$order->order_number." -> {$newStatus->label()} (Stock Syncing...)");
+					$this->command->getOutput()->write("Order ".$order->order_number." -> {$newStatus->label()} (Stock Syncing...)\r");
 				}
 			}
 		}
