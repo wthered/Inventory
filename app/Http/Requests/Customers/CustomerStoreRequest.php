@@ -5,8 +5,11 @@
 	use App\Enums\Customers\CustomerType;
 	use App\Enums\Financial\PaymentTerms;
 	use App\Models\Customer;
+	use App\Rules\Customers\GreekAfm;
+	use App\Rules\Customers\GreekPhoneNumber;
 	use Illuminate\Contracts\Validation\ValidationRule;
 	use Illuminate\Foundation\Http\FormRequest;
+	use Illuminate\Support\Str;
 	use Illuminate\Validation\Rule;
 	use Illuminate\Validation\Rules\Enum;
 
@@ -16,6 +19,26 @@
 		 */
 		public function authorize(): bool {
 			return $this->user()?->can('create', Customer::class) ?? false;
+		}
+
+		/**
+		 * Prepare data prior to validation.
+		 */
+		protected function prepareForValidation(): void {
+			$this->merge([
+				// Strip whitespace/dashes from tax numbers
+				'tax_number' => $this->input('tax_number') ? preg_replace('/\s+/', '', $this->input('tax_number')) : null,
+				'phone'      => $this->input('phone') ? preg_replace('/[\s\-.()]+/', '', $this->input('phone')) : null,
+
+				// Cast empty string select options to null so 'integer' validation succeeds
+				'country_id' => $this->input('country_id') !== '' ? $this->input('country_id') : null,
+				'city_id'    => $this->input('city_id') !== '' ? $this->input('city_id') : null,
+
+				// Trim string inputs
+				'code'       => $this->input('code') ? trim($this->input('code')) : null,
+				'name'       => $this->input('name') ? trim($this->input('name')) : null,
+				'email'      => $this->input('email') ? Str::lower(trim($this->input('email'))) : null,
+			]);
 		}
 
 		/**
@@ -29,19 +52,44 @@
 				'name'             => ['required', 'string', 'max:255'],
 				'company_name'     => ['nullable', 'string', 'max:255'],
 				'email'            => ['nullable', 'email', 'max:255'],
-				'phone'            => ['required', 'string', 'max:255'],
-				'tax_number'       => ['nullable', 'string', 'max:255'],
+				'phone'            => ['required', 'string', new GreekPhoneNumber()],
+				'tax_number'       => ['nullable', 'string', new GreekAfm()],
 				'customer_type'    => ['required', new Enum(CustomerType::class)],
 				'is_active'        => ['required', 'boolean'],
 				'credit_limit'     => ['nullable', 'numeric', 'min:0'],
 				'payment_terms'    => ['required', new Enum(PaymentTerms::class)],
 				'billing_address'  => ['nullable', 'string'],
 				'shipping_address' => ['nullable', 'string'],
-				'city'             => ['nullable', 'string', 'max:255'],
+				'city_id'          => [
+					'nullable',
+					'integer',
+					Rule::exists('cities', 'id')->where(function ($query) {
+						$query->where('country_id', $this->input('country_id'));
+					}),
+				],
 				'state'            => ['nullable', 'string', 'max:255'],
-				'country'          => ['nullable', 'string', 'max:255'],
+				'country_id'       => ['nullable', 'integer', Rule::exists('countries', 'id')],
 				'postal_code'      => ['nullable', 'string', 'max:255'],
 				'notes'            => ['nullable', 'string'],
 			];
+		}
+
+		/**
+		 * Handle data processing after validation passes.
+		 */
+		protected function passedValidation(): void {
+//			dd($this->validated());
+			// Uppercase Postal Code or Code if required
+			if ($this->has('postal_code') && $this->validated('postal_code')) {
+				$this->merge([
+					'postal_code' => Str::upper($this->validated('postal_code')),
+				]);
+			}
+
+			if ($this->has('code') && !empty($this->validated('code'))) {
+				$this->merge([
+					'code' => Str::upper($this->validated('code')),
+				]);
+			}
 		}
 	}

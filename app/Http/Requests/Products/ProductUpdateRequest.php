@@ -151,8 +151,8 @@
 		 *
 		 * Transform or structure the validated data before it reaches the controller.
 		 */
-		public function passedValidation(): void {
-			$validated = $this->validated();
+		protected function passedValidation(): void {
+			$validated = $this->validator->getData();
 
 			// 1. Normalize checkboxes into boolean values
 			$validated['track_inventory'] = $this->has('track_inventory');
@@ -178,7 +178,7 @@
 				$validated['specifications'] = null;
 			}
 
-			// Replace request input payload with transformed validated data
-			$this->replace($validated);
+			// Replace the validated array in the validator instance
+			$this->validator->setData(array_merge($this->validator->getData(), $validated));
 		}
 	}

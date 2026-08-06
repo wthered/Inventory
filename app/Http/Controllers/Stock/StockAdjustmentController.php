@@ -22,6 +22,7 @@
 	use App\Services\Stock\InventoryStockService;
 	use Carbon\Carbon;
 	use Exception;
+	use Illuminate\Http\RedirectResponse;
 	use Illuminate\Http\Request;
 	use Illuminate\Support\Collection;
 	use Illuminate\Support\Facades\Auth;
@@ -32,9 +33,12 @@
 	class StockAdjustmentController extends Controller {
 
 		private AdjustmentReasonService $service;
-		private InventoryStockService $inventoryService;
+		private InventoryStockService   $inventoryService;
 
-		public function __construct(AdjustmentReasonService $adjustmentReasonService, InventoryStockService $stockService) {
+		public function __construct(
+			AdjustmentReasonService $adjustmentReasonService,
+			InventoryStockService $stockService
+		) {
 			$this->service = $adjustmentReasonService;
 			$this->inventoryService = $stockService;
 		}
@@ -56,46 +60,76 @@
 
 			return view('stocks.adjustments.index', [
 				'adjustments' => $adjustments,
+				'reasons'     => AdjustmentReason::class,
 				'user'        => Auth::check() ? UserDTO::fromModel(Auth::user()) : null,
 			]);
 		}
 
 		/**
 		 * Store a newly created resource in storage.
+		 *
+		 * @throws Throwable
 		 */
-		public function store(StockAdjustmentStoreRequest $request) {
+		public function store(StockAdjustmentStoreRequest $request): RedirectResponse {
 			$input = $request->validated();
 
-			$adjustment = StockAdjustment::create([
-				'adjustment_number' => 'ADJ-'.Str::upper(Str::random(8)),
-				'warehouse_id'      => $input['warehouse_id'],
-				'adjustment_date'   => Carbon::now(config('app.timezone'))->toDateString(),
-				'notes'             => $input['notes'],
-				'created_by'        => $input['created_by'],
-			]);
+			$adjustment = DB::transaction(function () use ($input) {
+				// 1. Create Parent Stock Adjustment
+				$adjustment = StockAdjustment::query()->create([
+					'warehouse_id'      => (int) $input['warehouse_id'],
+					'adjustment_number' => 'ADJ-'.Carbon::parse($input['adjustment_date'])->format('Ymd').'-'.Str::upper(Str::random(6)),
+					'adjustment_date'   => Carbon::parse($input['adjustment_date'])->format('Y-m-d'),
+					'notes'             => $input['notes'] ?? null,
+					'status'            => MovementStatus::PENDING,
+					'created_by'        => Auth::id(),
+				]);
 
-			$object = new ProductDTO($input['product']);
-			$productLocation = $object->product->inventories()->where('location_id', $input['location'])->first();
-			$adjustment->items()->create([
-				'stock_adjustment_id' => $adjustment->id,
-				'product_id'          => $object->id,
-				'location_id'         => $input['location'],
-				'reason'              => $input['reason'],
-				'quantity'            => $input['quantity'],
-				'quantity_before'     => $productLocation->quantity,
-				//				'quantity_after'      => 'Handled by Observer'
-				'unit_cost'           => $object->cost_price,
-				'notes'               => $input['notes'],
-			]);
+				// 2. Loop & Create Adjustment Items
+				foreach ($input['items'] as $item) {
+					$locationId = !empty($item['location_id']) ? (int) $item['location_id'] : null;
+					$productId = (int) $item['product_id'];
+					$quantity = (int) $item['quantity'];
 
-			return response()->json(['success' => true]);
+					// Snapshot quantity_before from current stock (if location exists)
+					$currentStock = $locationId
+						? (WarehouseLocation::query()->where('id', $locationId)->value('current_capacity') ?? 0)
+						: 0;
+
+					// Calculate stock after adjustment based on item type
+					$quantityAfter = ($item['type'] === 'increase')
+						? ($currentStock + $quantity)
+						: ($currentStock - $quantity);
+
+					$product = new ProductDTO($productId);
+
+					$adjustment->items()->create([
+						'product_id'      => $product->id,
+						'location_id'     => $locationId,
+						'type'            => $item['type'],
+						'reason'          => $item['reason'],
+						'quantity'        => $quantity,
+						'quantity_before' => $currentStock,
+						'quantity_after'  => $quantityAfter,
+						'unit_cost'       => $product->cost_price,
+						'notes'           => $item['notes'] ?? null,
+					]);
+				}
+
+				return $adjustment;
+			});
+
+			return redirect()->route('inventory.adjustments.show', $adjustment)->with('success', 'Stock adjustment created successfully.');
 		}
 
 		/**
 		 * Show the form for creating a new resource.
 		 */
-		public function create() {
-			//
+		public function create(Request $request) {
+			return view('stocks.adjustments.create', [
+				'warehouses'        => Warehouse::query()->get(),
+				'typeGroup'         => AdjustmentType::class,
+				'adjustmentReasons' => AdjustmentReason::class,
+			]);
 		}
 
 		/**
@@ -129,7 +163,9 @@
 		 */
 		public function edit(string $stockAdjustment) {
 			// 1. Σιγουρεύεσαι ότι οι γραμμές έχουν ήδη φορτωμένα τα updates τους
-			$adjustment = StockAdjustment::find($stockAdjustment)->load(['items.location', 'items.product.brand']);
+			$adjustment = StockAdjustment::query()->find($stockAdjustment)->load([
+				'items.location', 'items.product.brand'
+			]);
 
 			// 2. Φέρνεις τις τοποθεσίες της συγκεκριμένης αποθήκης, ταξινομημένες
 			$locations = WarehouseLocation::query()->where('warehouse_id', $adjustment->warehouse_id)->orderBy('name')->pluck('id');
@@ -252,7 +288,17 @@
 		}
 
 		public function check(StockAdjustmentValidationRequest $request) {
-			dd($request->input());
+			$input = $request->validated();
+			$quantity = [
+				'current'    => $input['inputData']['currentQuantity'],
+				'maximum'    => $input['inputData']['maximumQuantity'],
+				'adjustment' => $input['quantity'],
+			];
+			$isAllowed = $quantity['current'] + $quantity['adjustment'] <= $quantity['maximum'];
+			return response()->json([
+				'success' => false,
+				'allowed' => $isAllowed,
+			], $isAllowed ? 200 : 406);
 		}
 
 		/**
@@ -264,7 +310,7 @@
 
 			//  Έλεγχος αν έχει ήδη εγκριθεί για αποφυγή διπλών εγγραφών
 			if ($adjustment->approved_at) {
-				dd($adjustment);
+//				dd($adjustment);
 				return redirect()
 					->route('inventory.adjustments.show', $adjustment->id)
 					->with('error', 'Αυτό το παραστατικό έχει ήδη εγκριθεί.');
@@ -286,7 +332,7 @@
 			} catch (Exception|Throwable $e) {
 				return redirect()
 					->route('inventory.adjustments.show', $adjustment->id)
-					->with('error', 'Σφάλμα κατά την έγκριση: ' . $e->getMessage());
+					->with('error', 'Σφάλμα κατά την έγκριση: '.$e->getMessage());
 			}
 
 			// 3. Επιστροφή στην προβολή με μήνυμα επιτυχίας (Το dd() αφαιρέθηκε!)

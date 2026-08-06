@@ -31,7 +31,6 @@
 				'tax_number'       => fake()->unique()->regexify('[0-9]{9}'),
 				'billing_address'  => fake()->address(),
 				'shipping_address' => fake()->address(),
-				'city'             => fake()->city(),
 				'state'            => fake()->state(),
 				'postal_code'      => fake()->postcode(),
 				'customer_type'    => fake()->randomElement(CustomerType::cases())->value, // Individual ή Company

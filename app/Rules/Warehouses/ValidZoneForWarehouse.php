@@ -2,7 +2,6 @@
 
 	namespace App\Rules\Warehouses;
 
-	use App\DataTransferObjects\Warehouse\WarehouseDTO;
 	use App\Models\Warehouse;
 	use Closure;
 	use Illuminate\Contracts\Validation\ValidationRule;
@@ -29,7 +28,7 @@
 //			}
 
 			$zoneNumber = intval($value);
-			$warehouse  = Warehouse::find($this->warehouse);
+			$warehouse = Warehouse::query()->find($this->warehouse);
 
 //			dd([
 //				'zoneNumber' => $zoneNumber,

@@ -31,7 +31,8 @@
 		}
 
 		public function children(): HasMany {
-			return $this->hasMany(Category::class, 'parent_id')->orderBy('sort_order');
+			// in CategoryGlobalScope, I already define a default orderBy
+			return $this->hasMany(Category::class, 'parent_id');
 		}
 
 		public function parent(): BelongsTo {

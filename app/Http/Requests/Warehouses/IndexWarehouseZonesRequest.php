@@ -25,13 +25,13 @@
 					'required',
 					'integer',
 					'min:1',
-					Rule::exists('products', 'id')->whereNull('deleted_at'),
+					Rule::exists('products', 'id'),
 				],
 				'warehouse' => [
 					'required',
 					'integer',
 					'min:1',
-					Rule::exists('warehouses', 'id')->whereNull('deleted_at'),
+					Rule::exists('warehouses', 'id'),
 				],
 				//				'zone'      => [
 				//					'required',
@@ -85,24 +85,12 @@
 		}
 
 		/**
-		 * Get the validated data.
-		 */
-		public function validated($key = null, $default = null): array {
-			$validated = parent::validated($key, $default);
-
-			return [
-				'warehouse_id' => $validated['warehouse'],
-				'product'      => $validated['product'],
-			];
-		}
-
-		/**
 		 * Prepare the data for validation.
 		 */
 		protected function prepareForValidation(): void {
 			$this->merge([
-				'warehouse' => $this->route('warehouse')->id,
-				'zone'      => intval($this->query('zone')),
+//				'warehouse' => $this->route('warehouse')->id,
+'zone' => intval($this->query('zone')),
 			]);
 		}
 	}

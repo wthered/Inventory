@@ -82,7 +82,7 @@
                         <p>{{ $customer->phone }}</p>
                     </div>
                     <div class="detail-group">
-                        <label>Tax Number (AFM)</label>
+                        <label>Tax Number (ΑΦΜ)</label>
                         <p>{{ $customer->tax_number ?? '—' }}</p>
                     </div>
                     <div class="detail-group">
@@ -95,7 +95,7 @@
                     </div>
                     <div class="detail-group">
                         <label>Payment Terms</label>
-                        <p>{{ $customer->payment_terms->value ?? $customer->payment_terms }}</p>
+                        <p>{{ $customer->payment_terms->label() ?? $customer->payment_terms }}</p>
                     </div>
                 </div>
             </div>
@@ -116,11 +116,11 @@
                     </div>
                     <div class="detail-group">
                         <label>City & State</label>
-                        <p>{{ filter_var([$customer->city, $customer->state]) ? implode(', ', array_filter([$customer->city, $customer->state])) : '—' }}</p>
+                        <p>{{ $customer->city->name }}, {{ $customer->state }}</p>
                     </div>
                     <div class="detail-group">
                         <label>Postal Code / Country</label>
-                        <p>{{ filter_var([$customer->postal_code, $customer->country]) ? implode(', ', array_filter([$customer->postal_code, $customer->country])) : '—' }}</p>
+                        <p>{{ $customer->postal_code }}, {{ $customer->country->name }}</p>
                     </div>
                     @if($customer->notes)
                         <div class="detail-group" style="grid-column: 1 / -1;">

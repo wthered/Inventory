@@ -9,6 +9,7 @@
 	use App\Http\Requests\Transactions\FilterBrandsRequest;
 	use App\Models\Brand;
 	use App\Models\Category;
+	use App\Models\Product;
 
 
 	class CategoryController extends Controller {
@@ -123,10 +124,27 @@
 
 		public function filter(CategoryFilterRequest $request, Category $category) {
 			$category->load(['brands', 'children']);
+
+//			dd($request->validated());
+
+			// Extract child category IDs once to keep queries clean and efficient
+			$children = $category->children()->pluck('id');
+
 			return response()->json([
-				'options' => $category->children()->orderBy('name')->get()->map(function (Category $category) {
-					return "<option value='".$category->id."'>".$category->name."</option>";
+				'categories' => $category->children()->whereHas('products')->get()->map(function (Category $child) {
+					return "<option value='".$child->id."'>".$child->name."</option>";
 				})->prepend("<option value=''>Select Sub Category</option>")->join(''),
+
+				'brands' => Brand::query()->whereHas('products', function ($query) use ($children) {
+					$query->whereIn('category_id', $children);
+				})->get()->map(function (Brand $brand) {
+					return "<option value='".$brand->id."'>".$brand->name."</option>";
+				})->prepend("<option value=''>All Brands</option>")->join(''),
+
+				'products' => Product::query()->whereIn('category_id', $children)->orderBy('name')->get()
+				                     ->map(function (Product $product) {
+					                     return view('common.products.index_row', ['product' => $product])->render();
+				                     })->join(''),
 			]);
 		}
 	}

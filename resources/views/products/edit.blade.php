@@ -74,8 +74,7 @@
                             <select id="category_id" name="parent_category" required>
                                 <option value="">Select Category</option>
                                 @foreach($categories as $category)
-                                    <option value="{{ $category->id }}"
-                                            @if(old('parent_category', $category->id) == $product->category['parent_id']) selected @endif>
+                                    <option value="{{ $category->id }}" @selected(old('parent_category', $product->category['parent_id'] ?? null) == $category->id)>
                                         {{ $category->name }}
                                     </option>
                                 @endforeach
@@ -111,9 +110,8 @@
                             <label for="brand_id">Brand</label>
                             <select id="brand_id" name="brand_id">
                                 <option value="">Select Brand</option>
-                                @foreach($brands as $brand)
-                                    <option
-                                            value="{{ $brand->id }}" @selected(old('brand_id', $brand->id) == $product->brand['id'])>{{ $brand->name }}</option>
+                                @foreach($brands as $index => $name)
+                                    <option value="{{ $index }}" @selected(old('brand_id', $product->brand['id'] ?? null) == $index)>{{ $name }}</option>
                                 @endforeach
                             </select>
                             @if($errors->has('brand_id'))
@@ -122,6 +120,22 @@
                                 @endforeach
                             @else
                                 <span class="text-muted">Manufacturer or brand association.</span>
+                            @endif
+                        </div>
+
+                        <div class="form-group">
+                            <label for="supplier">Primary Supplier</label>
+                            <select id="supplier" name="product_supplier">
+                                @foreach($suppliers as $index => $name)
+                                    <option value="{{ $index }}" @selected($index == $product_supplier)>{{ $name }}</option>
+                                @endforeach
+                            </select>
+                            @if($errors->has('product_supplier'))
+                                @foreach($errors->get('product_supplier') as $message)
+                                    <span class="error-message">{{ $message }}</span><br>
+                                @endforeach
+                            @else
+                                <span class="text-muted">Non-schema field kept for context.</span>
                             @endif
                         </div>
 
@@ -289,22 +303,6 @@
                                 <span class="text-muted">Maximum preferred stock quantity.</span>
                             @endif
                         </div>
-
-                        <div class="form-group">
-                            <label for="supplier">Primary Supplier</label>
-                            <select id="supplier" name="product_supplier">
-                                @foreach($product->suppliers as $supplier)
-                                    <option value="{{ $supplier->id }}" @selected($supplier->pivot['is_preferred'])>{{ $supplier->name }}</option>
-                                @endforeach
-                            </select>
-                            @if($errors->has('description'))
-                                @foreach($errors->get('description') as $message)
-                                    <span class="error-message">{{ $message }}</span><br>
-                                @endforeach
-                            @else
-                                <span class="text-muted">Non-schema field kept for context.</span>
-                            @endif
-                        </div>
                     </div>
 
                     <h2 class="form-section-title">Description & Metadata</h2>
@@ -345,8 +343,8 @@
                     <div class="action-buttons">
                         @csrf
                         <a href="{{ route('inventory.products.show', ['product' => $product->id]) }}" class="btn back">Cancel</a>
-                        <button type="submit" class="btn edit" id="updateButton"><i class="fas fa-save"></i> Update
-                            Product
+                        <button type="submit" class="btn edit" id="updateButton">
+                            <i class="fas fa-save"></i> Update Product
                         </button>
                     </div>
 

@@ -4,8 +4,11 @@
 
 	use App\Enums\Inventory\TransactionReason;
 	use App\Enums\Inventory\TransactionType;
-	use App\Enums\Inventory\TransferStatus;
-	use App\Models\{Purchases\PurchaseOrderItem, Sales\SalesOrderItem, StockAdjustmentItem, StockReturnItem, StockTransferItem};
+	use App\Models\{Purchases\PurchaseOrderItem,
+		Sales\SalesOrderItem,
+		StockAdjustmentItem,
+		StockReturnItem,
+		StockTransferItem};
 	use App\Services\Inventory\StockMovementService;
 	use Exception;
 	use Illuminate\Database\Eloquent\Model;
@@ -20,13 +23,15 @@
 			$this->movementService = $stockService;
 		}
 
+		public function creating(Model $item): void {
+			if ($item instanceof StockAdjustmentItem) {
+				// If 'quantity' represents the net change (e.g. +5 or -3)
+				$item->quantity_after = $item->quantity_before + $item->quantity;
+			}
+		}
+
 		/**
-		 * Όταν δημιουργείται μια νέα γραμμή (π.χ. προσθήκη προϊόντος σε επιστροφή)
-		 *
-		 * @throws Exception|Throwable
-		 */
-		/**
-		 * Όταν δημιουργείται μια νέα γραμμή (π.χ. προσθήκη προϊόντος σε μεταφορά)
+		 * Όταν δημιουργείται μια νέα γραμμή (π.χ. Προσθήκη προϊόντος σε επιστροφή)
 		 *
 		 * @throws Exception|Throwable
 		 */
@@ -59,22 +64,27 @@
 				$item instanceof SalesOrderItem      => TransactionType::OUT->value,
 				$item instanceof PurchaseOrderItem   => TransactionType::IN->value,
 				$item instanceof StockReturnItem     => TransactionType::RETURN->value,
-				default => throw new InvalidArgumentException("Unknown stock movement for model: " . get_class($item)),
+				default                              => throw new InvalidArgumentException("Unknown stock movement for model: ".get_class($item)),
 			};
 		}
 
 		/**
 		 * Όταν αλλάζει κάτι στη γραμμή (αλλαγή ποσότητας ή ράφι)
+		 *
 		 * @throws Exception|Throwable
 		 */
 		public function updated(Model $item): void {
-			if (!$this->shouldProcess($item)) return;
+			if (!$this->shouldProcess($item)) {
+				return;
+			}
 
 			// 1. Ειδικός χειρισμός αν πρόκειται για StockTransferItem
 			if ($item instanceof StockTransferItem) {
 				$diff = $item->quantity_requested - $item->getOriginal('quantity_requested');
 
-				if ($diff === 0) return; // Δεν άλλαξε η ποσότητα
+				if ($diff === 0) {
+					return;
+				} // Δεν άλλαξε η ποσότητα
 
 				// Αν αυξήθηκε η αιτούμενη ποσότητα, πρέπει να βγάλουμε κι άλλο stock από την πηγή (OUT).
 				// Αν μειώθηκε, πρέπει να επιστρέψουμε το stock στην πηγή (IN).
@@ -123,7 +133,9 @@
 		 * @throws Exception|Throwable
 		 */
 		public function deleted(Model $item): void {
-			if (!$this->shouldProcess($item)) return;
+			if (!$this->shouldProcess($item)) {
+				return;
+			}
 
 			if ($item instanceof StockTransferItem) {
 				// If it was still pending or canceled, we only roll back Warehouse A's OUT movement
@@ -142,7 +154,7 @@
 				return;
 			}
 
-			$type        = $this->determineTransactionType($item);
+			$type = $this->determineTransactionType($item);
 			$reverseType = ($type === TransactionType::IN->value) ? TransactionType::OUT->value : TransactionType::IN->value;
 
 			$this->movementService->handleItemMovement($item, $reverseType);

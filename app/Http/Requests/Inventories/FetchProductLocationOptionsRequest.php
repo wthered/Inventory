@@ -19,20 +19,37 @@
 		}
 
 		/**
+		 * Prepare the data for validation.
+		 */
+		protected function prepareForValidation(): void {
+			$this->merge([
+				'warehouse'  => $this->filled('warehouse') ? intval($this->input('warehouse')) : null,
+				'product_id' => $this->filled('product_id') ? intval($this->input('product_id')) : null,
+				'location'   => $this->filled('location') ? intval($this->input('location')) : null,
+			]);
+		}
+
+		/**
 		 * Get the validation rules that apply to the request.
 		 *
 		 * @return array<string, ValidationRule|array|string>
 		 */
 		public function rules(): array {
 			return [
-				'warehouse' => [
+				'warehouse'  => [
 					'required',
 					'integer',
 					'min:1',
 					Rule::exists('warehouses', 'id'),
 				],
-				'location'  => [
-					'required',
+				'product_id' => [
+					'nullable',
+					'integer',
+					'min:1',
+					Rule::exists('products', 'id'),
+				],
+				'location'   => [
+					'nullable',
 					'integer',
 					'min:1',
 					Rule::exists('warehouse_locations', 'id')->where(function ($query) {
@@ -52,10 +69,13 @@
 				'warehouse.min'      => 'Invalid warehouse selection.',
 				'warehouse.exists'   => 'The selected warehouse is no longer available.',
 
-				'location.required' => 'Please select a location.',
-				'location.integer'  => 'Invalid location selection.',
-				'location.min'      => 'Invalid location selection.',
-				'location.exists'   => 'The selected location does not exist in this warehouse.',
+				'product_id.integer' => 'Invalid product selection.',
+				'product_id.min'     => 'Invalid product selection.',
+				'product_id.exists'  => 'The selected product does not exist.',
+
+				'location.integer' => 'Invalid location selection.',
+				'location.min'     => 'Invalid location selection.',
+				'location.exists'  => 'The selected location does not exist in this warehouse.',
 			];
 		}
 
@@ -64,28 +84,9 @@
 		 */
 		public function attributes(): array {
 			return [
-				'warehouse' => 'warehouse',
-				'location'  => 'location',
+				'warehouse'  => 'warehouse',
+				'product_id' => 'product',
+				'location'   => 'location',
 			];
-		}
-
-		/**
-		 * Hook: Εκτελείται μετά την επιτυχή επικύρωση.
-		 */
-		protected function passedValidation(): void {
-			$this->replace([
-				'warehouse' => intval($this->input('warehouse')),
-				'location'  => intval($this->input('location')),
-			]);
-		}
-
-		/**
-		 * Prepare the data for validation.
-		 */
-		protected function prepareForValidation(): void {
-			$this->merge([
-				'warehouse' => $this->filled('warehouse') ? $this->input('warehouse') : null,
-				'location'  => $this->filled('location') ? $this->input('location') : null,
-			]);
 		}
 	}

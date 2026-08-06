@@ -109,6 +109,41 @@
             </a>
         </li>
 
+        <!-- Human Resources Section -->
+        <li class="menu-header">Human Resources</li>
+
+        <!-- Employees -->
+        <li>
+            <a href="{{ route('hr.employees.index') }}"
+               class="{{ Route::is('hr.employees.*') ? 'active' : '' }}">
+                <i class="fas fa-id-card"></i> Employees
+            </a>
+        </li>
+
+        {{-- Optional: Departments & Positions --}}
+        @can('department.view')
+            <li>
+                <a href="{{ route('hr.departments.index') }}"
+                   class="{{ Route::is('hr.departments.*') ? 'active' : '' }}">
+                    <i class="fas fa-sitemap"></i> Departments
+                </a>
+            </li>
+        @endcan
+
+        {{-- Optional: Attendance & Leaves --}}
+        <li>
+            <a href="{{ route('hr.attendances.index') }}"
+               class="{{ Route::is('hr.attendances.*') ? 'active' : '' }}">
+                <i class="fas fa-user-clock"></i> Attendance
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('hr.leave-requests.index') }}"
+               class="{{ Route::is('hr.leave-requests.*') ? 'active' : '' }}">
+                <i class="fas fa-calendar-minus"></i> Leave Requests
+            </a>
+        </li>
+
         <li class="menu-header">System</li>
 
         <!-- Reports -->

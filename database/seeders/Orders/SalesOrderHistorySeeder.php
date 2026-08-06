@@ -38,7 +38,7 @@
 			// Ανάκτηση των IDs των χρηστών που έχουν δικαίωμα Ακύρωσης / Διαγραφής πωλήσεων
 			$cancellationStaffIds = User::permission('sales_order.delete')->pluck('id');
 
-			foreach ($sales as $sale) {
+			foreach ($sales->shuffle() as $sale) {
 				$orderDate = $sale->order_date;
 				$creatorId = $sale->created_by;
 
@@ -77,7 +77,6 @@
 				}
 
 				// --- 3. Σε Επεξεργασία (Picking / Packing στην Αποθήκη) ---
-
 				if (in_array($sale->status_id, [
 					SalesOrderStatus::PROCESSING, SalesOrderStatus::SHIPPED, SalesOrderStatus::DELIVERED,
 					SalesOrderStatus::COMPLETED
@@ -120,9 +119,6 @@
 				}
 
 				// --- 5. Παραδόθηκε / Ολοκληρώθηκε ---
-				// Ανάκτηση των IDs των χρηστών που έχουν δικαίωμα Παράδοσης (ship) ή Έγκρισης/Ολοκλήρωσης (approve)
-//				$fulfillmentStaff = User::permission(['sales_order.ship', 'sales_order.approve'])->pluck('id');
-
 				if (in_array($sale->status_id, [SalesOrderStatus::DELIVERED, SalesOrderStatus::COMPLETED])) {
 					$deliveryDate = $shippingDate->copy()->addDays(mt_rand(2, 10));
 
@@ -138,9 +134,6 @@
 				}
 
 				// --- 6. Διαχείριση Ακυρωμένων (Cancelled) ---
-				// Ανάκτηση των IDs των χρηστών που έχουν δικαίωμα Ακύρωσης / Διαγραφής πωλήσεων
-//				$cancellationStaffIds = User::permission('sales_order.delete')->pluck('id');
-
 				if ($sale->status_id === SalesOrderStatus::CANCELLED) {
 					$sale->history()->create([
 						'action'      => 'order_cancelled',

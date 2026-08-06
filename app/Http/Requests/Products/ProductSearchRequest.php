@@ -4,6 +4,7 @@
 
 	use Illuminate\Contracts\Validation\ValidationRule;
 	use Illuminate\Foundation\Http\FormRequest;
+	use Illuminate\Support\Facades\Auth;
 
 	class ProductSearchRequest extends FormRequest {
 		/**
@@ -13,7 +14,7 @@
 			// Change from false to true to allow authenticated operations
 			// todo:
 			// return $this->user->can('search products') some time
-			return true;
+			return Auth::check();
 		}
 
 		/**

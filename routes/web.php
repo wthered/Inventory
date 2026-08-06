@@ -33,3 +33,8 @@
 	Route::middleware(['web', 'auth'])->name('inventory.')->group(function () {
 		require base_path('routes/sales.php');
 	});
+
+	// ERP Modules: Human Resources Block
+	Route::middleware(['web', 'auth', 'verified'])->prefix('hr')->name('hr.')->group(function () {
+		require base_path('routes/hr.php');
+	});

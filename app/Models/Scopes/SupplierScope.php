@@ -11,6 +11,6 @@
 		 * Apply the scope to a given Eloquent query builder.
 		 */
 		public function apply(Builder $builder, Model $model): void {
-			$builder->where(['is_active' => true]);
+			$builder->where(['is_active' => true])->orderBy('name');
 		}
 	}

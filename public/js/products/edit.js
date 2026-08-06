@@ -1,4 +1,4 @@
-const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
 const productId = document.getElementById('product_id').value;
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -41,7 +41,6 @@ function refreshPreview(imageUrl) {
     });
 }
 
-// Upload an Image and couple it with the selected product
 // Upload an Image and couple it with the selected product
 document.getElementById('image_upload').addEventListener('change', function (event) {
     const fileInput = event.target;
@@ -109,17 +108,20 @@ document.getElementById('category_id').addEventListener('change', function (even
     const selectedCategory = event.target.value;
 
     fetch(`/categories/${selectedCategory}/filter`, {
-        method: 'GET',
+        method: 'POST',
         headers: {
             'Accept': 'application/json',
+            'X-CSRF-TOKEN': token,
             'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
+        },
+        body: JSON.stringify({
+            parent_category: document.getElementById('category_id').value,
+        })
     }).then(response => {
         return response.json();
     }).then(data => {
         // For example, update a product list or the subcategories list
-        document.getElementById('sub_category').innerHTML = data.options;
+        document.getElementById('sub_category').innerHTML = data.categories;
     }).catch(error => {
         console.error('Error:', error);
     });
@@ -148,7 +150,3 @@ document.getElementById('sub_category').addEventListener('change', function (eve
         console.error('Error:', error);
     });
 });
-
-// document.getElementById("updateButton").addEventListener('click', function (event) {
-// 	event.preventDefault();
-// });

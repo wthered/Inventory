@@ -14,7 +14,7 @@
 		use CanSeedProductHistory, CanFetchProductImages, CanSeedInitialProducts;
 
 		public function run(): void {
-			$users = User::pluck('id')->toArray();
+			$users = User::query()->pluck('id')->toArray();
 
 			// 1. Μαζικό Insert Προϊόντων (Όπως το είχες)
 			$initialTime = $this->insertInitialProducts();

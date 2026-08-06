@@ -21,7 +21,8 @@
 				$table->string('tax_number')->nullable()->comment('ΑΦΜ πελάτη');
 				$table->text('billing_address')->nullable();
 				$table->text('shipping_address')->nullable();
-				$table->string('city')->nullable();
+				$table->unsignedInteger('city_id')->nullable();
+				$table->foreign('city_id')->references('id')->on('cities')->nullOnDelete();
 				$table->string('state')->nullable();
 				$table->unsignedInteger('country_id')->nullable();
 				$table->foreign('country_id')->references('id')->on('countries')->nullOnDelete();

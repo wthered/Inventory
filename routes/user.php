@@ -12,7 +12,6 @@
 		// Profile Settings Sub-Routes
 		Route::prefix('settings')->name('settings.')->group(function () {
 			Route::get('/', [ProfileController::class, 'settings'])->name('index');
-			Route::get('{setting}/edit', [ProfileController::class, 'editSetting'])->name('edit');
-			Route::put('{setting}', [ProfileController::class, 'updateSetting'])->name('update');
+			Route::put('/', [ProfileController::class, 'setSettings'])->name('update');
 		});
 	});

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Customers Edit Form Stylesheet (Page-Specific Overrides)
+   Customers Module Common Stylesheet
    ========================================================================== */
 
 /* Outer Form Card */
@@ -8,7 +8,7 @@
 	border           : 1px solid var(--color-border);
 	border-radius    : var(--radius-lg);
 	box-shadow       : var(--shadow-md);
-	overflow         : visible; /* Allows autocomplete floating dropdown to break out */
+	overflow         : visible; /* Allows floating dropdowns (like autocomplete) to overlay outside bounds */
 	display          : flex;
 	flex-direction   : column;
 	gap              : var(--space-xl);
@@ -44,7 +44,7 @@
 }
 
 .form-group {
-	position       : relative; /* Anchor for autocomplete dropdown */
+	position       : relative; /* Relative anchor for autocomplete dropdown positioning */
 	display        : flex;
 	flex-direction : column;
 	gap            : var(--space-xs);
@@ -54,7 +54,7 @@
 	grid-column : 1 / -1;
 }
 
-/* Labels & Indicators */
+/* Labels & Required Indicators */
 .form-label {
 	font-size   : 0.8125rem;
 	font-weight : 600;
@@ -101,7 +101,53 @@ textarea.form-control {
 	min-height : 80px;
 }
 
-/* Validation Feedback Overrides */
+/* Validation Feedback Overrides & Alert Banners */
+.alert {
+	display       : flex;
+	align-items   : flex-start;
+	gap           : var(--space-md, 0.75rem);
+	padding       : var(--space-md, 1rem);
+	border-radius : var(--radius-md, 8px);
+	font-size     : 0.875rem;
+	margin-bottom : var(--space-lg, 1.5rem);
+}
+
+.alert i {
+	font-size   : 1.25rem;
+	line-height : 1.25;
+	flex-shrink : 0;
+}
+
+.alert strong {
+	display       : block;
+	font-size     : 0.9rem;
+	margin-bottom : var(--space-xs, 0.25rem);
+}
+
+.alert ul {
+	margin          : var(--space-xs, 0.25rem) 0 0 0;
+	padding-left    : 1.25rem;
+	list-style-type : disc;
+}
+
+.alert li {
+	margin-bottom : 0.25rem;
+}
+
+.alert li:last-child {
+	margin-bottom : 0;
+}
+
+.alert-danger {
+	background-color : rgba(239, 68, 68, 0.1);
+	border           : 1px solid var(--color-error, #ef4444);
+	color            : var(--color-error, #ef4444);
+}
+
+.alert-danger i {
+	color : var(--color-error, #ef4444);
+}
+
 .error {
 	color      : var(--color-error);
 	font-size  : 0.8125rem;
@@ -120,10 +166,10 @@ textarea.form-control {
 	left          : 0;
 	right         : 0;
 	z-index       : 1050;
-	background    : var(--color-surface);
-	border        : 1px solid var(--color-border);
-	border-radius : var(--radius-md);
-	box-shadow    : var(--shadow-md);
+	background    : var(--color-surface, #ffffff);
+	border        : 1px solid var(--color-border, #e5e7eb);
+	border-radius : var(--radius-md, 6px);
+	box-shadow    : 0 4px 12px rgba(0, 0, 0, 0.15);
 	max-height    : 200px;
 	overflow-y    : auto;
 	margin-top    : 4px;
@@ -160,64 +206,6 @@ textarea.form-control {
 	gap             : var(--space-md);
 	padding-top     : var(--space-md);
 	border-top      : 1px solid var(--color-border);
-}
-
-/* Validation Feedback Overrides */
-.alert {
-	display       : flex;
-	align-items   : flex-start;
-	gap           : var(--space-md);
-	padding       : var(--space-md);
-	border-radius : var(--radius-md);
-	font-size     : 0.875rem;
-	margin-bottom : var(--space-lg);
-}
-
-.alert i {
-	font-size   : 1.25rem;
-	line-height : 1.25;
-	flex-shrink : 0;
-}
-
-.alert strong {
-	display       : block;
-	font-size     : 0.9rem;
-	margin-bottom : var(--space-xs);
-}
-
-.alert ul {
-	margin          : var(--space-xs) 0 0 0;
-	padding-left    : 1.25rem;
-	list-style-type : disc;
-}
-
-.alert li {
-	margin-bottom : 0.25rem;
-}
-
-.alert li:last-child {
-	margin-bottom : 0;
-}
-
-.alert-danger {
-	background-color : rgba(239, 68, 68, 0.1);
-	border           : 1px solid var(--color-error);
-	color            : var(--color-error);
-}
-
-.alert-danger i {
-	color : var(--color-error);
-}
-
-.error {
-	color      : var(--color-error);
-	font-size  : 0.8125rem;
-	margin-top : 0.25rem;
-}
-
-.form-control.is-invalid,
-.form-select.is-invalid {
-	border-color : var(--color-error);
 }
 
 /* Responsive Breakdown */

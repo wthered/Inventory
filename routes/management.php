@@ -41,7 +41,6 @@
 	Route::middleware('permission:category.view')->group(function () {
 		Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
 		Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
-		Route::get('categories/{category}/filter', [CategoryController::class, 'filter'])->name('categories.children');
 	});
 
 	Route::middleware('permission:category.update')->group(function () {
@@ -106,8 +105,10 @@
 		Route::post('/{warehouse}/filter', 'filter')->name('filter');
 
 		// Cascading Spatial Dropdowns (Organized safely down to Bin level)
-		Route::post('/locations', 'getLocations')->name('base');
-		Route::post('/location/details', 'getLocationDetails')->name('base');
+		Route::post('/locations', 'getLocations')->name('locations');
+		Route::post('/location/details', 'getLocationDetails')->name('locations.details');
+
+		Route::post('/locations/resolve', 'resolveLocation')->name('locations.resolve');
 
 		Route::post('/zones', 'getZones')->name('zones');
 		Route::post('/aisles', 'getAisles')->name('aisles');
@@ -123,6 +124,7 @@
 	*/
 	Route::prefix('categories')->name('categories.')->controller(CategoryController::class)->group(function () {
 		Route::post('/{category}/brands', 'filterBrands')->name('filter.brands');
+		Route::post('/{category}/filter', 'filter')->name('children');
 	});
 
 	/*
@@ -145,7 +147,7 @@
 
 		// Core Inline Event Logging Handlers
 		Route::post('/{inventory}/transfer', [StockTransferController::class, 'store'])->name('transfer');
-		Route::post('/{inventory}/adjust', [StockAdjustmentController::class, 'store'])->name('adjust');
+		Route::post('/{inventory}/adjust', [InventoryController::class, 'adjust'])->name('adjust');
 
 		// Stock Validation & Setup (FIXED: Route names are unique now)
 		Route::post('/adjustment/reasons', [StockAdjustmentController::class, 'reasons'])->name('reasons');
@@ -160,7 +162,7 @@
 		StockAdjustmentController::class, 'approve'
 	])->name('adjustments.approve');
 
-	Route::resource('adjustments', StockAdjustmentController::class)->except(['store']);
+	Route::resource('adjustments', StockAdjustmentController::class);
 
 	Route::resource('returns', StockReturnController::class);
 
@@ -169,7 +171,8 @@
 	| Global Framework Utilities & Geographic Lookup
 	|--------------------------------------------------------------------------
 	*/
-	Route::get('/filters', [FilterController::class, 'getFilters'])->name('global');
+	Route::post('products/filter', [FilterController::class, 'products'])->name('products.filter');
+	Route::post('adjustments/filter', [FilterController::class, 'adjustments'])->name('adjustments.filter');
 
 	// Sovereign Countries REST Resource
 	Route::resource('countries', CountryController::class);

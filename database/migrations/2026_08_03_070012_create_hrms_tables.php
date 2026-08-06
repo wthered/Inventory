@@ -66,7 +66,6 @@
 
 			// 4. Employee Details (Προσωπικά / Ευαίσθητα Στοιχεία - 1-to-1)
 			Schema::create('employee_details', function (Blueprint $table) {
-				$table->increments('id');
 				$table->unsignedInteger('employee_id')->unique();
 				$table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
 
@@ -109,7 +108,6 @@
 
 			// 6. Attendances (Παρουσιολόγιο Αποθήκης)
 			Schema::create('attendances', function (Blueprint $table) {
-				$table->increments('id');
 				$table->unsignedInteger('employee_id');
 				$table->unsignedInteger('warehouse_id'); // Σε ποια αποθήκη έγινε το check-in
 
@@ -119,7 +117,7 @@
 				$table->date('work_date');
 				$table->dateTime('check_in');
 				$table->dateTime('check_out')->nullable();
-				$table->decimal('overtime_hours', 4, 2)->default(0.00);
+				$table->decimal('overtime_hours', 4)->default(0);
 
 				$table->timestamps();
 

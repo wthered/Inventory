@@ -4,7 +4,6 @@
 
 	use App\Models\HumanResources\Department;
 	use App\Models\HumanResources\Employee;
-	use App\Models\HumanResources\EmployeeDetail;
 	use App\Models\HumanResources\Position;
 	use App\Models\User;
 	use App\Models\Warehouse;
@@ -39,8 +38,17 @@
 		 */
 		public function configure(): static {
 			return $this->afterCreating(function (Employee $employee) {
-				EmployeeDetail::factory()->create([
-					'employee_id' => $employee->id,
+				$employee->detail()->create([
+					'afm'                     => fake()->numerify('#########'),
+					'social_security'         => fake()->numerify('###########'),
+					'id_card_number'          => strtoupper(fake()->lexify('??')).fake()->numerify('######'),
+					'birth_date'              => fake()->dateTimeBetween('-60 years', '-18 years')->format('Y-m-d'),
+					'address'                 => fake()->streetAddress(),
+					'city'                    => fake()->city(),
+					'postal_code'             => fake()->postcode(),
+					'iban'                    => fake()->iban('GR'),
+					'emergency_contact_name'  => fake()->name(),
+					'emergency_contact_phone' => fake()->phoneNumber(),
 				]);
 			});
 		}

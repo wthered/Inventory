@@ -42,17 +42,17 @@
 		 */
 		public function category(): string {
 			return match ($this) {
-				self::PURCHASE, self::SALE, self::TRANSFER_IN, self::TRANSFER_OUT, self::RETURNED => 'core_operations',
+				self::PURCHASE, self::SALE, self::TRANSFER_IN, self::TRANSFER_OUT, self::RETURNED                     => 'core_operations',
 
-				self::STOCKTAKE, self::COUNTING_ERROR, self::DATA_ENTRY, self::FOUND, self::ADJUSTMENT => 'stock_corrections',
+				self::STOCKTAKE, self::COUNTING_ERROR, self::DATA_ENTRY, self::FOUND, self::ADJUSTMENT                => 'stock_corrections',
 
 				self::DAMAGED, self::EXPIRED, self::QC_REJECT, self::QC_SAMPLE, self::QUALITY_CONTROL, self::SPILLAGE => 'quality_issues',
 
-				self::THEFT, self::LOST, self::WRITE_OFF => 'loss_theft',
+				self::THEFT, self::LOST, self::WRITE_OFF                                                              => 'loss_theft',
 
-				self::PRODUCTION, self::SAMPLE, self::DEMO, self::PROMO, self::DONATION => 'business_use',
+				self::PRODUCTION, self::SAMPLE, self::DEMO, self::PROMO, self::DONATION                               => 'business_use',
 
-				self::OTHER => 'other',
+				self::OTHER                                                                                           => 'other',
 			};
 		}
 
@@ -82,7 +82,7 @@
 			// 2. Τοποθετούμε κάθε reason στη σωστή ομάδα
 			foreach (self::cases() as $reason) {
 				$categoryKey = $reason->category();
-				$groupTitle  = $groupLabels[$categoryKey] ?? $groupLabels['other'];
+				$groupTitle = $groupLabels[$categoryKey] ?? $groupLabels['other'];
 
 				$dropdown[$groupTitle][$reason->value] = $reason->label();
 			}
@@ -92,7 +92,7 @@
 		}
 
 		public function label(): string {
-			return __("inventory.reasons." . $this->value);
+			return __("inventory.reasons.".$this->value);
 		}
 
 		/**
@@ -160,42 +160,53 @@
 		}
 
 		/**
-		 * Get color for UI display
-		 *
-		 * @throws Exception
+		 * Returns the primary hex color (borders, text, icons).
 		 */
 		public function color(): string {
 			return match ($this) {
-				// Loss/negative reasons - red/orange
-				self::DAMAGED, self::EXPIRED, self::THEFT, self::LOST, self::WRITE_OFF, self::QC_REJECT => 'danger',
+				// Loss/negative reasons - Red
+				self::DAMAGED, self::EXPIRED, self::THEFT, self::LOST, self::WRITE_OFF, self::QC_REJECT => '#DC3545',
 
-				// Quality/issue reasons - yellow
-				self::SPILLAGE, self::QUALITY_CONTROL, self::QC_SAMPLE => 'warning',
+				// Quality/issue reasons - Amber/Yellow
+				self::SPILLAGE, self::QUALITY_CONTROL, self::QC_SAMPLE                                  => '#D97706',
 
-				// Correction reasons - blue
-				self::STOCKTAKE, self::COUNTING_ERROR, self::DATA_ENTRY, self::FOUND, self::ADJUSTMENT => 'info',
+				// Correction reasons - Blue
+				self::STOCKTAKE, self::COUNTING_ERROR, self::DATA_ENTRY, self::FOUND, self::ADJUSTMENT  => '#0D6EFD',
 
-				// Business use - purple
-				self::PRODUCTION, self::SAMPLE, self::DEMO, self::PROMO, self::DONATION => 'secondary',
+				// Business use - Purple
+				self::PRODUCTION, self::SAMPLE, self::DEMO, self::PROMO, self::DONATION                 => '#6F42C1',
 
-				// Core operations - green
-				self::PURCHASE, self::SALE, self::TRANSFER_IN, self::TRANSFER_OUT, self::RETURNED => 'success',
+				// Core operations - Green
+				self::PURCHASE, self::SALE, self::TRANSFER_IN, self::TRANSFER_OUT, self::RETURNED       => '#198754',
 
-				self::OTHER => 'light',
+				// Neutral / Other - Gray
+				self::OTHER                                                                             => '#6C757D',
 			};
 		}
 
 		/**
-		 * Check if this reason is a correction (not a real transaction)
+		 * Returns a soft background hex tint suitable for badges and table tags.
 		 */
-		public function isCorrectionReason(): bool {
-			return in_array($this, [
-				self::STOCKTAKE,
-				self::COUNTING_ERROR,
-				self::DATA_ENTRY,
-				self::FOUND,
-				self::QUALITY_CONTROL,
-			]);
+		public function backgroundColor(): string {
+			return match ($this) {
+				// Loss/negative reasons - Soft Red
+				self::DAMAGED, self::EXPIRED, self::THEFT, self::LOST, self::WRITE_OFF, self::QC_REJECT => '#F8D7DA',
+
+				// Quality/issue reasons - Soft Amber
+				self::SPILLAGE, self::QUALITY_CONTROL, self::QC_SAMPLE                                  => '#FFF3CD',
+
+				// Correction reasons - Soft Blue
+				self::STOCKTAKE, self::COUNTING_ERROR, self::DATA_ENTRY, self::FOUND, self::ADJUSTMENT  => '#CFE2FF',
+
+				// Business use - Soft Purple
+				self::PRODUCTION, self::SAMPLE, self::DEMO, self::PROMO, self::DONATION                 => '#E2D9F3',
+
+				// Core operations - Soft Green
+				self::PURCHASE, self::SALE, self::TRANSFER_IN, self::TRANSFER_OUT, self::RETURNED       => '#D1E7DD',
+
+				// Neutral / Other - Soft Gray
+				self::OTHER                                                                             => '#E2E3E5',
+			};
 		}
 
 		/**
@@ -216,27 +227,27 @@
 		 */
 		public function icon(): string {
 			return match ($this) {
-				self::DAMAGED => '⚠️',
-				self::EXPIRED => '📅',
-				self::THEFT => '🔒',
-				self::LOST => '🔍',
-				self::WRITE_OFF => '📝',
-				self::SPILLAGE => '💧',
-				self::PURCHASE => '📦',
-				self::SALE => '💰',
-				self::TRANSFER_IN, self::TRANSFER_OUT => '🔄',
-				self::ADJUSTMENT => '🛠️',
-				self::RETURNED => '↩️',
-				self::FOUND => '🎯',
-				self::STOCKTAKE => '📊',
-				self::COUNTING_ERROR => '❌',
-				self::DATA_ENTRY => '⌨️',
+				self::DAMAGED                                           => '⚠️',
+				self::EXPIRED                                           => '📅',
+				self::THEFT                                             => '🔒',
+				self::LOST                                              => '🔍',
+				self::WRITE_OFF                                         => '📝',
+				self::SPILLAGE                                          => '💧',
+				self::PURCHASE                                          => '📦',
+				self::SALE                                              => '💰',
+				self::TRANSFER_IN, self::TRANSFER_OUT                   => '🔄',
+				self::ADJUSTMENT                                        => '🛠️',
+				self::RETURNED                                          => '↩️',
+				self::FOUND                                             => '🎯',
+				self::STOCKTAKE                                         => '📊',
+				self::COUNTING_ERROR                                    => '❌',
+				self::DATA_ENTRY                                        => '⌨️',
 				self::QC_REJECT, self::QC_SAMPLE, self::QUALITY_CONTROL => '🔬',
-				self::PRODUCTION => '🏭',
-				self::SAMPLE, self::DEMO => '📱',
-				self::PROMO => '🎁',
-				self::DONATION => '❤️',
-				self::OTHER => '❓',
+				self::PRODUCTION                                        => '🏭',
+				self::SAMPLE, self::DEMO                                => '📱',
+				self::PROMO                                             => '🎁',
+				self::DONATION                                          => '❤️',
+				self::OTHER                                             => '❓',
 			};
 		}
 

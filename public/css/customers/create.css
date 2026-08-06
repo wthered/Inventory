@@ -1,12 +1,14 @@
-/* --- Customer Create Form Specific Styles --- */
+/* ==========================================================================
+   Customers Create & Edit Form Stylesheet (Page-Specific Overrides)
+   ========================================================================== */
 
-/* Form Wrapper Card */
+/* Outer Form Card */
 .form-card {
 	background-color : var(--color-surface);
 	border           : 1px solid var(--color-border);
 	border-radius    : var(--radius-lg);
 	box-shadow       : var(--shadow-md);
-	overflow         : hidden;
+	overflow         : visible;
 	display          : flex;
 	flex-direction   : column;
 	gap              : var(--space-xl);
@@ -21,12 +23,12 @@
 }
 
 .section-header {
-	padding-bottom : var(--space-sm);
+	padding-bottom : var(--space-xs);
 	border-bottom  : 1px solid var(--color-border);
 }
 
 .section-header h3 {
-	font-size   : 1.05rem;
+	font-size   : 1rem;
 	font-weight : 600;
 	color       : var(--color-text-primary);
 	display     : flex;
@@ -34,14 +36,16 @@
 	gap         : var(--space-sm);
 }
 
-/* Grid Layout for Form Inputs */
+/* Form Grid Layout */
 .form-grid {
 	display               : grid;
 	grid-template-columns : repeat(2, 1fr);
 	gap                   : var(--space-md);
 }
 
+/* Ensure form groups act as relative positioning parents */
 .form-group {
+	position       : relative; /* <-- CRITICAL: Gives .autocomplete-results its anchor */
 	display        : flex;
 	flex-direction : column;
 	gap            : var(--space-xs);
@@ -63,22 +67,32 @@
 	color   : var(--color-error);
 }
 
-/* Form Controls (Inputs, Selects, Textareas) */
-.form-control,
+/* Form Select Controls Override */
 .form-select {
-	width            : 100%;
-	padding          : 0.625rem 0.875rem;
-	background-color : var(--color-bg-alt);
-	border           : 1px solid var(--color-border);
-	border-radius    : var(--radius-md);
-	color            : var(--color-text-primary);
-	font-size        : 0.9rem;
-	transition       : border-color 0.2s ease, box-shadow 0.2s ease;
+	width               : 100%;
+	padding             : 0.625rem 2.25rem 0.625rem 0.875rem;
+	font-size           : 0.875rem;
+	background-color    : var(--color-input-bg);
+	color               : var(--color-input-text);
+	border              : 1px solid var(--color-border);
+	border-radius       : var(--radius-md);
+	outline             : none;
+	cursor              : pointer;
+	appearance          : none;
+	-webkit-appearance  : none;
+	background-image    : url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+	background-position : right 0.75rem center;
+	background-repeat   : no-repeat;
+	background-size     : 1.25em 1.25em;
+	transition          : border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
-.form-control:focus,
+.form-select:hover {
+	border-color     : var(--color-primary);
+	background-color : var(--color-bg-alt);
+}
+
 .form-select:focus {
-	outline      : none;
 	border-color : var(--color-primary);
 	box-shadow   : 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
 }
@@ -88,74 +102,29 @@ textarea.form-control {
 	min-height : 80px;
 }
 
-/* Error Banner & Input Error Styling */
+/* Validation Feedback Overrides */
 .error {
-	color      : var(--color-error, #ef4444);
+	color      : var(--color-error);
 	font-size  : 0.8125rem;
 	margin-top : 0.25rem;
 }
 
 .form-control.is-invalid,
 .form-select.is-invalid {
-	border-color : var(--color-error, #ef4444);
+	border-color : var(--color-error);
 }
 
-.alert-danger {
-	background-color : rgba(239, 68, 68, 0.1);
-	border           : 1px solid var(--color-error);
-	color            : var(--color-error);
-}
-
-.alert-danger ul {
-	margin-top   : var(--space-xs);
-	padding-left : var(--space-lg);
-	font-size    : 0.875rem;
-}
-
-/* Form Action Buttons Footer */
-.form-footer {
-	display         : flex;
-	justify-content : flex-end;
-	align-items     : center;
-	gap             : var(--space-md);
-	padding-top     : var(--space-md);
-	border-top      : 1px solid var(--color-border);
-}
-
-.btn-secondary {
-	display          : inline-flex;
-	align-items      : center;
-	padding          : 0.625rem 1.25rem;
-	border-radius    : var(--radius-md);
-	text-decoration  : none;
-	font-weight      : 500;
-	font-size        : 0.875rem;
-	color            : var(--color-text-muted);
-	background-color : transparent;
-	border           : 1px solid var(--color-border);
-	transition       : all 0.2s ease;
-}
-
-.btn-secondary:hover {
-	color            : var(--color-text-primary);
-	background-color : var(--color-bg-alt);
-}
-
-/* Positioning & Autocomplete Dropdown */
-.position-relative {
-	position : relative;
-}
-
+/* Autocomplete Dropdown Menu */
 .autocomplete-results {
 	position      : absolute;
 	top           : 100%;
 	left          : 0;
 	right         : 0;
-	z-index       : 1000;
+	z-index       : 1050; /* Ensure high z-index so it overlays lower inputs */
 	background    : var(--color-surface, #ffffff);
-	border        : 1px solid var(--color-border, #d1d5db);
-	border-radius : var(--radius-md, 0.375rem);
-	box-shadow    : var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+	border        : 1px solid var(--color-border, #e5e7eb);
+	border-radius : var(--radius-md, 6px);
+	box-shadow    : 0 4px 12px rgba(0, 0, 0, 0.15);
 	max-height    : 200px;
 	overflow-y    : auto;
 	margin-top    : 4px;
@@ -166,24 +135,83 @@ textarea.form-control {
 }
 
 .autocomplete-item {
-	padding    : 8px 12px;
-	color      : var(--color-text-primary, #1f2937);
+	padding    : 0.5rem 0.75rem;
+	color      : var(--color-text-primary);
+	font-size  : 0.875rem;
 	cursor     : pointer;
 	transition : background-color 0.15s ease;
 }
 
 .autocomplete-item:hover {
-	background-color : var(--color-bg-alt, #f3f4f6);
+	background-color : var(--color-bg-alt);
 }
 
 .autocomplete-item.no-results,
 .autocomplete-item.loading {
-	color      : var(--color-text-muted, #6b7280);
+	color      : var(--color-text-muted);
 	font-style : italic;
 	cursor     : default;
 }
 
-/* Responsive Grid Adjustments */
+/* Form Actions Footer */
+.form-footer {
+	display         : flex;
+	justify-content : flex-end;
+	align-items     : center;
+	gap             : var(--space-md);
+	padding-top     : var(--space-md);
+	border-top      : 1px solid var(--color-border);
+}
+
+/* General Alert Container */
+.alert {
+	display       : flex;
+	align-items   : flex-start;
+	gap           : var(--space-md, 0.75rem);
+	padding       : var(--space-md, 1rem);
+	border-radius : var(--radius-md, 8px);
+	font-size     : 0.875rem;
+	margin-bottom : var(--space-lg, 1.5rem);
+}
+
+.alert i {
+	font-size   : 1.25rem;
+	line-height : 1.25;
+	flex-shrink : 0;
+}
+
+.alert strong {
+	display       : block;
+	font-size     : 0.9rem;
+	margin-bottom : var(--space-xs, 0.25rem);
+}
+
+.alert ul {
+	margin          : var(--space-xs, 0.25rem) 0 0 0;
+	padding-left    : 1.25rem;
+	list-style-type : disc;
+}
+
+.alert li {
+	margin-bottom : 0.25rem;
+}
+
+.alert li:last-child {
+	margin-bottom : 0;
+}
+
+/* Alert Danger (Error Variant) */
+.alert-danger {
+	background-color : rgba(239, 68, 68, 0.1);
+	border           : 1px solid var(--color-error, #ef4444);
+	color            : var(--color-error, #ef4444);
+}
+
+.alert-danger i {
+	color : var(--color-error, #ef4444);
+}
+
+/* Responsive Breakdown */
 @media (max-width : 768px) {
 	.form-grid {
 		grid-template-columns : 1fr;

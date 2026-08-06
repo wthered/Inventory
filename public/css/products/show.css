@@ -778,40 +778,39 @@ body {
 /* Adjustment Modal Errors */
 /* Errors container */
 #errors {
-	margin : 1rem 0;
-}
-
-/* Remove default UL styling */
-#errors .error-list {
-	list-style : none;
-	padding    : 0;
-	margin     : 0;
+	margin          : 1rem 0;
+	width           : 100%;
+	padding         : 0 1rem;
+	display         : flex;
+	justify-content : center;
+	align-items     : center;
+	flex-direction  : column;
 }
 
 /* Individual error items */
-#errors .error-list li {
-	padding          : 0.75rem 1rem;
-	margin-bottom    : 0.5rem;
-
-	border-radius    : 0.5rem;
-	font-size        : 0.95rem;
+#errors .error {
+	display          : flex;
+	align-items      : center;
+	gap              : var(--space-xs, 0.5rem);
+	padding          : var(--space-xs) var(--space-sm);
+	margin-top       : var(--space-xs);
+	background-color : rgba(239, 68, 68, 0.15);
+	color            : var(--color-error, #ef4444);
+	border           : 1px solid var(--color-error, #ef4444);
+	border-radius    : var(--radius-md, 0.5rem);
+	font-size        : 0.85rem;
+	font-weight      : 500;
 	line-height      : 1.4;
-
-	/* fallback if alert classes are not Bootstrap */
-	background-color : #fff3cd;
-	border           : 1px solid #ffeeba;
-	color            : #856404;
+	animation        : fadeIn 0.2s ease-in-out;
+	flex             : 1;
+	flex-wrap        : wrap;
+	width            : 100%;
 }
 
-/* Remove margin from last item */
-#errors .error-list li:last-child {
-	margin-bottom : 0;
-}
-
-/* Optional: subtle icon before each error */
-#errors .error-list li::before {
-	content      : "⚠️";
-	margin-right : 0.5rem;
+/* Optional warning icon before message */
+#errors .error::before {
+	content   : "⚠️";
+	font-size : 0.85rem;
 }
 
 /* //Adjustment Modal Errors */

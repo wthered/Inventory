@@ -22,7 +22,7 @@
 			'tax_number',
 			'billing_address',
 			'shipping_address',
-			'city',
+			'city_id',
 			'state',
 			'country_id',
 			'postal_code',
@@ -47,9 +47,7 @@
 			'tax_number'       => 'string',    // 18 looks like an integer
 			'billing_address'  => 'string',
 			'shipping_address' => 'string',
-			'city'             => 'string',
 			'state'            => 'string',
-			'country'          => 'string',
 			'postal_code'      => 'string',     // zip codes often contain hyphens → keep as string
 			'customer_type'    => 'string',
 			'credit_limit'     => 'decimal:2',  // money with 2 decimal places
@@ -67,5 +65,9 @@
 
 		public function country(): BelongsTo {
 			return $this->belongsTo(Country::class);
+		}
+
+		public function city(): BelongsTo {
+			return $this->belongsTo(City::class);
 		}
 	}

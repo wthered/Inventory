@@ -2,6 +2,7 @@
 
 	namespace App\Models\HumanResources;
 
+	use App\Enums\HumanResources\EmployeeStatus;
 	use App\Models\User;
 	use App\Models\Warehouse;
 	use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,6 +31,7 @@
 		protected $casts = [
 			'hire_date' => 'date',
 			'is_active' => 'boolean',
+			'status'    => EmployeeStatus::class,
 		];
 
 		/**

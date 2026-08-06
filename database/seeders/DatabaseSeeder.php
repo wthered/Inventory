@@ -2,7 +2,11 @@
 
 	namespace Database\Seeders;
 
-	use Database\Seeders\HumanResources\HumanResourcesSeeder;
+	use Database\Seeders\HumanResources\AttendanceSeeder;
+	use Database\Seeders\HumanResources\DepartmentSeeder;
+	use Database\Seeders\HumanResources\EmployeeSeeder;
+	use Database\Seeders\HumanResources\LeaveRequestSeeder;
+	use Database\Seeders\HumanResources\PositionSeeder;
 	use Database\Seeders\inventories\Audits\InventoryAuditSeeder;
 	use Database\Seeders\inventories\InventoryMovementLogSeeder;
 	use Database\Seeders\inventories\InventorySeeder;
@@ -45,9 +49,6 @@
 
 				// This seeder also does product_supplier seeding
 				SupplierSeeder::class,
-
-				// Human Resources
-				HumanResourcesSeeder::class,
 			]);
 
 			// --- 2. Locations & Αρχικό Απόθεμα ---
@@ -81,6 +82,15 @@
 
 				StockReturnSeeder::class,
 				StockReturnItemSeeder::class,
+			]);
+
+			// Human Resources
+			$this->call([
+				DepartmentSeeder::class,
+				PositionSeeder::class,
+				EmployeeSeeder::class,
+				LeaveRequestSeeder::class,
+				AttendanceSeeder::class,
 			]);
 
 			Schema::enableForeignKeyConstraints();

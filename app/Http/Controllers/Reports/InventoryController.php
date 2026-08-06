@@ -2,14 +2,21 @@
 
 	namespace App\Http\Controllers\Reports;
 
+	use App\DataTransferObjects\ProductDTO;
+	use App\Enums\Inventory\AdjustmentType;
+	use App\Enums\Inventory\MovementStatus;
 	use App\Http\Controllers\Controller;
+	use App\Http\Requests\Inventories\AdjustInventoryRequest;
 	use App\Http\Requests\Inventories\FetchProductLocationOptionsRequest;
+	use App\Models\Inventories\Inventory;
 	use App\Models\Product;
+	use App\Models\StockAdjustment;
 	use App\Services\Inventory\InventoryReportService;
 	use App\Services\Inventory\LocationOptionsService;
+	use Carbon\Carbon;
 	use Illuminate\Contracts\View\View;
 	use Illuminate\Http\JsonResponse;
-	use Illuminate\Http\Request;
+	use Illuminate\Support\Str;
 
 	class InventoryController extends Controller {
 		/**
@@ -22,7 +29,7 @@
 		 * Constructor with dependency injection
 		 */
 		public function __construct(InventoryReportService $reportService, LocationOptionsService $locationService) {
-			$this->reportService   = $reportService;
+			$this->reportService = $reportService;
 			$this->locationService = $locationService;
 		}
 
@@ -53,7 +60,33 @@
 			return response()->json($options);
 		}
 
-		public function getInventories(Request $request, Product $product): JsonResponse {
-			return response()->json($product->inventories());
+		public function adjust(AdjustInventoryRequest $request, Inventory $inventory) {
+			$input = $request->validated();
+//			dd($input);
+
+			$adjustment = StockAdjustment::query()->create([
+				'adjustment_number' => 'ADJ-'.Str::upper(Str::random(8)),
+				'warehouse_id'      => $input['warehouse_id'],
+				'adjustment_date'   => Carbon::now(config('app.timezone'))->toDateString(),
+				'notes'             => $input['notes'],
+				'status'            => MovementStatus::PENDING->value,
+				'created_by'        => $input['created_by'],
+			]);
+
+			$object = new ProductDTO($input['product']);
+			$productLocation = $object->product->inventories()->where('location_id', $input['location'])->first();
+			$adjustment->items()->create([
+				'product_id'      => $object->id,
+				'location_id'     => $input['location'],
+				'reason'          => $input['reason'],
+				'quantity'        => $input['quantity'],
+				'quantity_before' => $productLocation->quantity,
+				//				'quantity_after'      => 'Handled by Observer'
+				'unit_cost'       => $object->cost_price,
+				'type'            => AdjustmentType::ADJUSTMENT->value,
+				'notes'           => $input['notes'],
+			]);
+
+			return response()->json(['success' => true]);
 		}
 	}

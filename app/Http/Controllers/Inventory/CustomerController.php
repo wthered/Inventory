@@ -28,11 +28,11 @@
 			// Search by name, company, email, phone, or code
 			if ($search = $request->input('search')) {
 				$query->where(function ($q) use ($search) {
-					$q->where('name', 'like', "%{$search}%")
-					  ->orWhere('company_name', 'like', "%{$search}%")
-					  ->orWhere('email', 'like', "%{$search}%")
-					  ->orWhere('phone', 'like', "%{$search}%")
-					  ->orWhere('code', 'like', "%{$search}%");
+					$q->where('name', 'like', "%".$search."%")
+					  ->orWhere('company_name', 'like', "%".$search."%")
+					  ->orWhere('email', 'like', "%".$search."%")
+					  ->orWhere('phone', 'like', "%".$search."%")
+					  ->orWhere('code', 'like', "%".$search."%");
 				});
 			}
 
@@ -51,11 +51,9 @@
 		/**
 		 * Show the form for creating a new customer.
 		 *
-		 * @param  Request  $request
-		 *
 		 * @return \Illuminate\View\View
 		 */
-		public function create(Request $request) {
+		public function create() {
 			return view('customers.create', [
 				'countries' => Country::query()->get(),
 				'terms'     => PaymentTerms::cases(),
@@ -82,35 +80,36 @@
 		/**
 		 * Display the specified customer profile.
 		 *
-		 * @param  Request   $request
 		 * @param  Customer  $customer
 		 *
 		 * @return \Illuminate\View\View
 		 */
-		public function show(Request $request, Customer $customer) {
+		public function show(Customer $customer) {
 			// Eager load sales_orders with creator, ordered by order_date descending
 			$customer->load([
 				'sales' => function ($query) {
 					$query->with('creator')->orderBy('order_date', 'desc');
-				}
+				},
+				'city',
+				'country',
 			]);
 
-			return view('customers.show', compact('customer'));
+			return view('customers.show', ['customer' => $customer]);
 		}
 
 		/**
 		 * Show the form for editing the specified customer.
 		 *
-		 * @param  Request   $request
 		 * @param  Customer  $customer
 		 *
 		 * @return \Illuminate\View\View
 		 */
-		public function edit(Request $request, Customer $customer) {
+		public function edit(Customer $customer) {
 			return view('customers.edit', [
-				'customer' => $customer,
-				'terms'    => PaymentTerms::cases(),
-				'types'    => CustomerType::cases(),
+				'customer'  => $customer,
+				'countries' => Country::query()->get(),
+				'terms'     => PaymentTerms::cases(),
+				'types'     => CustomerType::cases(),
 			]);
 		}
 
@@ -123,6 +122,7 @@
 		 * @return RedirectResponse
 		 */
 		public function update(CustomerUpdateRequest $request, Customer $customer) {
+//			dd($request->validated());
 			$customer->update($request->validated());
 
 			return redirect()

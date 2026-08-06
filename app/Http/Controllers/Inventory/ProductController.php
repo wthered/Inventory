@@ -4,6 +4,7 @@
 
 	use App\DataTransferObjects\ProductDTO;
 	use App\Enums\Inventory\AdjustmentReason;
+	use App\Enums\Stock\ProductStockStatus;
 	use App\Http\Controllers\Controller;
 	use App\Http\Requests\Products\ProductInformationRequest;
 	use App\Http\Requests\Products\ProductSearchRequest;
@@ -17,6 +18,7 @@
 	use App\Services\Inventory\InventoryLevelService;
 	use App\Services\Inventory\LocationOptionsService;
 	use App\Services\Search\ProductSearchService;
+	use App\Traits\Profile\ManagesUserSettings;
 	use Exception;
 	use Illuminate\Contracts\View\Factory;
 	use Illuminate\Contracts\View\View;
@@ -26,6 +28,8 @@
 	use Illuminate\Support\Collection;
 
 	class ProductController extends Controller {
+		// Imports all methods from the trait directly into this class
+		use ManagesUserSettings;
 
 		private InventoryLevelService  $service;
 		private ProductSearchService   $searchService;
@@ -46,11 +50,13 @@
 		 */
 		public function index(): Factory|View {
 			return view('products.index', [
-				'categories' => Category::query()->whereNull('parent_id')->get(),
-				'suppliers'  => Supplier::all(),
+				'categories'  => Category::query()->whereNull('parent_id')->get(),
+				'suppliers'   => Supplier::all(),
+				'stockStatus' => ProductStockStatus::class,
+				//				'brands'     => Brand::all(),
 
 				// 1. Counts - Χρησιμοποιούμε τη λογική των inventories
-				'low_stock'  => Product::query()->whereHas('inventories', function ($q) {
+				'low_stock'   => Product::query()->whereHas('inventories', function ($q) {
 					$q->havingRaw('SUM(available_quantity) <= products.reorder_point');
 				})->count(),
 
@@ -85,10 +91,14 @@
 			$profit = $entry->selling_price - $entry->cost_price;
 
 			$inventoryItems = Collection::make($entry->inventories->items());
+//			dd($inventoryItems);
+
 			$stock = Collection::make([
 				'available' => $inventoryItems->sum('available_quantity'),
 				'reserved'  => $inventoryItems->sum('reserved_quantity'),
 			]);
+
+//			dd($stock);
 
 			$inventoryStatuses = [];
 			$entry->inventories->each(function (Inventory $item) use (&$inventoryStatuses, $entry) {
@@ -119,11 +129,14 @@
 		public function edit(Request $request, int $product): Factory|View {
 
 			$object = new ProductDTO($product);
+			$preferred = $object->suppliers->where('pivot.is_preferred', 1)->first();
 
 			return view('products.edit', [
 				'categories'       => Category::query()->whereNull('parent_id')->orderBy('sort_order')->get(),
 				'child_categories' => Category::query()->where('parent_id', $object->category['parent_id'])->get(),
-				'brands'           => Category::query()->find($object->category['parent_id'])->brands()->get(),
+				'brands'           => Category::query()->find($object->product['category_id'])->brands()->pluck('name', 'id'),
+				'suppliers'        => Supplier::query()->pluck('name', 'id'),
+				'product_supplier' => $preferred->id,
 				'product'          => $object,
 			]);
 		}
@@ -194,11 +207,14 @@
 
 		public function getInformation(ProductInformationRequest $request): JsonResponse {
 			$input = Collection::make($request->validated());
+			$productObject = new ProductDTO($input->get('product'));
 			return response()->json([
-				'product' => $input->get('product'),
+				'product' => $productObject,
 			]);
 		}
 
+		// Used by js/stocks/adjustments/search/products.js
+		// Used by js/stocks/adjustments/search/create.js
 		public function search(ProductSearchRequest $request): JsonResponse {
 			// Retrieve only safely validated data from the request rules
 			$filters = $request->validated();

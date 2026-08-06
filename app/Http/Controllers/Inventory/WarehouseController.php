@@ -177,6 +177,7 @@
 
 		public function getLocations(FetchProductLocationOptionsRequest $request): JsonResponse {
 			$input = $request->validated();
+//			dd($input);
 			$warehouse = Warehouse::query()->find($input['warehouse']);
 
 			return response()->json([
@@ -188,97 +189,88 @@
 			]);
 		}
 
-		private function createZoneOptions(Warehouse $warehouse): Collection {
+		private function createZoneOptions(Warehouse $warehouse): string {
 			return Collection::range(1, $warehouse['zones'])->map(function ($zone) {
-				return [
-					'value' => "Z".$zone,
-					'text'  => "Zone ".$zone
-				];
-			});
+				return "<option value='Z".$zone."'>Zone ".$zone."</option>";
+			})->prepend("<option value=''>Warehouse Zone</option>")->implode('');
 		}
 
-		private function createAisleOptions(Warehouse $warehouse): array {
-			$options = Collection::range(1, $warehouse['aisles'])->map(function (int $aisle) {
+		private function createAisleOptions(Warehouse $warehouse): string {
+			return Collection::range(1, $warehouse['aisles'])->map(function (int $aisle) {
 				return "<option value='".$aisle."'>Aisle ".$aisle."</option>";
-			})->implode('');
-			return [
-				'options'   => $options,
-				'locations' => $warehouse['aisles'],
-			];
+			})->prepend("<option value=''>Warehouse Aisle</option>")->implode('');
 		}
 
-		private function createRackOptions(Warehouse $warehouse): Collection {
+		private function createRackOptions(Warehouse $warehouse): string {
 			return Collection::range(1, $warehouse['racks'])->map(function ($rack) {
-				return [
-					'value' => $rack,
-					'text'  => $rack
-				];
-			});
+				return "<option value='".$rack."'>Rack ".$rack."</option>";
+			})->prepend("<option value=''>Warehouse Rack</option>")->implode('');
 		}
 
-		private function createShelfOptions(Warehouse $warehouse): Collection {
+		private function createShelfOptions(Warehouse $warehouse): string {
 			return Collection::range(1, $warehouse['shelves'])->map(function ($shelf) {
-				return [
-					'value' => $shelf,
-					'text'  => $shelf
-				];
-			});
+				return "<option value='".$shelf."'>Shelf ".$shelf."</option>";
+			})->prepend("<option value=''>Warehouse Shelf</option>")->implode('');
 		}
 
-		private function createBinOptions(Warehouse $warehouse): Collection {
+		private function createBinOptions(Warehouse $warehouse): string {
 			return Collection::range(1, $warehouse['bins'])->map(function ($bin) {
-				return [
-					'value' => $bin,
-					'text'  => $bin
-				];
-			});
+				return "<option value='".$bin."'>Bin ".$bin."</option>";
+			})->prepend("<option value=''>Warehouse Bin</option>")->implode('');
 		}
 
 		/**
 		 * Gets available destinations when changing the
 		 * desired destination warehouse drop down value
 		 */
-		public function getZones(IndexWarehouseZonesRequest $request, Warehouse $warehouse): JsonResponse {
+		public function getZones(IndexWarehouseZonesRequest $request): JsonResponse {
 			$input = $request->validated();
+//			dd($input['warehouse']);
 
 			return response()->json([
 				'success' => Collection::make($input)->isNotEmpty(),
-				'zone'    => $this->createZoneOptions($warehouse),
+				'zone'    => $this->createZoneOptions(Warehouse::query()->find($input['warehouse'])),
 			]);
 		}
 
-		public function getAisles(IndexWarehouseAislesRequest $request, Warehouse $warehouse): JsonResponse {
+		public function getAisles(IndexWarehouseAislesRequest $request): JsonResponse {
 			$input = $request->validated();
+			$warehouse = Warehouse::query()->find($input['warehouse']);
 
 			return response()->json([
 				'success' => Collection::make($input)->isNotEmpty(),
-				'aisles'  => $this->createAisleOptions($warehouse),
+				'aisle'   => $this->createAisleOptions($warehouse),
 			]);
 		}
 
-		public function getRacks(IndexWarehouseRacksRequest $request, Warehouse $warehouse): JsonResponse {
+		public function getRacks(IndexWarehouseRacksRequest $request): JsonResponse {
+			$input = $request->validated();
+//			dd($input);
+			$warehouse = Warehouse::query()->find($input['warehouse']);
 
 			return response()->json([
 				'success' => Collection::make($request->validated())->isNotEmpty(),
-				'options' => $this->createRackOptions($warehouse),
+				'rack'    => $this->createRackOptions($warehouse),
 			]);
 		}
 
-		public function getShelves(IndexWarehouseShelvesRequest $request, Warehouse $warehouse): JsonResponse {
+		public function getShelves(IndexWarehouseShelvesRequest $request): JsonResponse {
 			$input = $request->validated();
+			$warehouse = Warehouse::query()->find($input['warehouse']);
 
 			return response()->json([
 				'success' => Collection::make($input)->isNotEmpty(),
-				'options' => $this->createShelfOptions($warehouse),
+				'shelf'   => $this->createShelfOptions($warehouse),
 			]);
 		}
 
-		public function getBins(IndexWarehouseBinsRequest $request, Warehouse $warehouse): JsonResponse {
+		public function getBins(IndexWarehouseBinsRequest $request): JsonResponse {
 			$input = $request->validated();
+			$warehouse = Warehouse::query()->find($input['warehouse']);
 
 			return response()->json([
 				'success' => Collection::make($input)->isNotEmpty(),
-				'options' => $this->createBinOptions($warehouse),
+				'bin'     => $this->createBinOptions($warehouse),
 			]);
 		}
 
@@ -315,9 +307,10 @@
 
 			// Pass the Builder to your service
 			return response()->json([
-				'options'   => Collection::make($options[Str::plural($request->validated('type'))])->map(function ($option) {
-					return "<option value='".$option['value']."'>".$option['text']."</option>";
-				})->implode(''),
+				'options'   => Collection::make($options[Str::plural($request->validated('type'))])
+				                         ->map(function ($option) {
+					                         return "<option value='".$option['value']."'>".$option['text']."</option>";
+				                         })->implode(''),
 				'locations' => $locationCollection->map(function (LocationDTO $location) {
 					return view('partials.location_card', ['location' => $location])->render();
 				})->implode(''),
@@ -335,11 +328,8 @@
 		public function getLocationDetails(StockAdjustmentItemRequest $request): JsonResponse {
 			$inputLocation = $request->validated('location_id');
 
-//			dd($inputLocation);
-
 			// Εύρεση της θέσης μαζί με την αποθήκη της
 			$location = WarehouseLocation::query()->with('warehouse')->findOrFail($inputLocation);
-//			dd($location);
 			$warehouse = $location->warehouse;
 
 			// Έλεγχος των ενεργών επιπέδων της αποθήκης
@@ -352,7 +342,10 @@
 			];
 
 			// 5. Ανάκτηση όλων των θέσεων της αποθήκης για το client-side cascade filtering
-			$rawLocations = WarehouseLocation::where('warehouse_id', $warehouse->id)->get()->map(function ($loc) use ($levelsConfig) {
+			$rawLocations = WarehouseLocation::query()->where('warehouse_id', $warehouse->id)->get()->map(function ($loc
+			) use (
+				$levelsConfig
+			) {
 				$codeParts = [];
 				if ($levelsConfig['zone'] && $loc->zone !== null) {
 					$codeParts[] = $loc->zone;
@@ -388,7 +381,10 @@
 
 				$levels['zone'] = ['html' => $zoneHtml, 'disabled' => false, 'visible' => true];
 			} else {
-				$levels['zone'] = ['html' => '', 'disabled' => true, 'visible' => false];
+				$levels['zone'] = [
+					'html'     => "<option value=''>".__('warehouse.levels_plural.zone')."</option>",
+					'disabled' => true, 'visible' => false
+				];
 			}
 
 			// --- AISLE ---
@@ -400,7 +396,10 @@
 
 				$levels['aisle'] = ['html' => $aisleHtml, 'disabled' => false, 'visible' => true];
 			} else {
-				$levels['aisle'] = ['html' => '', 'disabled' => true, 'visible' => false];
+				$levels['aisle'] = [
+					'html'     => "<option value=''>".__('warehouse.levels_plural.aisle')."</option>",
+					'disabled' => true, 'visible' => false
+				];
 			}
 
 			// --- RACK ---
@@ -412,7 +411,10 @@
 
 				$levels['rack'] = ['html' => $rackHtml, 'disabled' => false, 'visible' => true];
 			} else {
-				$levels['rack'] = ['html' => '', 'disabled' => true, 'visible' => false];
+				$levels['rack'] = [
+					'html'     => "<option value=''>".__('warehouse.levels_plural.rack')."</option>",
+					'disabled' => true, 'visible' => false
+				];
 			}
 
 			// --- SHELF ---
@@ -424,7 +426,10 @@
 
 				$levels['shelf'] = ['html' => $shelfHtml, 'disabled' => false, 'visible' => true];
 			} else {
-				$levels['shelf'] = ['html' => '', 'disabled' => true, 'visible' => false];
+				$levels['shelf'] = [
+					'html'     => "<option value=''>".__('warehouse.levels_plural.shelf')."</option>",
+					'disabled' => true, 'visible' => false
+				];
 			}
 
 			// --- BIN ---
@@ -436,7 +441,10 @@
 
 				$levels['bin'] = ['html' => $binHtml, 'disabled' => false, 'visible' => true];
 			} else {
-				$levels['bin'] = ['html' => '', 'disabled' => true, 'visible' => false];
+				$levels['bin'] = [
+					'html'     => "<option value=''>".__('warehouse.levels_plural.bin')."</option>",
+					'disabled' => true, 'visible' => false
+				];
 			}
 
 			return response()->json([
@@ -446,7 +454,26 @@
 			]);
 		}
 
-		public function getWarehouses(Request $request){
+		public function resolveLocation(WarehouseFilterRequest $request): JsonResponse {
+			$input = $request->validated();
 
+			$locationId = WarehouseLocation::query()
+			                               ->where('warehouse_id', $input['warehouse'])
+			                               ->where('zone', $input['zone'])
+			                               ->where('aisle', $input['aisle'])
+			                               ->where('rack', $input['rack'])
+			                               ->where('shelf', $input['shelf'])
+			                               ->where('bin', $input['bin'])
+			                               ->value('id'); // Returns the scalar ID directly (or null if not found)
+
+			if (!$locationId) {
+				return response()->json([
+					'message' => 'The specified location was not found in this warehouse or is not active.'
+				], 404);
+			}
+
+			return response()->json([
+				'id' => $locationId,
+			]);
 		}
 	}

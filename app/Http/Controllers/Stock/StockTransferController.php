@@ -43,27 +43,27 @@
 
 			// 1. Find target location safely
 			$targetLocation = WarehouseLocation::query()
-				->where([
-					'warehouse_id' => $validated['targetLocation']['warehouse'],
-					'zone'         => $validated['targetLocation']['zone'],
-					'aisle'        => $validated['targetLocation']['aisle'],
-					'rack'         => $validated['targetLocation']['rack'],
-					'shelf'        => $validated['targetLocation']['shelf'],
-					'bin'          => $validated['targetLocation']['bin'],
-				])
-				->firstOrFail();
+			                                   ->where([
+				                                   'warehouse_id' => $validated['targetLocation']['warehouse'],
+				                                   'zone'         => $validated['targetLocation']['zone'],
+				                                   'aisle'        => $validated['targetLocation']['aisle'],
+				                                   'rack'         => $validated['targetLocation']['rack'],
+				                                   'shelf'        => $validated['targetLocation']['shelf'],
+				                                   'bin'          => $validated['targetLocation']['bin'],
+			                                   ])
+			                                   ->firstOrFail();
 
 			// 2. Find source inventory to grab batch numbers if tracking
 			$sourceInventory = Inventory::query()
-				->where('location_id', $validated['location_id'])
-				->where('product_id', $validated['product_id'])
-				->firstOrFail();
+			                            ->where('location_id', $validated['location_id'])
+			                            ->where('product_id', $validated['product_id'])
+			                            ->firstOrFail();
 
 			try {
 				return DB::transaction(function () use ($validated, $sourceInventory, $targetLocation) {
 
 					// Create Header
-					$transfer = StockTransfer::create([
+					$transfer = StockTransfer::query()->create([
 						'transfer_number'     => StockTransfer::generateTransferNumber(),
 						'source_warehouse_id' => $validated['sourceLocation']['warehouse'],
 						'target_warehouse_id' => $validated['targetLocation']['warehouse'],
@@ -89,7 +89,7 @@
 					return response()->json([
 						'transfer' => $transfer->id,
 						'item'     => $item->id,
-						'success'  => "Transfer " . $transfer->transfer_number . " initiated successfully.",
+						'success'  => "Transfer ".$transfer->transfer_number." initiated successfully.",
 					]);
 				});
 			} catch (InsufficientStockException $e) {
@@ -149,7 +149,7 @@
 			} catch (Throwable $e) {
 				return redirect()
 					->route('inventory.transfers.index')
-					->with('error', 'Παρουσιάστηκε σφάλμα κατά την ακύρωση της μεταφοράς: ' . $e->getMessage());
+					->with('error', 'Παρουσιάστηκε σφάλμα κατά την ακύρωση της μεταφοράς: '.$e->getMessage());
 			}
 		}
 
@@ -191,14 +191,17 @@
 				return redirect()
 					->back()
 					->withInput()
-					->with('error', 'Παρουσιάστηκε σφάλμα κατά την ενημέρωση: ' . $e->getMessage());
+					->with('error', 'Παρουσιάστηκε σφάλμα κατά την ενημέρωση: '.$e->getMessage());
 			}
 		}
 
 		/**
 		 * Show the form for editing the specified stock transfer.
 		 */
-		public function edit(Request $request, StockTransfer $transfer): Factory|View|\Illuminate\View\View|RedirectResponse {
+		public function edit(
+			Request $request,
+			StockTransfer $transfer
+		): Factory|View|\Illuminate\View\View|RedirectResponse {
 			// Ασφάλεια: Επιτρέπεται η επεξεργασία ΜΟΝΟ αν η κατάσταση είναι PENDING
 			if ($transfer->status_id !== TransferStatus::PENDING) {
 				return redirect()
@@ -216,7 +219,7 @@
 				'transfer' => $transfer,
 				// Αν χρειάζεσαι λίστα αποθηκών για αλλαγή (προαιρετικά, αν το επιτρέπεις)
 				// 'warehouses' => \App\Models\Warehouse::all(),
-				'user'      => Auth::check() ? UserDTO::fromModel(Auth::user()) : null,
+				'user'     => Auth::check() ? UserDTO::fromModel(Auth::user()) : null,
 			]);
 		}
 	}

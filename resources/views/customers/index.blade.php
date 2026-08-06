@@ -42,6 +42,7 @@
                            name="search"
                            value="{{ request('search') }}"
                            placeholder="Search by name, email, phone, code..."
+                           aria-label="Search customers"
                            class="form-control">
                 </div>
 
@@ -114,21 +115,23 @@
                                 @endif
                             </td>
                             <td class="text-right actions-cell">
-                                @can('customer.view')
-                                    <a href="{{ route('inventory.customers.show', $customer->id) }}"
-                                       class="btn-icon"
-                                       title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                @endcan
+                                <div class="action-buttons-group">
+                                    @can('customer.view')
+                                        <a href="{{ route('inventory.customers.show', $customer->id) }}"
+                                           class="btn-action btn-show"
+                                           title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    @endcan
 
-                                @can('customer.update')
-                                    <a href="{{ route('inventory.customers.edit', $customer->id) }}"
-                                       class="btn-icon"
-                                       title="Edit Customer">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                @endcan
+                                    @can('customer.update')
+                                        <a href="{{ route('inventory.customers.edit', $customer->id) }}"
+                                           class="btn-action btn-edit"
+                                           title="Edit Customer">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    @endcan
+                                </div>
                             </td>
                         </tr>
                     @empty

@@ -13,7 +13,7 @@
     <div class="main-container">
 
         {{-- Page Header --}}
-        <div class="page-header-container">
+        <div class="page-header">
             <div class="header-titles">
                 <h1 class="page-title">Επεξεργασία Προσαρμογής #{{ $adjustment->id }}</h1>
                 <p class="page-subtitle">
@@ -76,8 +76,11 @@
                 <div class="form-group">
                     <label class="form-label">Υπεύθυνη Αποθήκη</label>
                     <div class="input-group">
-                        <span class="input-group-text" style="background-color: #e9ecef;"><i class="bi bi-house-door"></i></span>
-                        <input type="text" class="form-input fw-bold text-primary" value="{{ $manager ? $manager->firstName." ".$manager->lastName : 'Δεν ορίστηκε' }}" readonly disabled style="background-color: #f8f9fa;">
+                        <span class="input-group-text" style="background-color: #e9ecef;"><i
+                                    class="bi bi-house-door"></i></span>
+                        <input type="text" class="form-input fw-bold text-primary"
+                               value="{{ $manager ? $manager->firstName." ".$manager->lastName : 'Δεν ορίστηκε' }}"
+                               readonly disabled style="background-color: #f8f9fa;">
                     </div>
                     {{-- Κρυφό input για να περνάει το warehouse_id στο request αν χρειάζεται --}}
                     <input type="hidden" name="warehouse_id" value="{{ $adjustment->warehouse_id }}">
@@ -145,10 +148,12 @@
                                 {{-- 2. Brand Selector --}}
                                 <div class="form-group">
                                     <label class="form-label" for="brand">Μάρκα (Brand)</label>
-                                    <select class="form-select brand-select" id="brand" data-item-id="{{ $item->id }}" {{ !data_get($item, 'product.category_id') ? 'disabled' : '' }}>
+                                    <select class="form-select brand-select" id="brand"
+                                            data-item-id="{{ $item->id }}" {{ !data_get($item, 'product.category_id') ? 'disabled' : '' }}>
                                         <option value="">Επιλέξτε Μάρκα...</option>
                                         @if($item->product && $item->product->brand)
-                                            <option value="{{ $item->product->brand_id }}" selected>{{ $item->product->brand->name }}</option>
+                                            <option value="{{ $item->product->brand_id }}"
+                                                    selected>{{ $item->product->brand->name }}</option>
                                         @endif
                                     </select>
                                 </div>
@@ -174,9 +179,12 @@
                                 </div>
 
                                 {{-- Location Selector με 5 Cascade Επιπέδα --}}
-                                <div class="form-group warehouse-cascade-container" data-item-id="{{ $item->id }}" style="margin-bottom: 1rem;">
+                                <div class="form-group warehouse-cascade-container" data-item-id="{{ $item->id }}"
+                                     style="margin-bottom: 1rem;">
 
-                                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Θέση (Location)</label>
+                                    <label class="form-label"
+                                           style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Θέση
+                                        (Location)</label>
 
                                     {{-- Το κρυφό input που κρατάει το ID για το Request --}}
                                     <input type="hidden"
@@ -246,7 +254,9 @@
                                 {{-- Quantity --}}
                                 <div class="form-group">
                                     <label class="form-label">Ποσότητα Μεταβολής</label>
-                                    <input type="number" name="items[{{ $item->id }}][quantity]" class="form-input" min="1" value="{{ old("items.{$item->id}.quantity", abs($item->quantity)) }}" required>
+                                    <input type="number" name="items[{{ $item->id }}][quantity]" class="form-input"
+                                           min="1" value="{{ old("items.{$item->id}.quantity", abs($item->quantity)) }}"
+                                           required>
                                 </div>
                             </div>
                         </div>

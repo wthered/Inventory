@@ -12,6 +12,6 @@
 		 */
 		public function apply(Builder $builder, Model $model): void {
 			// Example: only include active brands
-			$builder->where('is_active', true);
+			$builder->where('is_active', true)->orderBy('name');
 		}
 	}

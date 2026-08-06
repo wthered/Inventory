@@ -2,14 +2,13 @@
 
 	namespace App\Http\Requests\Inventories;
 
+	use App\Models\Inventories\Inventory;
 	use App\Models\Inventories\InventoryTransaction;
-	use App\Models\Inventory;
 	use App\Models\Product;
 	use Carbon\Carbon;
 	use Illuminate\Contracts\Validation\ValidationRule;
 	use Illuminate\Contracts\Validation\Validator;
 	use Illuminate\Foundation\Http\FormRequest;
-	use Illuminate\Support\Collection;
 	use Illuminate\Support\Facades\Auth;
 	use Illuminate\Validation\Rule;
 
@@ -129,9 +128,9 @@
 				// Example 2: Business logic for decrease adjustments
 				if ($this->input('type') === 'decrease') {
 					$inventory = Inventory::query()
-						->where('product_id', $this->input('product_id'))
-						->where('location_id', $this->input('location_id'))
-						->first();
+					                      ->where('product_id', $this->input('product_id'))
+					                      ->where('location_id', $this->input('location_id'))
+					                      ->first();
 
 					if (!$inventory) {
 						$validator->errors()->add('quantity', 'No inventory record found for this product and location.');
@@ -142,10 +141,10 @@
 
 				// Example 3: Check for duplicate recent adjustments
 				$recentAdjustment = InventoryTransaction::where('product_id', $this->input('product_id'))
-					->where('location_id', $this->input('location_id'))
-					->where('quantity', $this->input('quantity'))
-					->where('type', $this->input('type'))
-					->where('created_at', '>=', Carbon::now()->subMinutes(5));
+				                                        ->where('location_id', $this->input('location_id'))
+				                                        ->where('quantity', $this->input('quantity'))
+				                                        ->where('type', $this->input('type'))
+				                                        ->where('created_at', '>=', Carbon::now()->subMinutes(5));
 
 				if ($recentAdjustment->exists()) {
 					$validator->errors()->add('quantity', 'A similar adjustment was made recently (last 5 minutes). Please confirm this is intentional.');
@@ -171,9 +170,5 @@
 				'reason'      => trim($this->input('reason')),
 				'notes'       => $this->input('notes') ? trim($this->input('notes')) : null,
 			]);
-		}
-
-		public function validated($key = null, $default = null) {
-			return Collection::make(parent::validated());
 		}
 	}

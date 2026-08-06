@@ -1,5 +1,4 @@
 /* --- Root Variables (DARK THEME - UNIFIED) --- */
-/* --- Root Variables (DARK THEME - UNIFIED) --- */
 :root {
 	/* --- COLOR PALETTE (DARK THEME) --- */
 	--color-bg             : #0f172a;
@@ -13,7 +12,7 @@
 
 	--color-accent         : #10b981;
 	--color-primary        : #3b82f6;
-	/* RGB version for transparency (used in notifications) */
+	/* RGB version for transparency */
 	--color-primary-rgb    : 59, 130, 246;
 	--color-primary-hover  : #2563eb;
 
@@ -30,7 +29,7 @@
 	--radius-full          : 9999px;
 
 	/* --- SPACING SCALE --- */
-	--space-xs             : 0.25rem; /* Η προσθήκη που χρειαζόμασταν */
+	--space-xs             : 0.25rem;
 	--space-sm             : 0.5rem;
 	--space-md             : 1rem;
 	--space-lg             : 1.5rem;
@@ -41,9 +40,9 @@
 	--shadow-md            : 0 4px 10px rgba(0, 0, 0, 0.25);
 	--shadow-lg            : 0 6px 20px rgba(0, 0, 0, 0.3);
 
-	/* --- FONT --- */
-	--font-family          : 'Inter';
-	--font-mono            : monospace;
+	/* --- TYPOGRAPHY --- */
+	--font-family          : 'Inter', system-ui, -apple-system, sans-serif;
+	--font-mono            : ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
 }
 
 /* --- Base Reset & Global Layout --- */
@@ -120,6 +119,30 @@ body #box {
 	text-align : right;
 }
 
+/* Base Form Inputs & Controls */
+.form-control {
+	width            : 100%;
+	padding          : 0.625rem 0.875rem;
+	font-size        : 0.875rem;
+	background-color : var(--color-input-bg);
+	color            : var(--color-input-text);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-md);
+	outline          : none;
+	transition       : border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+	border-color : var(--color-primary);
+	box-shadow   : 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.form-control::placeholder {
+	color : var(--color-text-muted);
+}
+
+/* //Base Form Inputs & Controls */
+
 /* Buttons & Triggers */
 .btn-primary {
 	display          : inline-flex;
@@ -151,11 +174,66 @@ body #box {
 	font-size : 0.8125rem;
 }
 
+.btn-secondary {
+	display          : inline-flex;
+	align-items      : center;
+	justify-content  : center;
+	gap              : var(--space-xs);
+	padding          : 0.625rem 1rem;
+	font-size        : 0.875rem;
+	font-weight      : 500;
+	border-radius    : var(--radius-md);
+	background-color : var(--color-bg-alt);
+	color            : var(--color-text-primary);
+	border           : 1px solid var(--color-border);
+	cursor           : pointer;
+	text-decoration  : none;
+	transition       : background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+	white-space      : nowrap;
+}
+
+.btn-secondary:hover {
+	background-color : var(--color-border);
+	color            : var(--color-text-primary);
+}
+
 /* Action Buttons Group */
 .action-buttons-group {
 	display         : inline-flex;
 	gap             : var(--space-sm);
 	justify-content : flex-end;
+}
+
+/* Table Action Buttons Container */
+.actions-cell {
+	white-space : nowrap;
+}
+
+/* Base Icon Button */
+.btn-icon {
+	display          : inline-flex;
+	align-items      : center;
+	justify-content  : center;
+	width            : 32px;
+	height           : 32px;
+	border-radius    : var(--radius-md);
+	border           : 1px solid var(--color-border);
+	background-color : var(--color-bg-alt);
+	color            : var(--color-text-muted);
+	font-size        : 0.875rem;
+	text-decoration  : none;
+	transition       : all 0.2s ease;
+}
+
+.btn-icon:hover {
+	color            : var(--color-primary);
+	border-color     : var(--color-primary);
+	background-color : rgba(var(--color-primary-rgb), 0.1);
+	transform        : translateY(-1px);
+}
+
+.btn-icon:active {
+	transform : translateY(0);
 }
 
 .inline-form {

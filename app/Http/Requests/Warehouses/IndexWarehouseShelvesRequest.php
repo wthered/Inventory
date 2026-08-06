@@ -30,15 +30,13 @@
 					'required',
 					'integer',
 					'min:1',
-					Rule::exists('products', 'id')
-						->whereNull('deleted_at'),
+					Rule::exists('products', 'id')->whereNull('deleted_at'),
 				],
 				'warehouse' => [
 					'required',
 					'integer',
 					'min:1',
-					Rule::exists('warehouses', 'id')
-						->whereNull('deleted_at'),
+					Rule::exists('warehouses', 'id')->whereNull('deleted_at'),
 				],
 				'zone'      => [
 					'required',
@@ -64,19 +62,12 @@
 		 * Configure the validator instance.
 		 */
 		public function withValidator($validator): void {
+//			dd();
 			$validator->after(function ($validator) {
-				// Validate warehouse from route parameter
-				$warehouse = $this->route('warehouse');
-
-				if (!$warehouse) {
-					$validator->errors()->add('warehouse', 'Warehouse not found in route parameters.');
-					return;
-				}
-
 				// Validate that the warehouse exists and isn't deleted
-				$warehouse = Warehouse::query()->where('id', $warehouse->id)->whereNull('deleted_at');
+				$warehouse = Warehouse::query()->where('id', $this->input('warehouse'))->pluck('id');
 
-				if (!$warehouse->exists()) {
+				if ($warehouse->isEmpty()) {
 					$validator->errors()->add('warehouse', 'The specified warehouse does not exist or has been deleted.');
 				}
 			});
@@ -115,24 +106,6 @@
 				'zone'    => 'zone number',
 				'aisle'   => 'aisle number',
 				'rack'    => 'rack number',
-			];
-		}
-
-		/**
-		 * Get the validated data.
-		 */
-		public function validated($key = null, $default = null): array {
-			$validated = parent::validated($key, $default);
-
-			// Get warehouse ID from route parameter
-			$warehouse = $this->route('warehouse');
-
-			return [
-				'product'   => $validated['product'],
-				'warehouse' => $warehouse->id,
-				'zone'      => $validated['zone'],
-				'aisle'     => $validated['aisle'],
-				'rack'      => $validated['rack'],
 			];
 		}
 

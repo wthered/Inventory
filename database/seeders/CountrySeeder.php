@@ -25,6 +25,7 @@
 				$this->command->info("Fetching batch ".($step + 1)."/".$totalSteps." (offset=".$offset.")...");
 
 				$response = Http::timeout(15)
+				                ->retry(3, 2000)
 				                ->withToken('rc_live_8e59ad65846046359a2af02eac868d67')
 				                ->get('https://api.restcountries.com/countries/v5', [
 					                'limit'  => $limit,
@@ -63,13 +64,20 @@
 							'name'       => $country['names']['common'] ?? $code,
 							'code_alpha' => $country['codes']['alpha_3'] ?? null,
 							'phone_code' => $phoneCode,
-							'is_active'  => true,
+							'is_active'  => false,
 						]
 					);
 				}
 			}
 
-			Country::query()->whereIn('code', ['GR', 'FR', 'DE', 'US', 'CY', 'UK'])->update(['is_active' => true]);
+			// 1. Reset all countries to inactive
+			Country::query()->update(['is_active' => false]);
+
+			// 2. Activate only the target 6 countries (using GB instead of UK)
+			Country::query()->withoutGlobalScopes()
+			       ->whereIn('code', ['GR', 'FR', 'DE', 'US', 'CY', 'GB'])
+			       ->update(['is_active' => true]);
+
 			$this->command->info('Countries seeded successfully!');
 		}
 	}

@@ -77,7 +77,7 @@
 
 			$states = $country->cities()
 			                  ->whereNotNull('state')
-			                  ->where('state', 'LIKE', "%".$input['query']."%")
+			                  ->whereRaw('LOWER(state) LIKE ?', ["%".$input['query']."%"])
 			                  ->distinct()
 			                  ->pluck('state')
 			                  ->map(function ($state) {

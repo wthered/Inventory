@@ -89,16 +89,35 @@
    ========================================================================== */
 .sidebar {
 	position         : fixed;
-	top              : 0;
 	left             : -16rem; /* Hidden by default */
 	width            : 16rem;
-	height           : 100%;
+	height           : calc(100vh - 60px);
+	top              : 60px;
 	background-color : var(--color-bg-dark);
-	padding-top      : 60px; /* Offset for fixed navbar */
+	padding-top      : 0;
 	transition       : left 0.3s;
 	z-index          : 1000;
 	box-shadow       : var(--shadow-md);
 	border-right     : 1px solid var(--color-border);
+
+	/* --- VERTICAL SCROLLBAR --- */
+	overflow-y       : auto;
+	scrollbar-width  : thin; /* Firefox */
+	scrollbar-color  : var(--color-border) transparent; /* Firefox */
+}
+
+/* Custom Scrollbar for Webkit browsers (Chrome, Edge, Safari) */
+.sidebar::-webkit-scrollbar {
+	width : 5px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+	background    : var(--color-border);
+	border-radius : 10px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+	background : transparent;
 }
 
 /* Menu List */

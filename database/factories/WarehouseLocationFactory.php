@@ -14,8 +14,8 @@
 			// Generic fallback values (κυρίως για Unit Tests)
 			return [
 				'warehouse_id'     => Warehouse::factory(),
-				'code'             => 'LOC-' . $this->faker->unique()->bothify('??-##'),
-				'name'             => 'Generic Slot ' . $this->faker->word(),
+				'code'             => 'LOC-'.$this->faker->unique()->bothify('??-##'),
+				'name'             => 'Generic Slot '.$this->faker->word(),
 				'zone'             => 1,
 				'aisle'            => 1,
 				'rack'             => 1,
@@ -37,8 +37,8 @@
 			return $this->state(function (array $attributes) use ($warehouse) {
 				return []; // Επιστρέφουμε άδειο, γιατί θα κάνουμε override στο sequence ή bulk
 			})->afterMaking(function (WarehouseLocation $location) {
-				// Δεν χρειαζόμαστε ενέργειες post-make
-				print("End of creation Location " . $location->id . "\n");
+				// Δε χρειαζόμαστε ενέργειες post-make
+				print("End of creation Location ".$location->id."\n");
 			});
 		}
 
@@ -71,7 +71,7 @@
 									'shelf'            => $s,
 									'bin'              => $b,
 									'capacity'         => $capacity,
-									'current_capacity' => 0,
+									'current_capacity' => mt_rand(0, $capacity),
 									'description'      => "Storage unit slot located in Zone ".$z.", Aisle ".$a,
 									'is_active'        => fake()->boolean(),
 									'created_at'       => $now->subHours(mt_rand(0, 23))->setMinutes(mt_rand(0, 59))->setSeconds(mt_rand(0, 59)),

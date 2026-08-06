@@ -53,6 +53,7 @@
         </div>
 
         <!-- Filters -->
+        <!-- Filters -->
         <div class="filters">
             <select class="filter" name="category" id="parent_category">
                 <option value="">All Categories</option>
@@ -60,20 +61,28 @@
                     <option value="{{ $category->id }}">{{ $category['name'] }}</option>
                 @endforeach
             </select>
+
             <select class="filter" name="child_category" id="child_category">
                 <option value="">All Sub Categories</option>
             </select>
+
+            <!-- Brand Dropdown -->
+            <select class="filter" name="brand" id="filter_brand">
+                <option value="">All Brands</option>
+            </select>
+
             <select class="filter" name="supplier" id="filter_supplier">
                 <option value="">All Suppliers</option>
                 @foreach($suppliers as $supplier)
                     <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
                 @endforeach
             </select>
+
             <select class="filter" name="stock" id="filter_stock">
-                <option value="">Stock Status</option>
-                <option value="Stock">In Stock</option>
-                <option value="Low">Low Stock</option>
-                <option value="Out">Out of Stock</option>
+                <option value="" disabled>Stock Status</option>
+                @foreach($stockStatus::cases() as $status)
+                    <option value="{{ $status->value }}" @selected($status === $stockStatus::NORMAL)>{{ $status->label() }}</option>
+                @endforeach
             </select>
         </div>
 
@@ -85,7 +94,7 @@
                     <div>Name</div>
                     <div>SKU</div>
                     <div>Category</div>
-                    <div>Supplier</div>
+                    <div>Brand</div>
                     <div>Stock</div>
                     <div>Selling Price (per Unit)</div>
                     <div>Actions</div>
@@ -97,7 +106,9 @@
                     @endforeach
                 </div>
 
-                {{ $product_list->links('pagination::simple') }}
+                <div class="pagination">
+                    {{ $product_list->links('pagination::simple') }}
+                </div>
 
             </div>
         </div>

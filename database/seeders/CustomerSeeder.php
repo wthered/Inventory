@@ -33,7 +33,7 @@
 		 */
 		private function createCustomerList(): void {
 			$creation_time = Carbon::now(config('app.timezone'));
-			$countries = Country::query()->pluck('id');
+			$countries = Country::query()->whereHas('cities')->with('cities')->get();;
 
 			for ($round = 0; $round < $this->rounds; $round++) {
 				$response = Http::withHeaders([
@@ -45,9 +45,13 @@
 				if ($response->failed()) {
 					$this->command->error('❌ Mockaroo API dropped connection. Using fallback CustomerFactory state.');
 
+					$country = $countries->random();
+					$randomCity = $country->cities->random();
+
 					// Fallback: Αν πέσει το API, παράγουμε 64 records από το Factory απευθείας για να μη σταματήσει το build
 					$fallbackData = Customer::factory()->count(64)->raw([
-						'country_id' => $countries->random(),
+						'country_id' => $country->id,
+						'city_id'    => $randomCity->id,
 						'created_at' => $creation_time,
 						'updated_at' => $creation_time,
 					]);
@@ -59,6 +63,11 @@
 				$apiCustomers = Collection::make($response->json());
 
 				$formatted = $apiCustomers->map(function ($customer) use ($creation_time, $countries) {
+
+					// Selecting a random country
+					$country = $countries->random();
+					$randomCity = $country->cities->random();
+
 					// Χρήση του factory ->raw() για να εξασφαλίσουμε ομοιομορφία
 					// και συμπλήρωση τυχόν πεδίων που λείπουν από το API payload
 					return Customer::factory()->raw([
@@ -70,7 +79,7 @@
 						'tax_number'       => $customer['tax_number'] ?? 'EL'.fake()->numerify('#########'),
 						'billing_address'  => $customer['billing_address'] ?? null,
 						'shipping_address' => $customer['shipping_address'] ?? null,
-						'city'             => $customer['city'] ?? null,
+						'city_id'          => $randomCity->id,
 						'state'            => $customer['state'] ?? null,
 						'country_id'       => $countries->random(),
 						'postal_code'      => $customer['postal_code'] ?? null,

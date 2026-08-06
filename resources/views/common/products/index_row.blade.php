@@ -6,7 +6,7 @@
     <div class="product-sku">{{ $product->sku ?? 'PR-001' }}</div>
     <div class="product-category">{{ $product->category->name ?? 'No Category Name' }}</div>
     <div class="product-brand">{{ $product->brand->name ?? 'No Brand' }}</div>
-    <div class="product-stock">{{ $product->current_stock }}</div>
+    <div class="product-stock">{{ number_format($product->current_stock) }}</div>
     <div class="product-price">€{{ number_format($product->selling_price ?? 0, 2) }}</div>
     <div class="product-actions">
         <a href="{{ route('inventory.products.show', ['product' => $product->id]) }}" class="btn small view"><i

@@ -22,7 +22,7 @@
 			// Υποθέτουμε ότι το Bin είναι απλό νούμερο (integer)
 			$binNumber = filter_var($value, FILTER_VALIDATE_INT) ? intval($value) : null;
 
-			$warehouse = Warehouse::find($this->warehouse);
+			$warehouse = Warehouse::query()->find($this->warehouse);
 
 			if (!$warehouse) {
 				$fail("The warehouse was not found.");

@@ -2,7 +2,9 @@
 
 	namespace Database\Seeders\inventories\Concerns;
 
+	use App\DataTransferObjects\ProductDTO;
 	use Carbon\Carbon;
+	use Illuminate\Support\Collection;
 	use Illuminate\Support\Facades\DB;
 	use Illuminate\Support\Str;
 
@@ -18,56 +20,60 @@
 		protected function seedInventoryRecords($products, $warehouses): void {
 			$this->command->info('--- Starting Inventory Population ---');
 			$now = Carbon::now();
-			$affectedProducts = collect(); // Track modified products for stock recalculation
+			$affectedProducts = Collection::empty(); // Track modified products for stock recalculation
 
 			foreach ($warehouses->shuffle() as $warehouse) {
 				$this->command->comment("Filling Warehouse: ".$warehouse->name."......");
 
 				DB::table('warehouse_locations')
 				  ->where('warehouse_id', $warehouse->id)
-				  ->chunkById(self::BATCH_SIZE, function ($locations) use (
-					  $products,
-					  $warehouse,
-					  $now,
-					  &
-					  $affectedProducts
-				  ) {
+				  ->chunkById(self::BATCH_SIZE, function ($locations) use ($products, $warehouse, &$affectedProducts) {
 					  $batch = [];
 					  $generatedInBatch = [];
 
 					  foreach ($locations->shuffle() as $location) {
-						  if (fake()->boolean(25)) {
-							  $productId = $products->random();
+//						  if (fake()->boolean(25)) {
+						  $product = new ProductDTO($products->random());
 
-							  // Generate wider batch numbers to prevent unexpected upsert overwrites
-							  $batchNumber = 'BATCH-'.Str::padLeft((string) mt_rand(1, 99999), 5, '0');
-							  $signature = "{$productId}-{$warehouse->id}-{$location->id}-{$batchNumber}";
+						  // Generate wider batch numbers to prevent unexpected upsert overwrites
+						  $batchNumber = 'BATCH-'.Str::upper(Str::random(4).'-'.Str::random(4))."-".Str::padLeft(mt_rand(1, 99999), 5, '0');
+						  $signature = $product->id."-".$warehouse->id."-".$location->id."-".$batchNumber;
 
-							  // Guard against in-memory batch collisions
-							  if (isset($generatedInBatch[$signature])) {
-								  continue;
-							  }
+						  // Guard against in-memory batch collisions
+						  if (isset($generatedInBatch[$signature])) {
+							  continue;
+						  }
 
-							  $generatedInBatch[$signature] = true;
-							  $affectedProducts->push($productId);
+						  $generatedInBatch[$signature] = true;
+						  $affectedProducts->push($product->id);
 
-							  $quantity = mt_rand(16, 1024);
-							  $unit_cost = fake()->randomFloat(2, 1, 1000);
+						  $unit_cost = fake()->randomFloat(2, 1, 1000);
 
+						  $initial_quantity = $product->current_stock;
+						  $available = $initial_quantity;
+
+						  while ($available > 0) {
+							  // 1. Pick a random quantity between 1 and the remaining available stock
+							  $quantity = mt_rand(1, $available);
+
+							  // 2. Add to your batch array
 							  $batch[] = [
-								  'product_id'         => $productId,
+								  'product_id'         => $product->id,
 								  'warehouse_id'       => $warehouse->id,
 								  'location_id'        => $location->id,
 								  'quantity'           => $quantity,
-								  'reserved_quantity'  => mt_rand(0, $quantity),
-								  'batch_number'       => $batchNumber,
+								  'reserved_quantity'  => $available - $quantity,
 								  'unit_cost'          => $unit_cost,
 								  'total_cost'         => $quantity * $unit_cost,
-								  'manufacturing_date' => $now->copy()->subMonths(mt_rand(0, 12))->subDays(mt_rand(0, 30))->format('Y-m-d'),
-								  'expiry_date'        => $now->copy()->addYears(mt_rand(0, 8))->addMonths(mt_rand(0, 12))->addDays(mt_rand(0, 30))->format('Y-m-d'),
-								  'created_at'         => $now->copy()->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
-								  'updated_at'         => $now->copy()->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
+								  'batch_number'       => $batchNumber,
+								  'manufacturing_date' => Carbon::now()->copy()->subMonths(mt_rand(0, 12))->subDays(mt_rand(0, 30))->format('Y-m-d'),
+								  'expiry_date'        => Carbon::now()->copy()->addYears(mt_rand(0, 8))->addMonths(mt_rand(0, 12))->addDays(mt_rand(0, 30))->format('Y-m-d'),
+								  'created_at'         => Carbon::now()->copy()->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
+								  'updated_at'         => Carbon::now()->copy()->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
 							  ];
+
+							  // 3. Subtract from available stock
+							  $available -= $quantity;
 						  }
 
 						  $this->command->getOutput()->write('.');

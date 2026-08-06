@@ -673,7 +673,7 @@
                                         Current
                                     </div>
                                     <div id="previewCurrent"
-                                         style="font-size: 24px; font-weight: 600; color: var(--color-text-primary);">0
+                                         style="font-size: 24px; font-weight: 600; color: var(--color-input-bg);">0
                                     </div>
                                 </div>
                                 <div class="preview-item">

@@ -2,10 +2,11 @@
 
 	namespace App\Http\Requests\Products;
 
+	use App\Enums\Stock\ProductStockStatus;
 	use Illuminate\Contracts\Validation\ValidationRule;
 	use Illuminate\Foundation\Http\FormRequest;
 	use Illuminate\Support\Facades\Auth;
-	use Illuminate\Support\Str;
+	use Illuminate\Validation\Rule;
 
 	class FilterProductsRequest extends FormRequest {
 		/**
@@ -16,67 +17,89 @@
 		}
 
 		/**
+		 * Hook: Executed BEFORE validation.
+		 * Used for sanitizing and casting raw inputs.
+		 */
+		protected function prepareForValidation(): void {
+			$this->merge([
+				'category'       => $this->filled('category') ? intval($this->input('category')) : null,
+				'child_category' => $this->filled('child_category') ? intval($this->input('child_category')) : null,
+				'brand'          => $this->filled('brand') ? intval($this->input('brand')) : null,
+				'supplier'       => $this->filled('supplier') ? intval($this->input('supplier')) : null,
+				'status'         => $this->filled('status') ? $this->input('status') : ProductStockStatus::NORMAL->value,
+			]);
+		}
+
+		/**
 		 * Get the validation rules that apply to the request.
 		 *
 		 * @return array<string, ValidationRule|array|string>
 		 */
 		public function rules(): array {
 			return [
-				'category' => [
+				'category'       => [
 					'nullable',
 					'integer',
-					'exists:categories,id'
+					'exists:categories,id',
 				],
-				'supplier' => [
+				'child_category' => [
 					'nullable',
 					'integer',
-					'exists:suppliers,id'
+					Rule::exists('categories', 'id')->where('parent_id', $this->input('category')),
 				],
-				'status'   => [
+				'brand'          => [
+					'nullable',
+					'integer',
+					'exists:brands,id',
+				],
+				'supplier'       => [
+					'nullable',
+					'integer',
+					'exists:suppliers,id',
+				],
+				'status'         => [
 					'nullable',
 					'string',
-					'in:Stock,Low,Out'
+					Rule::enum(ProductStockStatus::class),
 				],
 			];
 		}
 
+		/**
+		 * Custom error messages.
+		 */
 		public function messages(): array {
 			return [
 				// --- Category Messages ---
-				'category.integer' => 'The selected category ID must be a whole number and valid category.',
-				'category.exists'  => 'The chosen category does not exist in the database. Please select a valid one.',
+				'category.integer'       => 'The selected category ID must be a valid whole number.',
+				'category.exists'        => 'The chosen parent category does not exist in the database.',
+				'child_category.integer' => 'The subcategory ID must be a valid whole number.',
+				'child_category.exists'  => 'The chosen subcategory does not exist or is not a valid child category.',
 
 				// --- Supplier Messages ---
-				'supplier.integer' => 'The selected supplier must be a whole number and valid supplier.',
-				'supplier.exists'  => 'The chosen supplier is not recognized. Please select a valid supplier.',
+				'supplier.integer'       => 'The selected supplier must be a whole number.',
+				'supplier.exists'        => 'The chosen supplier is not recognized.',
 
 				// --- Status Messages ---
-				'status.string'    => 'The status must be provided as text',
-				'status.in'        => 'The status must be one of the following options: Stock, Low, or Out.',
+				'status.string'          => 'The stock status must be text.',
+				'status.enum'            => 'The selected stock status is invalid.',
+
+				// --- Brand Messages ---
+				'brand.integer'          => 'The selected brand must be a whole number.',
+				'brand.exists'           => 'The chosen brand does not exist.',
 			];
 		}
 
 		/**
-		 * Hook: Εκτελείται ΠΡΙΝ το validation.
-		 * Χρησιμοποιείται για το "Sanitization" των δεδομένων.
-		 */
-		protected function prepareForValidation(): void {
-			$this->merge([
-				'category' => $this->filled('category') ? intval($this->input('category')) : null,
-				'supplier' => $this->filled('supplier') ? intval($this->input('supplier')) : null,
-				'status'   => $this->input('status') ?: 'Stock',
-			]);
-		}
-
-		/**
-		 * Hook: Εκτελείται ΜΕΤΑ την επιτυχή επαλήθευση.
-		 * Εδώ μπορούμε να κάνουμε τελικές διορθώσεις στα δεδομένα.
+		 * Hook: Executed AFTER successful validation.
+		 * Converts the status string directly into a backed Enum instance for controller usage.
 		 */
 		protected function passedValidation(): void {
-			$this->merge([
-				'status'   => Str::ucfirst(Str::lower($this->validated('status'))),
-				'category' => intval($this->validated('category')),
-				'supplier' => $this->validated('supplier'),
-			]);
+			if (!empty($this->validated('status'))) {
+				$this->merge([
+					// Keep status as the scalar string backing value (e.g. 'in_stock')
+					'status' => ProductStockStatus::from($this->validated('status'))->value,
+				]);
+			}
 		}
 	}

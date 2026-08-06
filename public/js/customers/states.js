@@ -11,14 +11,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!stateInput || !resultsContainer) return;
 
-    stateInput.addEventListener('keyup', function () {
+    // Use 'input' instead of 'keyup' for broader coverage (handles paste, typing, etc.)
+    stateInput.addEventListener('input', function () {
         const query = this.value.trim();
         const countryId = countrySelect ? countrySelect.value : null;
 
-        // Clear previous timer on every keyup
         clearTimeout(debounceTimer);
 
-        // 1. Guard Clause: Require a selected Country
+        // Guard Clause: Require Country selection
         if (!countryId) {
             if (query.length > 0 && countryError) {
                 countryError.classList.remove('d-none');
@@ -30,31 +30,28 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // Hide country warning if a country is selected
         if (countryError) {
             countryError.classList.add('d-none');
         }
 
-        // 2. Hide container if search query is too short
+        // Hide if query is less than 2 chars
         if (query.length < 2) {
             resultsContainer.classList.add('d-none');
             resultsContainer.innerHTML = '';
             return;
         }
 
-        // 3. Show loading indicator while waiting for the 3-second debounce
+        // Show loading text during debounce
         resultsContainer.classList.remove('d-none');
-        resultsContainer.innerHTML = '<div class="autocomplete-item loading"><i class="ri-loader-4-line spin"></i> Searching in 3 seconds...</div>';
+        resultsContainer.innerHTML = '<div class="autocomplete-item loading">Searching...</div>';
 
-        // 4. Set 3000ms (3 seconds) delay after last keyup
+        // 250ms Debounce
         debounceTimer = setTimeout(() => {
             fetchStates(query, countryId);
-        }, 3000);
+        }, 250);
     });
 
     function fetchStates(query, countryId) {
-        resultsContainer.innerHTML = '<div class="autocomplete-item loading">Fetching results...</div>';
-
         const fetchUrl = `/countries/${countryId}/states`;
 
         fetch(fetchUrl, {
@@ -65,35 +62,36 @@ document.addEventListener('DOMContentLoaded', function () {
                 'X-CSRF-TOKEN': token,
             },
             body: JSON.stringify({query: query})
-        }).then(response => {
-            if (!response.ok) throw new Error('Network error');
-            return response.json();
-        }).then(data => {
-            resultsContainer.innerHTML = '';
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response failed');
+                return response.json();
+            })
+            .then(data => {
+                resultsContainer.innerHTML = '';
 
-            if (!data || data.length === 0) {
-                resultsContainer.innerHTML = '<div class="autocomplete-item no-results">No states found</div>';
-                return;
-            }
+                if (!data || data.length === 0) {
+                    resultsContainer.innerHTML = '<div class="autocomplete-item no-results">No states found</div>';
+                    return;
+                }
 
-            console.log("Response:", data);
-            data.forEach(item => {
-                const div = document.createElement('div');
-
-                // On selection
-                div.addEventListener('click', function () {
-                    stateInput.value = item.name || item;
-                    resultsContainer.classList.add('d-none');
-                    resultsContainer.innerHTML = '';
-                });
-
-                resultsContainer.appendChild(div);
+                // Render returned data
+                resultsContainer.innerHTML = data;
+            })
+            .catch(error => {
+                console.error('Error fetching states:', error);
+                resultsContainer.innerHTML = '<div class="autocomplete-item no-results">Error loading suggestions</div>';
             });
-        }).catch(error => {
-            console.error('Error fetching states:', error);
-            resultsContainer.innerHTML = '<div class="autocomplete-item no-results">Error loading suggestions</div>';
-        });
     }
+
+    // Attach click listener once to parent container (Event Delegation)
+    resultsContainer.addEventListener('click', function (e) {
+        const clickedItem = e.target.closest('.autocomplete-item');
+        if (clickedItem && !clickedItem.classList.contains('no-results') && !clickedItem.classList.contains('loading')) {
+            stateInput.value = clickedItem.textContent.trim();
+            resultsContainer.classList.add('d-none');
+        }
+    });
 
     // Hide dropdown when clicking outside
     document.addEventListener('click', function (e) {
@@ -102,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Clear country error automatically if user selects a country later
+    // Clear error indicator when country changes
     if (countrySelect) {
         countrySelect.addEventListener('change', function () {
             if (this.value && countryError) {

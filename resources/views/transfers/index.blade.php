@@ -9,7 +9,7 @@
 @section('content')
     <div class="main-container">
         <!-- Ενιαίο Page Header σύμφωνα με το movement.css -->
-        <div class="page-header-container">
+        <div class="page-header">
             <div class="header-titles">
                 <h1 class="page-title">Stock Transfers</h1>
                 <p class="page-subtitle">Διαχείριση και παρακολούθηση μεταφορών μεταξύ αποθηκών</p>
@@ -63,12 +63,14 @@
                         </td>
                         <td class="text-right">
                             <div class="action-links">
-                                <a href="{{ route('inventory.transfers.show', $transfer) }}" class="link-view" title="Προβολή">
+                                <a href="{{ route('inventory.transfers.show', $transfer) }}" class="link-view"
+                                   title="Προβολή">
                                     View
                                 </a>
 
                                 @if($transfer->status_id === $status::PENDING)
-                                    <a href="{{ route('inventory.transfers.edit', $transfer) }}" class="link-edit" title="Επεξεργασία">
+                                    <a href="{{ route('inventory.transfers.edit', $transfer) }}" class="link-edit"
+                                       title="Επεξεργασία">
                                         Edit
                                     </a>
                                 @endif

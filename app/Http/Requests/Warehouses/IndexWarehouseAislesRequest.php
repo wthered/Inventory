@@ -44,11 +44,11 @@
 					'required',
 					'integer',
 					new ValidZoneForWarehouse($this->input('warehouse')),
-					function ($attribute, $value, $fail) use ($warehouse) {
-						if ($warehouse && $value > $warehouse->zones) {
-							$fail("Zone " . $value . " cannot exceed " . $warehouse->zones . " for this warehouse.");
-						}
-					},
+					//					function ($attribute, $value, $fail) use ($warehouse) {
+					//						if ($warehouse && $value > $warehouse->zones) {
+					//							$fail("Zone " . $value . " cannot exceed " . $warehouse->zones . " for this warehouse.");
+					//						}
+					//					},
 				]
 			];
 		}
@@ -85,7 +85,7 @@
 		protected function passedValidation(): void {
 			$this->merge([
 				// Μετατροπή του zone σε καθαρό integer μετά το επιτυχές validation
-				'zone' => (int) $this->input('zone'),
+				'zone'         => (int) $this->input('zone'),
 
 				// Εξασφαλίζουμε ότι το warehouse_id υπάρχει στα δεδομένα μας
 				// παίρνοντάς το είτε από το input είτε από το route object
