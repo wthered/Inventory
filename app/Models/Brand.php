@@ -2,10 +2,13 @@
 
 	namespace App\Models;
 
+	use Illuminate\Database\Eloquent\Casts\Attribute;
 	use Illuminate\Database\Eloquent\Model;
 	use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 	use Illuminate\Database\Eloquent\Relations\HasMany;
 	use Illuminate\Database\Eloquent\SoftDeletes;
+	use Illuminate\Support\Facades\Storage;
+	use Illuminate\Support\Str;
 
 	class Brand extends Model {
 		use SoftDeletes;
@@ -33,6 +36,30 @@
 			return [
 				'is_active' => 'boolean',
 			];
+		}
+
+		/**
+		 * Accessor for logo_url ($brand->logo_url).
+		 * Resolves storage paths, external URLs, or local fallback images.
+		 */
+		protected function logoUrl(): Attribute {
+			return Attribute::make(
+				get: function (): ?string {
+					if (!$this->logo) {
+						return null;
+					}
+
+					if (Str::startsWith($this->logo, ['http://', 'https://'])) {
+						return $this->logo;
+					}
+
+					if (Str::startsWith($this->logo, 'brands/')) {
+						return Storage::disk('public')->url($this->logo);
+					}
+
+					return asset('images/brands/'.$this->logo);
+				}
+			);
 		}
 
 		/**

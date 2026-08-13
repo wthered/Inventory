@@ -46,11 +46,11 @@
                             <h2><i class="fas fa-file-invoice"></i> Βασικά Στοιχεία Παραγγελίας</h2>
                         </div>
                         <div class="card-body">
+                            {{-- First Row: Customer & Warehouse --}}
                             <div class="input-row">
                                 <div class="form-group">
                                     <label for="customer_id">Πελάτης:</label>
                                     <select name="customer_id" id="customer_id" class="form-select" disabled>
-                                        {{-- Κλειδωμένο κατά το Edit όπως στον Controller σου --}}
                                         <option value="{{ $sale->customer_id }}">
                                             {{ $sale->customer->name ?? 'Unknown Customer' }}
                                         </option>
@@ -73,6 +73,36 @@
                                 </div>
                             </div>
 
+                            {{-- NEW Second Row: Order Status & Payment Status --}}
+                            <div class="input-row">
+                                <div class="form-group">
+                                    <label for="status_id">Κατάσταση Παραγγελίας:</label>
+                                    <select name="status_id" id="status_id"
+                                            class="form-select @error('status_id') is-invalid @enderror">
+                                        @foreach($statuses::cases() as $status)
+                                            <option value="{{ $status->value }}" {{ old('status_id', $sale->status_id->value ?? $sale->status_id) == $status->value ? 'selected' : '' }}>
+                                                {{ $status->label() }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('status_id') <span class="error-text">{{ $message }}</span> @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="payment_status_id">Κατάσταση Πληρωμής:</label>
+                                    <select name="payment_status_id" id="payment_status_id"
+                                            class="form-select @error('payment_status_id') is-invalid @enderror">
+                                        @foreach($payments::cases() as $paymentStatus)
+                                            <option value="{{ $paymentStatus->value }}" {{ old('payment_status_id', $sale->payment_status_id->value ?? $sale->payment_status_id) == $paymentStatus->value ? 'selected' : '' }}>
+                                                {{ $paymentStatus->label() }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('payment_status_id') <span class="error-text">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
+
+                            {{-- NEW Third Row: Dates & Employee --}}
                             <div class="input-row">
                                 <div class="form-group">
                                     <label for="order_date">Ημερομηνία Παραγγελίας:</label>
@@ -85,11 +115,20 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label for="shipping_date">Ημερομηνία Αποστολής:</label>
+                                    <input type="date"
+                                           name="shipping_date"
+                                           id="shipping_date"
+                                           class="form-control @error('shipping_date') is-invalid @enderror"
+                                           value="{{ old('shipping_date', $sale->shipping_date ? $sale->shipping_date->format('Y-m-d') : '') }}">
+                                    @error('shipping_date') <span class="error-text">{{ $message }}</span> @enderror
+                                </div>
+
+                                <div class="form-group">
                                     <label for="created_by">Καταχωρήθηκε από (Υπάλληλος):</label>
                                     <select name="created_by" id="created_by" class="form-select" disabled>
-                                        {{-- Read-only βάσει της λογικής του Controller --}}
                                         <option value="">
-                                            {{ $sale->creator->account->fullName }} (ID)
+                                            {{ $sale->creator->account->fullName ?? $sale->creator->name ?? 'User #' . $sale->created_by }}
                                         </option>
                                     </select>
                                 </div>
@@ -135,22 +174,45 @@
                 <!-- RIGHT COLUMN: Sidebar Form Cards -->
                 <div class="form-sidebar">
                     <!-- Notes & Submit Card -->
-                    <div class="card HTML-card-accent">
+                    <div class="card card-accent">
                         <div class="card-header">
                             <h3><i class="fas fa-comment-alt"></i> Σημειώσεις / Οδηγίες</h3>
                         </div>
                         <div class="card-body">
                             <div class="form-group">
-                                <textarea name="notes" id="notes" rows="6" class="form-control"
-                                          placeholder="Προσθέστε παρατηρήσεις ή οδηγίες παράδοσης...">{{ old('notes', $sale->notes) }}</textarea>
+                <textarea name="notes" id="notes" rows="6" class="form-control"
+                          placeholder="Προσθέστε παρατηρήσεις ή οδηγίες παράδοσης...">{{ old('notes', $sale->notes) }}</textarea>
                             </div>
 
                             <hr class="form-divider">
 
-                            <div class="sidebar-totals">
+                            <div class="sidebar-totals"
+                                 data-subtotal="{{ $sale->subtotal }}"
+                                 data-tax="{{ $sale->tax_amount }}">
+
                                 <div class="total-row">
-                                    <span>Συνολικό Ποσό (Grand Total):</span>
-                                    <span class="font-numeric price-tag">€{{ number_format($sale->grand_total, 2) }}</span>
+                                    <span class="total-label">Μερικό Σύνολο (Subtotal):</span>
+                                    <span class="font-numeric">€{{ number_format($sale->subtotal, 2) }}</span>
+                                </div>
+
+                                <div class="total-row total-row-input">
+                                    <label for="discount_amount">Έκπτωση (€):</label>
+                                    <input type="number" step="0.01" name="discount_amount" id="discount_amount"
+                                           class="form-control font-numeric discount-input"
+                                           value="{{ old('discount_amount', $sale->discount_amount) }}">
+                                </div>
+
+                                <div class="total-row">
+                                    <span class="total-label">ΦΠΑ (Tax):</span>
+                                    <span class="font-numeric">€{{ number_format($sale->tax_amount, 2) }}</span>
+                                </div>
+
+                                <hr class="form-divider">
+
+                                <div class="total-row total-row-grand">
+                                    <span class="total-label">Συνολικό Ποσό (Grand Total):</span>
+                                    <span class="font-numeric price-tag"
+                                          id="grand_total">€{{ number_format($sale->grand_total, 2) }}</span>
                                 </div>
                             </div>
 
@@ -163,4 +225,8 @@
             </div>
         </form>
     </div>
+@endsection
+
+@section('scripts')
+    <script src="{{ asset('js/sales/edit.js') }}"></script>
 @endsection

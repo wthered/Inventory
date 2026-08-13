@@ -37,11 +37,11 @@
 
 			$many_users = $user_data->count();
 			$adminIndex = mt_rand(0, $user_data->count() - 1);
-			$roles      = Role::all();
+			$roles = Role::all();
 
 			// Φιλτράρουμε τους ρόλους για τις τυχαίες αναθέσεις
 			// Εξαιρούμε τον admin (που μπαίνει καρφωτά) και τον warehouse_manager (που ελέγχεται με ακρίβεια)
-			$poolRoles = Role::whereNotIn('name', ['admin', 'warehouse_manager'])->get();
+			$poolRoles = Role::query()->whereNotIn('name', ['admin', 'warehouse_manager'])->get();
 
 			$user_data->shuffle()->each(function ($user, $index) use ($poolRoles, $adminIndex, $roles, $many_users) {
 				// 1. Fixed Date Logic: Use ->copy() to prevent the base date from drifting every loop
@@ -51,7 +51,7 @@
 				$verifiedAt = isset($user['verified_at']) ? Carbon::createFromTimestamp($user['verified_at']) : $createdAt->copy()->addHours(mt_rand(1, 23));
 
 				// 3. Create the User
-				$that_user = User::create([
+				$that_user = User::query()->create([
 					'name'              => $user['username'],
 					'email'             => $user['email'],
 					'email_verified_at' => $verifiedAt->isValid() && fake()->boolean() ? $verifiedAt->timezone(config('app.timezone'))->toDateTimeString() : null,
@@ -88,14 +88,14 @@
 					'first_name'    => $user['forename'],
 					'last_name'     => $user['lastname'],
 					'phone'         => fake()->optional(0.7)->regexify('69[237]\d{7}'),
-					'avatar'        => "https://robohash.org/" . $user['token'] . ".png?size=64x64&set=set" . mt_rand(1, 5),
+					'avatar'        => "https://robohash.org/".$user['token'].".png?size=64x64&set=set".mt_rand(1, 5),
 					'is_active'     => fake()->boolean(90),
 					'last_login_at' => $last_seen->isValid() ? $last_seen->toDateTimeString() : Carbon::now()->toDateTimeString(),
 				]);
 
 				// 6. Clean Progress Output
 				$percent = number_format(100 * ($index + 1) / $many_users, 3);
-				print("[" . $percent . "% done] Created User ID: " . $that_user->id . " (" . $user['username'] . ")........\r");
+				print("[".$percent."% done] Created User ID: ".$that_user->id." (".$user['username'].")........\r");
 			});
 
 			// 1. Fetch only the users who have the specific role
@@ -103,14 +103,14 @@
 
 			// 2. Loop through and update their passwords
 			foreach ($warehouseManagers as $manager) {
-				$password = 'WarehouseManager' . Str::padLeft($manager->id, 4, '0');
+				$password = 'WarehouseManager'.Str::padLeft($manager->id, 4, '0');
 				$manager->update([
 					'password' => Hash::make($password),
 				]);
-				print("Changed password for manager " . $manager->account->full_name . " to ".$password."....\r");
+				print("Changed password for manager ".$manager->account->full_name." to ".$password."....\r");
 			}
 
-			$this->command->info("Successfully updated passwords for " . $warehouseManagers->count() . " warehouse managers");
+			$this->command->info("Successfully updated passwords for ".$warehouseManagers->count()." warehouse managers");
 
 			print("\nSeeding completed successfully.\n");
 			$users = User::query()->get();
@@ -135,7 +135,9 @@
 				'first_name'    => 'Λευτέρης',
 				'last_name'     => 'Πλιάσσας',
 				'phone'         => fake()->optional(0.7)->regexify('69[237]\d{7}'),
-				'avatar'        => 'https://robohash.org/' . Str::lower(Str::random(32)) . '.png?size=256x256&set=set' . fake()->randomElement([1, 2, 3, 4, 5]),
+				'avatar'        => 'https://robohash.org/'.Str::lower(Str::random(32)).'.png?size=256x256&set=set'.fake()->randomElement([
+						1, 2, 3, 4, 5
+					]),
 				'is_active'     => true,
 				'last_login_at' => fake()->boolean() ? Carbon::yesterday()->setHours(mt_rand(0, 23))->setMinutes(mt_rand(0, 59))->setSeconds(mt_rand(0, 59))->toDateTimeString() : null,
 				'created_at'    => $birthday->copy()->timezone(config('app.timezone', 'Europe/Athens')),
@@ -186,7 +188,7 @@
 			}
 
 			$myself->assignRole('admin');
-			$this->command->info(User::query()->count() . ' users created using ' . $this->requests . ' requests');
+			$this->command->info(User::query()->count().' users created using '.$this->requests.' requests');
 		}
 
 		private function factory(): Collection {
@@ -206,20 +208,20 @@
 						foreach (json_decode($body, true) as $user) {
 							$this->list->push($user);
 						}
-						$this->command->info("[" . __CLASS__ . "::" . __LINE__ . "] Start seeding round #" . ($round + 1) . " of " . $this->rounds);
+						$this->command->info("[".__CLASS__."::".__LINE__."] Start seeding round #".($round + 1)." of ".$this->rounds);
 						$users = $this->list->shuffle();
 					} else {
 						$this->command->error('❌ Failed to fetch users from external API ');
 						$birth = Carbon::createFromDate(1980, mt_rand(1, Carbon::today()->month), mt_rand(1, Carbon::today()->daysInMonth));
 						for ($u = 0; $u < self::BATCH_SIZE / $this->rounds; $u++) {
-							$nick     = fake()->userName() . Str::random(4);
-							$name     = fake()->firstName();
-							$last     = fake()->lastName();
-							$birth    = $birth->addDays(mt_rand(1, Carbon::today()->dayOfMonth))->timezone(config('app.timezone'));
+							$nick = fake()->userName().Str::random(4);
+							$name = fake()->firstName();
+							$last = fake()->lastName();
+							$birth = $birth->addDays(mt_rand(1, Carbon::today()->dayOfMonth))->timezone(config('app.timezone'));
 							$verified = fake()->boolean();
 							$users->push([
-								'username'          => $nick . '-' . $birth->format('Y'),
-								'email'             => $nick . '@' . fake()->domainName(),
+								'username'          => $nick.'-'.$birth->format('Y'),
+								'email'             => $nick.'@'.fake()->domainName(),
 								'password'          => $password,
 								'remember'          => $verified && fake()->boolean() ? Str::random(64) : null,
 								'hash'              => Str::random(32),
@@ -234,24 +236,24 @@
 								'token'             => Str::random(32),
 								'country'           => fake()->countryCode(),
 								'last_seen_at'      => $birth->isValid() ? mt_rand($birth->unix(), Carbon::now()->unix()) : Carbon::now()->unix(),
-								'avatar'            => "https://robohash.org/" . Str::lower(Str::random(32)) . ".jpg?size=128x128&set=set" . Collection::range(1, 5)->random(),
+								'avatar'            => "https://robohash.org/".Str::lower(Str::random(32)).".jpg?size=128x128&set=set".Collection::range(1, 5)->random(),
 								'description_short' => fake()->realText(),
 								'description_long'  => fake()->realText(512),
 							]);
 						}
-						print("[Round " . ($round + 1) . " of " . $this->rounds . "] I have created " . $users->count() . " users" . PHP_EOL);
+						print("[Round ".($round + 1)." of ".$this->rounds."] I have created ".$users->count()." users".PHP_EOL);
 					}
 				}
 				return $users;
 			} catch (RequestException $e) {
 				// Handle errors (network issues, 4xx/5xx responses, etc.)
 				if ($e->hasResponse()) {
-					echo "HTTP Error: " . $e->getResponse()->getStatusCode() . "\n";
+					echo "HTTP Error: ".$e->getResponse()->getStatusCode()."\n";
 				} else {
-					echo "Request Error: " . $e->getMessage() . "\n";
+					echo "Request Error: ".$e->getMessage()."\n";
 				}
 			} catch (ConnectionException $e) {
-				$this->command->error("Connection error: " . $e->getMessage());
+				$this->command->error("Connection error: ".$e->getMessage());
 			}
 			return Collection::empty();
 		}

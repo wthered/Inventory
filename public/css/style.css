@@ -20,6 +20,7 @@
 	--color-warning        : #f59e0b;
 	--color-border         : #374151;
 	--color-input-bg       : var(--color-surface);
+	--color-input-surface  : var(--color-surface);
 	--color-input-text     : var(--color-text-primary);
 
 	/* --- BORDER RADIUS --- */
@@ -293,12 +294,19 @@ body #box {
 	border-radius : var(--radius-md);
 	font-size     : 0.9rem;
 	box-shadow    : var(--shadow-sm);
+	margin-bottom : var(--space-md);
 }
 
 .alert-success {
 	background-color : rgba(16, 185, 129, 0.1);
 	border           : 1px solid var(--color-accent);
 	color            : var(--color-accent);
+}
+
+.alert-danger {
+	background-color : rgba(239, 68, 68, 0.1);
+	border           : 1px solid var(--color-error);
+	color            : var(--color-error);
 }
 
 /* Data Tables Structure */

@@ -1,0 +1,205 @@
+/* ==========================================================================
+   1. FORM CONTAINER & GRID
+   ========================================================================== */
+.form-card {
+	background-color : var(--color-surface);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-lg);
+	padding          : var(--space-xl);
+	box-shadow       : var(--shadow-md);
+	max-width        : 800px;
+	margin           : 0 auto;
+}
+
+.form-grid {
+	display               : grid;
+	grid-template-columns : repeat(2, 1fr);
+	gap                   : var(--space-lg);
+}
+
+.form-group {
+	display        : flex;
+	flex-direction : column;
+	gap            : var(--space-xs);
+}
+
+.form-group.full-width {
+	grid-column : span 2;
+}
+
+/* ==========================================================================
+   2. FORM CONTROLS & LABELS
+   ========================================================================== */
+.form-label {
+	font-size      : 0.85rem;
+	font-weight    : 600;
+	color          : var(--color-text-secondary);
+	text-transform : uppercase;
+	letter-spacing : 0.03em;
+}
+
+.form-label .required {
+	color : var(--color-error);
+}
+
+textarea.form-control {
+	min-height : 110px;
+	resize     : vertical;
+}
+
+.error-message {
+	color      : var(--color-error);
+	font-size  : 0.8rem;
+	margin-top : 0.25rem;
+}
+
+/* Checkbox Toggle Group */
+.checkbox-group {
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-sm);
+	cursor      : pointer;
+	user-select : none;
+	margin-top  : var(--space-xs);
+}
+
+.checkbox-group input[type="checkbox"] {
+	width        : 18px;
+	height       : 18px;
+	accent-color : var(--color-primary);
+	cursor       : pointer;
+}
+
+/* ==========================================================================
+   3. CATEGORY PICKER WIDGET
+   ========================================================================== */
+.category-picker-widget {
+	background-color : var(--color-bg-alt);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-md);
+	padding          : var(--space-md);
+	display          : flex;
+	flex-direction   : column;
+	gap              : var(--space-md);
+}
+
+/* Step 1: Controls Row */
+.category-controls-row {
+	display   : flex;
+	gap       : var(--space-sm);
+	flex-wrap : wrap;
+}
+
+.category-controls-row > * {
+	flex      : 1;
+	min-width : 200px;
+}
+
+/* Step 2: Selected Category Badges */
+.selected-badges-container {
+	display          : flex;
+	flex-wrap        : wrap;
+	gap              : var(--space-xs);
+	padding          : var(--space-xs);
+	min-height       : 38px;
+	background-color : var(--color-surface);
+	border           : 1px dashed var(--color-border);
+	border-radius    : var(--radius-md);
+	align-items      : center;
+}
+
+.selected-badge {
+	display          : inline-flex;
+	align-items      : center;
+	gap              : 6px;
+	background-color : rgba(var(--color-primary-rgb), 0.15);
+	color            : var(--color-primary);
+	border           : 1px solid var(--color-primary);
+	padding          : 0.25rem 0.625rem;
+	border-radius    : var(--radius-full);
+	font-size        : 0.8125rem;
+	font-weight      : 500;
+}
+
+.selected-badge button {
+	background  : none;
+	border      : none;
+	color       : var(--color-primary);
+	cursor      : pointer;
+	font-size   : 0.875rem;
+	line-height : 1;
+	padding     : 0;
+	display     : flex;
+	align-items : center;
+	transition  : color 0.15s ease;
+}
+
+.selected-badge button:hover {
+	color : var(--color-error);
+}
+
+/* Step 3: Scrollable Category Checkboxes */
+.categories-select-container {
+	max-height       : 200px;
+	overflow-y       : auto;
+	background-color : var(--color-surface);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-md);
+	padding          : var(--space-sm);
+	display          : flex;
+	flex-direction   : column;
+	gap              : 2px;
+}
+
+.category-checkbox-item {
+	display       : flex;
+	align-items   : center;
+	gap           : var(--space-sm);
+	padding       : 0.35rem 0.5rem;
+	border-radius : var(--radius-sm);
+	cursor        : pointer;
+	transition    : background-color 0.15s ease;
+}
+
+.category-checkbox-item:hover {
+	background-color : var(--color-bg-alt);
+}
+
+.category-checkbox-item .parent-prefix {
+	color        : var(--color-text-muted);
+	font-size    : 0.775rem;
+	margin-right : 4px;
+}
+
+/* ==========================================================================
+   4. FORM ACTIONS
+   ========================================================================== */
+.form-actions {
+	display         : flex;
+	justify-content : flex-end;
+	gap             : var(--space-md);
+	margin-top      : var(--space-xl);
+	padding-top     : var(--space-lg);
+	border-top      : 1px solid var(--color-border);
+}
+
+/* ==========================================================================
+   5. RESPONSIVE DESIGN
+   ========================================================================== */
+@media (max-width : 640px) {
+	.form-grid {
+		grid-template-columns : 1fr;
+	}
+
+	.form-group.full-width {
+		grid-column : span 1;
+	}
+
+	.category-controls-row {
+		flex-direction : column;
+	}
+
+	.category-controls-row > * {
+		min-width : 100%;
+	}
+}

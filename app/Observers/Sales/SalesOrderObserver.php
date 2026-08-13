@@ -38,7 +38,8 @@
 		public function updating(SalesOrder $salesOrder): void {
 			if ($salesOrder->relationLoaded('items')) {
 				$salesOrder->grand_total = $salesOrder->items->sum(function ($item) {
-					return $item->price * $item->quantity;
+//					dd($item);
+					return $item->unit_price * $item->quantity_ordered;
 				});
 			}
 		}

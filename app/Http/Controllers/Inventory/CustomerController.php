@@ -131,9 +131,25 @@
 		}
 
 		/**
-		 * Remove the specified resource from storage.
+		 * Remove the specified customer from storage (Soft Delete).
+		 *
+		 * @param  Customer  $customer
+		 *
+		 * @return RedirectResponse
 		 */
-		public function destroy(string $id) {
-			//
+		public function destroy(Customer $customer): RedirectResponse {
+			// Executes CustomerPolicy::delete($user, $customer)
+			Gate::authorize('delete', $customer);
+
+			// Prevent soft-deleting customers with existing sales orders
+			if ($customer->sales()->exists()) {
+				return back()->with('error', 'Δεν είναι δυνατή η διαγραφή του πελάτη επειδή έχει συνδεδεμένες παραγγελίες.');
+			}
+
+			$customer->delete();
+
+			return redirect()
+				->route('inventory.customers.index')
+				->with('success', 'Ο πελάτης διαγράφηκε με επιτυχία.');
 		}
 	}

@@ -3,6 +3,7 @@
 	namespace App\Http\Controllers\Inventory;
 
 	use App\Http\Controllers\Controller;
+	use App\Http\Requests\Brands\BrandListFilterRequest;
 	use App\Http\Requests\Categories\CategoryFilterRequest;
 	use App\Http\Requests\Categories\CategoryStoreRequest;
 	use App\Http\Requests\Categories\CategoryUpdateRequest;
@@ -119,7 +120,6 @@
 			                })
 			                ->prepend("<option value='' selected>Επιλέξτε Μάρκα...</option>")
 			                ->join('');
-
 		}
 
 		public function filter(CategoryFilterRequest $request, Category $category) {
@@ -145,6 +145,30 @@
 				                     ->map(function (Product $product) {
 					                     return view('common.products.index_row', ['product' => $product])->render();
 				                     })->join(''),
+			]);
+		}
+
+
+		public function filterBrandList(BrandListFilterRequest $request, Category $category) {
+			$input = $request->validated();
+			$term = $input['search'] ?? null;
+
+			$brands = $category->brands()
+			                   ->with('categories')
+			                   ->when($term, function ($query) use ($term) {
+				                   $query->where('name', 'LIKE', '%'.$term.'%');
+			                   })
+			                   ->orderBy('name')
+			                   ->paginate($request->session()->get('per_page', 15));
+
+			$rows = $brands->getCollection()->map(function ($brand) {
+				return view('common.brands.index_row', ['brand' => $brand])->render();
+			});
+
+			return response()->json([
+				'success'    => $rows->isNotEmpty(),
+				'rows'       => $rows->implode(''),
+				'pagination' => $brands->hasPages() ? $brands->withQueryString()->links('pagination::simple')->render() : '',
 			]);
 		}
 	}

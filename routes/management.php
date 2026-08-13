@@ -124,6 +124,7 @@
 	*/
 	Route::prefix('categories')->name('categories.')->controller(CategoryController::class)->group(function () {
 		Route::post('/{category}/brands', 'filterBrands')->name('filter.brands');
+		Route::post('/{category}/brands/list', 'filterBrandList')->name('filter.brands.list');
 		Route::post('/{category}/filter', 'filter')->name('children');
 	});
 

@@ -1,297 +1,269 @@
 /* ==========================================================================
-   Page Header Base Styling (Dark Background Variant)
+   Sales Order Edit Page (Dark Theme Refactored)
+   Assumes global style.css is loaded prior to this stylesheet.
    ========================================================================== */
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #1e293b;
-    padding-bottom: 1rem;
-    margin-bottom: 1.5rem;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
 
-.header-title h1 {
-    font-size: 1.75rem;
-    color: #f8fafc; /* Καθαρό, ανοιχτό contrast */
-    font-weight: 700;
-    margin: 0 0 0.25rem 0;
-}
-
-.subtitle {
-    margin: 0;
-    color: #94a3b8;
-    font-size: 0.95rem;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-}
-
-/* ==========================================================================
-   Two-Column Grid Layout
-   ========================================================================== */
+/* --------------------------------------------------------------------------
+   1. Page Layout & Grid Structure
+   -------------------------------------------------------------------------- */
 .form-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+	display               : grid;
+	grid-template-columns : 1fr;
+	gap                   : var(--space-lg);
 }
 
-@media (min-width: 1024px) {
-    .form-grid {
-        grid-template-columns: 2fr 1fr;
-        align-items: start;
-    }
+@media (min-width : 1024px) {
+	.form-grid {
+		grid-template-columns : 2fr 1fr;
+		align-items           : start;
+	}
 }
 
-/* ==========================================================================
-   Card Components
-   ========================================================================== */
+.input-row {
+	display               : grid;
+	grid-template-columns : 1fr;
+	gap                   : var(--space-md);
+	margin-bottom         : var(--space-md);
+}
+
+/* Dynamic column calculation for 2 or 3 field rows on larger screens */
+@media (min-width : 640px) {
+	.input-row {
+		grid-template-columns : repeat(12, 1fr);
+	}
+
+	.input-row > .form-group {
+		grid-column : span 12;
+	}
+
+	/* 2 fields in row -> 6 columns each */
+	.input-row > .form-group:first-child:nth-last-child(2),
+	.input-row > .form-group:first-child:nth-last-child(2) ~ .form-group {
+		grid-column : span 6;
+	}
+
+	/* 3 fields in row -> 4 columns each */
+	.input-row > .form-group:first-child:nth-last-child(3),
+	.input-row > .form-group:first-child:nth-last-child(3) ~ .form-group {
+		grid-column : span 4;
+	}
+}
+
+/* --------------------------------------------------------------------------
+   2. Card Component Extensions
+   -------------------------------------------------------------------------- */
 .card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    margin-bottom: 1.5rem;
+	background-color : var(--color-surface);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-lg);
+	box-shadow       : var(--shadow-md);
+	margin-bottom    : var(--space-lg);
+	overflow         : hidden;
 }
 
 .card-header {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid #e2e8f0;
-    background-color: #f8fafc;
-    border-top-left-radius: 7px;
-    border-top-right-radius: 7px;
+	padding          : var(--space-md) var(--space-lg);
+	border-bottom    : 1px solid var(--color-border);
+	background-color : var(--color-bg-alt);
 }
 
 .card-header h2,
 .card-header h3 {
-    margin: 0;
-    font-size: 1.1rem;
-    color: #1e293b;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+	margin      : 0;
+	font-size   : 1.05rem;
+	color       : var(--color-text-primary);
+	font-weight : 600;
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-sm);
 }
 
 .card-body {
-    padding: 1.25rem;
+	padding : var(--space-lg);
 }
 
-/* Accent Card Variant for Sidebar Action */
-.HTML-card-accent {
-    border-top: 4px solid #2563eb;
+.card-accent {
+	border-top : 4px solid var(--color-primary);
 }
 
-/* ==========================================================================
-   Form Controls & Row Management
-   ========================================================================== */
-.input-row {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-    margin-bottom: 1.25rem;
-}
-
-@media (min-width: 640px) {
-    .input-row {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
+/* --------------------------------------------------------------------------
+   3. Form Group Controls & Custom Selects
+   -------------------------------------------------------------------------- */
 .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+	display        : flex;
+	flex-direction : column;
+	gap            : var(--space-xs);
 }
 
 .form-group label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #475569;
-}
-
-.form-control,
-.form-select {
-    width: 100%;
-    padding: 0.6rem 0.75rem;
-    font-size: 0.95rem;
-    color: #1e293b;
-    background-color: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    transition: border-color 0.15s ease;
-    box-sizing: border-box;
-}
-
-.form-control:focus,
-.form-select:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.form-control:disabled,
-.form-select:disabled {
-    background-color: #f1f5f9;
-    color: #64748b;
-    cursor: not-allowed;
+	font-size   : 0.85rem;
+	font-weight : 600;
+	color       : var(--color-text-secondary);
 }
 
 textarea.form-control {
-    resize: vertical;
+	resize : vertical;
 }
 
-/* Validation Styling */
-.is-invalid {
-    border-color: #ef4444;
+/* Custom Styled Select Inputs */
+.form-select {
+	width               : 100%;
+	padding             : 0.625rem 2.5rem 0.625rem 0.875rem;
+	font-size           : 0.875rem;
+	font-weight         : 400;
+	line-height         : 1.5;
+	color               : var(--color-input-text);
+	background-color    : var(--color-input-surface, var(--color-surface));
+
+	-webkit-appearance  : none;
+	-moz-appearance     : none;
+	appearance          : none;
+
+	/* Custom SVG Dark-Mode Chevron Arrow */
+	background-image    : url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+	background-repeat   : no-repeat;
+	background-position : right 0.75rem center;
+	background-size     : 1.1em 1.1em;
+
+	border              : 1px solid var(--color-border);
+	border-radius       : var(--radius-md);
+	cursor              : pointer;
+	transition          : border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
-.error-text {
-    font-size: 0.8rem;
-    color: #ef4444;
+.form-select:hover:not(:disabled) {
+	border-color : var(--color-text-muted);
 }
 
-.alert-danger {
-    background-color: #fef2f2;
-    border: 1px solid #fca5a5;
-    color: #991b1b;
-    padding: 1rem;
-    border-radius: 6px;
-    margin-bottom: 1.5rem;
+.form-select:focus {
+	outline      : none;
+	border-color : var(--color-primary);
+	box-shadow   : 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
 }
 
-/* ==========================================================================
-   Static Items Table View
-   ========================================================================== */
+.form-select:disabled {
+	background-color : var(--color-bg-alt);
+	color            : var(--color-text-muted);
+	cursor           : not-allowed;
+	opacity          : 0.7;
+}
+
+.form-select option {
+	background-color : var(--color-surface);
+	color            : var(--color-text-primary);
+	padding          : var(--space-sm) var(--space-md);
+}
+
+/* --------------------------------------------------------------------------
+   4. Items Table View
+   -------------------------------------------------------------------------- */
 .edit-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 0.95rem;
+	width           : 100%;
+	border-collapse : collapse;
+	text-align      : left;
+	font-size       : 0.925rem;
 }
 
 .edit-table th {
-    background-color: #f8fafc;
-    color: #64748b;
-    font-weight: 600;
-    padding: 0.75rem 1.25rem;
-    border-bottom: 2px solid #e2e8f0;
-    text-transform: uppercase;
-    font-size: 0.8rem;
+	background-color : var(--color-bg-alt);
+	color            : var(--color-text-muted);
+	font-weight      : 600;
+	padding          : var(--space-md) var(--space-lg);
+	border-bottom    : 1px solid var(--color-border);
+	text-transform   : uppercase;
+	font-size        : 0.75rem;
+	letter-spacing   : 0.05em;
 }
 
 .edit-table td {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid #edf2f7;
-    color: #334155;
+	padding       : var(--space-md) var(--space-lg);
+	border-bottom : 1px solid var(--color-border);
+	color         : var(--color-text-secondary);
 }
 
 .item-meta {
-    font-size: 0.8rem;
-    color: #64748b;
+	font-size : 0.8rem;
+	color     : var(--color-text-muted);
 }
 
-/* ==========================================================================
-   Sidebar Totals & Buttons
-   ========================================================================== */
-.form-divider {
-    border: 0;
-    border-top: 1px dashed #e2e8f0;
-    margin: 1.25rem 0;
-}
-
+/* --------------------------------------------------------------------------
+   5. Sidebar Totals & Pricing Breakdown
+   -------------------------------------------------------------------------- */
 .sidebar-totals {
-    margin-bottom: 1.25rem;
+	display        : flex;
+	flex-direction : column;
+	gap            : var(--space-sm);
+	margin-bottom  : var(--space-lg);
 }
 
 .total-row {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+	display         : flex;
+	justify-content : space-between;
+	align-items     : center;
+	font-size       : 0.9rem;
+	color           : var(--color-text-secondary);
 }
 
-.total-row span:first-child {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #64748b;
+.total-label {
+	color       : var(--color-text-muted);
+	font-weight : 500;
+}
+
+.total-row-input {
+	display         : flex;
+	justify-content : space-between;
+	align-items     : center;
+}
+
+.total-row-input label {
+	cursor      : pointer; /* Visually indicates it's clickable */
+	margin      : 0;
+	color       : var(--color-text-muted);
+	font-weight : 500;
+	font-size   : 0.9rem;
+}
+
+.discount-input {
+	width      : 110px;
+	text-align : right;
+	padding    : 0.35rem 0.6rem;
+}
+
+.total-row-grand {
+	font-weight : 700;
+	font-size   : 1rem;
+	color       : var(--color-text-primary);
 }
 
 .price-tag {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #2563eb;
+	font-size : 1.35rem;
+	color     : var(--color-primary);
+}
+
+/* --------------------------------------------------------------------------
+   6. Utilities & Inline Hints
+   -------------------------------------------------------------------------- */
+.form-divider {
+	border     : 0;
+	border-top : 1px dashed var(--color-border);
+	margin     : var(--space-md) 0;
 }
 
 .btn-block {
-    width: 100%;
-    justify-content: center;
+	width           : 100%;
+	justify-content : center;
 }
 
 .font-numeric {
-    font-variant-numeric: tabular-nums;
+	font-variant-numeric : tabular-nums;
 }
 
-.margin-0 {
-    margin: 0;
-}
-
-.text-right {
-    text-align: right;
-}
-
-.text-center {
-    text-align: center;
+.error-text {
+	font-size : 0.8rem;
+	color     : var(--color-error);
 }
 
 .text-muted {
-    color: #64748b;
-}
-
-/* ==========================================================================
-   Buttons Styling
-   ========================================================================== */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.65rem 1.25rem;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    border: 1px solid transparent;
-    box-sizing: border-box;
-}
-
-.btn-primary {
-    background-color: #2563eb;
-    color: #ffffff;
-    border-color: #2563eb;
-}
-
-.btn-primary:hover {
-    background-color: #1d4ed8;
-    border-color: #1d4ed8;
-}
-
-.btn-secondary {
-    background-color: #ffffff;
-    color: #475569;
-    border-color: #cbd5e1;
-}
-
-.btn-secondary:hover {
-    background-color: #f8fafc;
-    color: #1e293b;
-}
-
-/* Full Width Utility for Sidebar Submit */
-.btn-block {
-    width: 100%;
-    justify-content: center;
+	color     : var(--color-text-muted);
+	font-size : 0.8rem;
 }

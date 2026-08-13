@@ -27,6 +27,7 @@
 				$table->decimal('selling_price', 10)->default(0)->comment('Regular selling price');
 				$table->decimal('discount_price', 10)->nullable()->comment('Optional discounted price');
 				$table->string('unit')->default('pcs')->comment('Unit of measurement: pcs, kg, liter, etc.');
+				$table->unsignedInteger('weight')->nullable()->default(1)->comment('Weight in grams');
 
 				$table->integer('min_stock_level')->default(0)->comment('Minimum stock threshold before alert');
 				$table->integer('max_stock_level')->nullable()->comment('Maximum allowed stock limit');

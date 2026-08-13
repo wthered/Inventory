@@ -24,7 +24,7 @@
 			$rawBrands = $this->loadBrandsFromFiles();
 
 			// 3. Fetch categories mapping (slug => id)
-			$categoryMap = Category::pluck('id', 'slug')->toArray();
+			$categoryMap = Category::query()->pluck('id', 'slug')->toArray();
 
 			if (empty($categoryMap)) {
 				$this->command->warn('❌ No categories found. Run CategorySeeder first!');
@@ -34,8 +34,8 @@
 			$this->command->info('=======================================');
 			$this->command->info('   🚀 STARTING BRAND SEEDER');
 			$this->command->info('=======================================');
-			$this->command->info('Total categories loaded: ' . count($categoryMap));
-			$this->command->info('Total brands to process: ' . count($rawBrands));
+			$this->command->info('Total categories loaded: '.count($categoryMap));
+			$this->command->info('Total brands to process: '.count($rawBrands));
 			$this->command->info('');
 
 			$createdCount = 0;
@@ -48,12 +48,12 @@
 				unset($brandData['category_slugs']);
 
 				// Create or update the Brand record
-				$brand = Brand::firstOrCreate(
+				$brand = Brand::query()->firstOrCreate(
 					['slug' => $brandData['slug']],
 					[
 						'name'        => $brandData['name'],
 						'description' => $brandData['description'] ?? null,
-						'logo'        => $brandData['logo'] ?? null,
+						'logo'        => $brandData['logo'] ? "brands/".$brandData['logo'] : null,
 						'website'     => $brandData['website'] ?? null,
 						'is_active'   => $brandData['is_active'] ?? true,
 					]
@@ -70,7 +70,7 @@
 						$categoryIds[] = $categoryMap[$slug];
 					} else {
 						// Gracefully log missing category match without crashing the seeder
-						$this->command->warn("  ⚠️ Category slug '".$slug."' attached to brand '" . $brand->name . "' does not exist in the database.");
+						$this->command->warn("  ⚠️ Category slug '".$slug."' attached to brand '".$brand->name."' does not exist in the database.");
 					}
 				}
 
@@ -92,14 +92,14 @@
 		 */
 		private function loadBrandsFromFiles(): array {
 			$allBrands = [];
-			$brandsPath = __DIR__ . '/data/brands/';
+			$brandsPath = __DIR__.'/data/brands/';
 
-			$this->command->info('Importing brands from ' . $brandsPath);
+			$this->command->info('Importing brands from '.$brandsPath);
 
 			// Αν ο φάκελος δεν υπάρχει, τον δημιουργούμε
 			if (!is_dir($brandsPath)) {
 				mkdir($brandsPath, 0755, true);
-				$this->command->warn("📁 Brands folder created at: " . $brandsPath);
+				$this->command->warn("📁 Brands folder created at: ".$brandsPath);
 				$this->command->warn("📝 Please add brand files (e.g., electronics.php) in this folder.");
 				return [];
 			}
@@ -108,7 +108,7 @@
 			$files = File::files($brandsPath);
 
 			if (empty($files)) {
-				$this->command->warn("📁 No brand files found in: " . $brandsPath);
+				$this->command->warn("📁 No brand files found in: ".$brandsPath);
 				$this->command->warn("📝 Please create at least one brand file (e.g., electronics.php)");
 				return [];
 			}
@@ -128,16 +128,16 @@
 
 					if (is_array($brands) && !empty($brands)) {
 						$allBrands = array_merge($allBrands, $brands);
-						$this->command->info("  📄 ".$filename." → " . count($brands) . " brands");
+						$this->command->info("  📄 ".$filename." → ".count($brands)." brands");
 					} else {
 						$this->command->warn("  ⚠️ ".$filename." → No brands found (empty file)");
 					}
 				} catch (Exception $e) {
-					$this->command->error("  ❌ ".$filename." → Error: " . $e->getMessage());
+					$this->command->error("  ❌ ".$filename." → Error: ".$e->getMessage());
 				}
 			}
 
-			$this->command->info("📊 Total brands loaded: " . count($allBrands));
+			$this->command->info("📊 Total brands loaded: ".count($allBrands));
 
 			return $allBrands;
 		}

@@ -201,12 +201,7 @@ textarea.form-control {
 }
 
 /* Alert Danger (Error Variant) */
-.alert-danger {
-	background-color : rgba(239, 68, 68, 0.1);
-	border           : 1px solid var(--color-error, #ef4444);
-	color            : var(--color-error, #ef4444);
-}
-
+/* .alert-danger is already defined in global style.css */
 .alert-danger i {
 	color : var(--color-error, #ef4444);
 }

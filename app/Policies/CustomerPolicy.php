@@ -38,6 +38,7 @@
 		 * Determine whether the user can delete the customer.
 		 */
 		public function delete(User $user, Customer $customer): bool {
+//			dd($customer);
 			return $user->can('customer.delete');
 		}
 	}

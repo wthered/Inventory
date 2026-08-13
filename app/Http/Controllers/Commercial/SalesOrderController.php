@@ -2,8 +2,10 @@
 
 	namespace App\Http\Controllers\Commercial;
 
+	use App\Enums\Financial\PaymentStatus;
 	use App\Enums\Sales\SalesOrderStatus;
 	use App\Http\Controllers\Controller;
+	use App\Http\Requests\Sales\SaleOrderUpdateRequest;
 	use App\Models\Customer;
 	use App\Models\Sales\SalesOrder;
 	use App\Models\User;
@@ -22,7 +24,7 @@
 		 * Display a listing of the sales orders.
 		 */
 		public function index() {
-			$sales = SalesOrder::with(['customer', 'warehouse'])
+			$sales = SalesOrder::query()->with(['customer', 'warehouse'])
 			                   ->orderBy('created_at', 'desc')
 			                   ->paginate(15);
 
@@ -118,35 +120,28 @@
 		 * Show the form for editing the specified sales order.
 		 */
 		public function edit(SalesOrder $sale) {
-			$customers = Customer::query()->orderBy('name')->get();
-			$warehouses = Warehouse::query()->orderBy('name')->get();
-			$employees = User::query()->orderBy('name')->get();
-
 			$sale->load(['items', 'creator', 'warehouse']);
 
-			return view('sales.edit', compact('sale', 'customers', 'warehouses', 'employees'));
+			return view('sales.edit', [
+				'sale'       => $sale,
+				'customers'  => Customer::query()->orderBy('name')->get(),
+				'warehouses' => Warehouse::query()->orderBy('name')->get(),
+				'employees'  => User::query()->orderBy('name')->get(),
+				'payments'   => PaymentStatus::class,
+				'statuses'   => SalesOrderStatus::class,
+			]);
 		}
 
 		/**
 		 * Update the specified sales order in storage.
 		 */
-		public function update(Request $request, SalesOrder $sale) {
-			$validated = $request->validate([
-				'warehouse_id' => 'required|exists:warehouses,id',
-				'order_date'   => 'required|date',
-				'notes'        => 'nullable|string',
-			]);
-
+		public function update(SaleOrderUpdateRequest $request, SalesOrder $sale) {
 			try {
-				$sale->update([
-					'warehouse_id' => $validated['warehouse_id'],
-					'order_date'   => $validated['order_date'],
-					'notes'        => $validated['notes'] ?? $sale->notes,
-				]);
+				dd($request->validated());
+				$sale->update($request->validated());
 
-				return redirect()->route('inventory.sales.index')
+				return redirect()->route('inventory.sales.show', $sale)
 				                 ->with('success', 'Sales order updated successfully.');
-
 			} catch (Exception $e) {
 				return redirect()->back()
 				                 ->withInput()

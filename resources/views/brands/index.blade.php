@@ -67,12 +67,18 @@
                 </div>
 
                 {{-- Select 2: Child Category (Dependent Dropdown) --}}
+
                 <div style="width: 220px; display: flex; flex-direction: column; gap: var(--space-xs);">
                     <label for="category_id"
                            style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 600; text-transform: uppercase;">Υποκατηγορία</label>
                     <select name="category_id" id="category_id"
-                            style="width: 100%; background-color: var(--color-bg-alt); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.5rem 0.75rem; color: var(--color-text-primary); font-size: 0.875rem; cursor: pointer;" {{ !request('parent_category_id') ? 'disabled' : '' }}>
+                            style="width: 100%; background-color: var(--color-bg-alt); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.5rem 0.75rem; color: var(--color-text-primary); font-size: 0.875rem; cursor: pointer;" {{ $subcategories->isEmpty() ? 'disabled' : '' }}>
                         <option value="">Όλες οι υποκατηγορίες</option>
+                        @foreach($subcategories as $id => $name)
+                            <option value="{{ $id }}" {{ request('category_id') == $id ? 'selected' : '' }}>
+                                {{ $name }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -106,48 +112,7 @@
                     </thead>
                     <tbody>
                     @forelse($brands as $brand)
-                        <tr>
-                            <td class="td-id">#{{ $brand->id }}</td>
-                            <td class="td-name">{{ $brand->name }}</td>
-                            <td>
-                                @forelse($brand->categories as $category)
-                                    <a href="{{ route('inventory.categories.show', ['category' => $category->id]) }}"
-                                       class="badge-count"
-                                       style="margin-right: var(--space-xs); margin-bottom: var(--space-xs);">
-                                        {{ $category->name }}
-                                    </a>
-                                @empty
-                                    <span class="td-description">—</span>
-                                @endforelse
-                            </td>
-
-                            <td class="text-right">
-                                <div class="action-buttons-group">
-                                    {{-- Κουμπί Προβολής (Show) --}}
-                                    <a href="{{ route('inventory.brands.show', $brand->id) }}"
-                                       class="btn-action btn-show" title="Προβολή">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-
-                                    {{-- Κουμπί Επεξεργασίας (Edit) --}}
-                                    <a href="{{ route('inventory.brands.edit', $brand->id) }}"
-                                       class="btn-action btn-edit" title="Επεξεργασία">
-                                        <i class="fas fa-pencil-alt"></i>
-                                    </a>
-
-                                    {{-- Κουμπί Διαγραφής (Delete) --}}
-                                    <form action="{{ route('inventory.brands.destroy', $brand->id) }}" method="POST"
-                                          class="inline-form"
-                                          onsubmit="return confirm('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το brand;');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-action btn-delete" title="Διαγραφή">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
+                        @include('common.brands.index_row', ['brand' => $brand])
                     @empty
                         <tr>
                             <td colspan="4" class="table-empty-state">
@@ -164,7 +129,7 @@
             </div>
 
             @if($brands->hasPages())
-                <div class="table-pagination">
+                <div class="table-pagination" id="pagination">
                     {{ $brands->links('pagination::simple') }}
                 </div>
             @endif
@@ -174,44 +139,5 @@
 @endsection
 
 @section('scripts')
-    <script>
-        document.getElementById('parent_category_id').addEventListener('change', function () {
-            const parentId = this.value;
-            const childrenSelect = document.getElementById('category_id');
-
-            // Επαναφορά του child select
-            childrenSelect.innerHTML = '<option value="">Όλες οι υποκατηγορίες</option>';
-
-            if (!parentId) {
-                childrenSelect.disabled = true;
-                return;
-            }
-
-            // Κάνουμε fetch τις υποκατηγορίες από το endpoint σας
-            fetch('/categories/children', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // Grabs the CSRF token from the meta tag in your general template
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    category_id: parentId // sending the categoryID in the request body
-                })
-            }).then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            }).then(data => {
-                data.forEach(child => {
-                    const option = document.createElement('option');
-                    option.value = child.id;
-                    option.textContent = child.name;
-                    childrenSelect.appendChild(option);
-                });
-                childrenSelect.disabled = false;
-            }).catch(error => console.error('Error fetching subcategories:', error));
-        });
-    </script>
+    <script src="{{ asset('js/brands/index.js') }}"></script>
 @endsection

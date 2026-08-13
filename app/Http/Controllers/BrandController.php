@@ -2,6 +2,7 @@
 
 	namespace App\Http\Controllers;
 
+	use App\Http\Requests\Brands\BrandStoreRequest;
 	use App\Http\Requests\Brands\BrandUpdateRequest;
 	use App\Http\Requests\Products\ProductSearchRequest;
 	use App\Models\Brand;
@@ -24,15 +25,40 @@
 		/**
 		 * Display a listing of the resource.
 		 */
-		public function index() {
-			// Φέρνουμε τα brands μαζί με τις κατηγορίες τους με ένα μόνο query
-			$brands = Brand::with('categories')->paginate(10);
-			$categories = Category::query()->whereNull('parent_id')->orderBy('name')->pluck('name', 'id');
+		public function index(Request $request) {
+			$query = Brand::query()->with('categories');
 
-			return view('brands.index', [
-				'brands'     => $brands,
-				'categories' => $categories,
-			]);
+			// Text search on brand name
+			if ($request->filled('search')) {
+				$query->where('name', 'LIKE', '%'.trim($request->input('search')).'%');
+			}
+
+			// Filter by child subcategory
+			if ($request->filled('category_id')) {
+				$query->whereHas('categories', function ($q) use ($request) {
+					$q->where('categories.id', $request->input('category_id'));
+				});
+			} // Otherwise filter by parent category
+			elseif ($request->filled('parent_category_id')) {
+				$query->whereHas('categories', function ($q) use ($request) {
+					$q->where('categories.parent_id', $request->input('parent_category_id'));
+				});
+			}
+
+			$brands = $query->paginate($request->session()->get('per_page', 15))->withQueryString();
+
+			// Parent categories for primary dropdown
+			$categories = Category::query()->whereNull('parent_id')->pluck('name', 'id');
+
+			// Child categories if parent is selected
+			$subcategories = collect();
+			if ($request->filled('parent_category_id')) {
+				$subcategories = Category::query()
+				                         ->where('parent_id', $request->input('parent_category_id'))
+				                         ->pluck('name', 'id');
+			}
+
+			return view('brands.index', compact('brands', 'categories', 'subcategories'));
 		}
 
 		/**
@@ -40,14 +66,45 @@
 		 *
 		 */
 		public function create() {
-			//
+			return view('brands.create', [
+				'categories' => Category::query()->whereNull('parent_id')->orderBy('name')->pluck('name', 'id'),
+			]);
 		}
 
 		/**
 		 * Store a newly created resource in storage.
 		 */
-		public function store(Request $request) {
-			//
+		public function store(BrandStoreRequest $request) {
+			// 1. Get validated data from request
+			$input = $request->validated();
+
+			// Add slug as automated attribute
+			$input['slug'] = Str::slug($input['name']);
+
+			// 2. Handle Logo Upload using Storage::disk('public')
+			if ($request->hasFile('logo')) {
+				$file = $request->file('logo');
+
+				// Format date string (e.g., 20260812)
+				$date = now()->format('Y-m-d');
+
+				// Construct custom filename: keychron_20260812.png
+				$filename = $input['slug']."_".$date.".".$file->getClientOriginalExtension();
+
+				// Store in 'storage/app/public/brands/keychron_20260812.png'
+				// Saves 'brands/keychron_20260812.png' to $data['logo']
+				$input['logo'] = $file->storeAs('brands', $filename, 'public');
+			}
+
+			// 3. Create Brand
+			$brand = Brand::query()->create($input);
+
+			// 4. Attach Category to Pivot Table (if category_id was selected)
+			if (!empty($input['category_id'])) {
+				$brand->categories()->attach($input['category_id']);
+			}
+
+			return redirect(route('inventory.brands.show', ['brand' => $brand]));
 		}
 
 		/**
@@ -126,7 +183,7 @@
 
 		public function getProducts(ProductSearchRequest $request) {
 			$input = $request->validated();
-			dd($input);
+//			dd($input);
 
 //			$products = Product::query()
 //			                   ->when(!empty($input['category_id']), function ($query) use ($input) {

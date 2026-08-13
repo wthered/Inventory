@@ -40,8 +40,8 @@
                 <div style="display: flex; align-items: center; gap: var(--space-md); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-md);">
                     {{-- Logo Showcase (Fallback αν δεν υπάρχει) --}}
                     <div style="width: 64px; height: 64px; background-color: var(--color-bg-alt); border: 1px solid var(--color-border); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                        @if($brand->logo)
-                            <img src="{{ asset('storage/' . $brand->logo) }}" alt="{{ $brand->name }}"
+                        @if($brand->logo_url)
+                            <img src="{{ $brand->logo_url }}" alt="{{ $brand->name }}"
                                  style="max-width: 100%; max-height: 100%; object-fit: contain;">
                         @else
                             <i class="fas fa-image" style="font-size: 1.5rem; color: var(--color-text-muted);"></i>

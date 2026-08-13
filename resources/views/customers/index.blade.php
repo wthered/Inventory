@@ -33,6 +33,12 @@
             </div>
         @endif
 
+        @if(session('error'))
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+            </div>
+        @endif
+
         <!-- Filters & Search Toolbar -->
         <div class="toolbar-card">
             <form action="{{ route('inventory.customers.index') }}" method="GET" class="toolbar-form">
@@ -101,8 +107,12 @@
                                 @endif
                             </td>
                             <td>
-                                @if($customer->city || $customer->country)
-                                    {{ implode(', ', array_filter([$customer->city, $customer->country])) }}
+                                @if($customer->city?->name || $customer->country?->name)
+                                    {{ implode(', ', array_filter([
+                                        $customer->city?->name,
+                                        $customer->city?->state,
+                                        $customer->country?->name
+                                    ])) }}
                                 @else
                                     <span class="text-muted">—</span>
                                 @endif
@@ -131,6 +141,19 @@
                                             <i class="fas fa-edit"></i>
                                         </a>
                                     @endcan
+
+                                    @can('customer.delete')
+                                        <form action="{{ route('inventory.customers.destroy', $customer->id) }}"
+                                              method="POST"
+                                              class="inline-form"
+                                              onsubmit="return confirm('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτόν τον πελάτη;');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn-action btn-delete" title="Διαγραφή">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>
@@ -148,7 +171,7 @@
 
             <!-- Pagination -->
             @if($customers->hasPages())
-                <div class="table-pagination">
+                <div class="table-pagination" id="pagination">
                     {{ $customers->links('pagination::simple') }}
                 </div>
             @endif

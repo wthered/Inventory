@@ -2,10 +2,8 @@
 
 	namespace App\Http\Controllers;
 
-	use App\Http\Requests\Filters\FilterSuppliersByBrandRequest;
 	use App\Http\Requests\Products\FilterProductsRequest;
 	use App\Http\Requests\Stocks\StockAdjustments\FilterAdjustmentsRequest;
-	use App\Models\Brand;
 	use App\Models\StockAdjustment;
 	use App\Models\Supplier;
 	use App\Services\Filters\ProductFilterService;
@@ -55,24 +53,21 @@
 		/**
 		 * Fetch suppliers that have products of the given brand.
 		 *
-		 * @param  FilterSuppliersByBrandRequest  $request
-		 * @param  Brand                          $brand
-		 *
 		 * @return JsonResponse
 		 */
-		public function suppliersByBrand(FilterSuppliersByBrandRequest $request, Brand $brand): JsonResponse {
+//		public function suppliersByBrand(FilterSuppliersByBrandRequest $request, Brand $brand): JsonResponse {
 //			dd($request->validated());
-			$suppliersOptions = Supplier::query()->whereHas('products', function ($query) use ($brand) {
-				$query->where('brand_id', $brand->id);
-			})->orderBy('name')->get()->map(function (Supplier $supplier) {
-				return "<option value='".$supplier->id."'>".$supplier->name."</option>";
-			})->prepend("<option value=''>All Suppliers</option>")->join('');
-
-			return response()->json([
-				'success'   => !empty($suppliersOptions),
-				'suppliers' => $suppliersOptions,
-			]);
-		}
+//			$suppliersOptions = Supplier::query()->whereHas('products', function ($query) use ($brand) {
+//				$query->where('brand_id', $brand->id);
+//			})->orderBy('name')->get()->map(function (Supplier $supplier) {
+//				return "<option value='".$supplier->id."'>".$supplier->name."</option>";
+//			})->prepend("<option value=''>All Suppliers</option>");
+//
+//			return response()->json([
+//				'success'   => $suppliersOptions->isNotEmpty(),
+//				'suppliers' => $suppliersOptions->join(''),
+//			]);
+//		}
 
 		public function adjustments(FilterAdjustmentsRequest $request) {
 			$input = $request->validated();

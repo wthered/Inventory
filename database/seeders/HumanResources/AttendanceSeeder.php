@@ -29,7 +29,8 @@
 			}
 
 			while ($employees->isNotEmpty()) {
-				$employee = $employees->pull($employees->keys()->random());
+				$employee_key = $employees->keys()->random();
+				$employee = $employees->pull($employee_key);
 
 				$warehouseId = $employee->warehouse_id ?? $warehouses->random()->id;
 
@@ -89,9 +90,9 @@
 					]);
 
 					// Live ενημέρωση στην ίδια γραμμή
-					$this->command->getOutput()->write("\rProcessing Employee #".$employee->id." for date: ".$date->toDateString());
+					$this->command->getOutput()->write("\rProcessing Employee #".$employee->id." for date: ".$date->toDateString()."\r");
 				}
-				$this->command->info("End of employee #".$employee->id."/".$employees->count());
+				$this->command->info("[Employee #".$employee->id."] End of employee #".$employee_key."/".$employees->count());
 			}
 		}
 	}

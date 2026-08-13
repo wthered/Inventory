@@ -23,6 +23,7 @@
 		public float                 $selling_price;
 		public ?float                $discount_price;
 		public ProductUnit           $unit;
+		public int                   $weight;
 		public int                   $min_stock_level;
 		public ?int                  $max_stock_level;
 		public ?int                  $current_stock;
@@ -61,6 +62,7 @@
 			$this->unit = $this->product->unit instanceof ProductUnit
 				? $this->product->unit
 				: ProductUnit::from($this->product->unit);
+			$this->weight = $this->product->weight;
 
 			$this->min_stock_level = $this->product->min_stock_level;
 			$this->max_stock_level = $this->product->max_stock_level;

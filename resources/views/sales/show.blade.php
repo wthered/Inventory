@@ -181,7 +181,7 @@
                             <label>Shipping Date</label>
                             <span class="info-value">
                                 <i class="fas fa-calendar-alt"></i>
-                                {{ $sale->shipping_date ? \Carbon\Carbon::parse($sale->shipping_date)->format('Y-m-d') : 'Not scheduled' }}
+                                {{ $sale->shipping_date ?? 'Not scheduled' }}
                             </span>
                         </div>
                     </div>

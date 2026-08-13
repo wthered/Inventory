@@ -136,7 +136,7 @@
                             <i class="fas fa-weight"></i>
                             <div>
                                 <label>Weight</label>
-                                <span>{{ $product->specifications['weight'] ?? 'N/A' }}</span>
+                                <span>{{ $product->weight ?? ($product->specifications['weight'] ?? 'N/A') }} gr</span>
                             </div>
                         </div>
                     </div>
@@ -144,7 +144,7 @@
                     <!-- Description -->
                     <div class="product-description">
                         <h3>Description</h3>
-                        <p>{{ $product->description }}</p>
+                        <p>{{ $product->description ?? 'No description available' }}</p>
                     </div>
 
                     <!-- Dynamic Specifications -->
