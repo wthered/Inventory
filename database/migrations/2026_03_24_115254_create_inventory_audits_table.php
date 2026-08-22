@@ -1,5 +1,6 @@
 <?php
 
+	use App\Enums\Inventory\AdjustmentType;
 	use App\Enums\Sales\SalesOrderStatus;
 	use Illuminate\Database\Migrations\Migration;
 	use Illuminate\Database\Schema\Blueprint;
@@ -27,6 +28,8 @@
 				$table->timestamp('started_at')->nullable();
 				$table->timestamp('completed_at')->nullable();
 				$table->text('notes')->nullable();
+				$table->nullableMorphs('auditable'); // Adds auditable_type & auditable_id
+				$table->json('metadata')->nullable();
 				$table->timestamps();
 			});
 
@@ -42,7 +45,7 @@
 				$table->integer('physical_quantity')->comment('Τι μέτρησε ο χρήστης');
 				$table->integer('discrepancy')->comment('physical - system (μπορεί να είναι +/-)');
 
-				$table->string('adjustment_status')->default('pending')->comment('pending / adjusted / ignored');
+				$table->string('adjustment_status')->default(AdjustmentType::PENDING->value);
 				$table->timestamps();
 
 				$table->foreign('product_id')->references('id')->on('products');

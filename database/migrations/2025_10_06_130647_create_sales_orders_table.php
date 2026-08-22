@@ -1,8 +1,6 @@
 <?php
 
-	use App\Enums\Financial\PaymentStatus;
 	use App\Enums\Inventory\MovementStatus;
-	use App\Enums\Sales\SalesOrderStatus;
 	use Illuminate\Database\Migrations\Migration;
 	use Illuminate\Database\Schema\Blueprint;
 	use Illuminate\Support\Facades\Schema;
@@ -33,9 +31,9 @@
 				$table->date('shipping_date')->nullable()->comment('The date when the order is scheduled to be or was shipped');
 
 				// Οικονομικά Στοιχεία (Σύνολα πώλησης)
-				$table->decimal('subtotal', 15, 2)->default(0)->comment('Total sales value before taxes and discounts');
-				$table->decimal('tax_amount', 15, 2)->default(0)->comment('Total calculated VAT/Tax for this order');
-				$table->decimal('discount_amount', 15, 2)->default(0)->comment('Total discount deducted from subtotal');
+				$table->decimal('subtotal', 15)->default(0)->comment('Total sales value before taxes and discounts');
+				$table->decimal('tax_amount', 15)->default(0)->comment('Total calculated VAT/Tax for this order');
+				$table->decimal('discount_amount', 15)->default(0)->comment('Total discount deducted from subtotal');
 				$table->decimal('grand_total', 15, 2)->default(0)->comment('Final amount to be paid by customer (subtotal + tax - discount)');
 
 				// Λογοδοσία

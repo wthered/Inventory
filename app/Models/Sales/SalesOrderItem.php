@@ -4,9 +4,11 @@
 
 	use App\Contracts\StockMoveable;
 	use App\Models\Product;
-	use App\Models\WarehouseLocation; // Προσθήκη για το Bin location
+	use App\Models\WarehouseLocation;
 	use Illuminate\Database\Eloquent\Model;
 	use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+	// Προσθήκη για το Bin location
 
 	class SalesOrderItem extends Model implements StockMoveable {
 
@@ -44,7 +46,7 @@
 		}
 
 		public function getWarehouseId(): int {
-			return $this->salesOrder?->warehouse_id ?? 0;
+			return $this->sale?->warehouse_id ?? 0;
 		}
 
 		/**

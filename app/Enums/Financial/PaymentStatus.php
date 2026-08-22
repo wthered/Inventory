@@ -36,10 +36,10 @@
 		 */
 		public function hexColor(): string {
 			return match ($this) {
-				self::UNPAID         => '#ef4444',         // Red 500
+				self::UNPAID         => '#ef4444', // Red 500
 				self::PARTIALLY_PAID => '#f97316', // Orange 500
-				self::PAID           => '#22c55e',           // Green 500
-				self::REFUNDED       => '#64748b',       // Slate 500
+				self::PAID           => '#22c55e', // Green 500
+				self::REFUNDED       => '#64748b', // Slate 500
 				self::VOID           => '',
 			};
 		}

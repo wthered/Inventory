@@ -135,7 +135,7 @@
 				'categories'       => Category::query()->whereNull('parent_id')->orderBy('sort_order')->get(),
 				'child_categories' => Category::query()->where('parent_id', $object->category['parent_id'])->get(),
 				'brands'           => Category::query()->find($object->product['category_id'])->brands()->pluck('name', 'id'),
-				'suppliers'        => Supplier::query()->pluck('name', 'id'),
+				'suppliers'        => Supplier::query()->pluck('company_name', 'id'),
 				'product_supplier' => $preferred->id,
 				'product'          => $object,
 			]);

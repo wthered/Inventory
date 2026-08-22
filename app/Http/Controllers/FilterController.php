@@ -2,12 +2,18 @@
 
 	namespace App\Http\Controllers;
 
+	use App\Http\Requests\Brands\BrandListFilterRequest;
 	use App\Http\Requests\Products\FilterProductsRequest;
+	use App\Http\Requests\Sales\SalesIndexFilterRequest;
 	use App\Http\Requests\Stocks\StockAdjustments\FilterAdjustmentsRequest;
+	use App\Models\Brand;
+	use App\Models\Product;
+	use App\Models\Sales\SalesOrder;
 	use App\Models\StockAdjustment;
 	use App\Models\Supplier;
 	use App\Services\Filters\ProductFilterService;
 	use Illuminate\Http\JsonResponse;
+	use Throwable;
 
 	class FilterController extends Controller {
 
@@ -31,9 +37,11 @@
 
 			// Returns a collection of unique Brand models (excluding nulls)
 			$brands = $filtered->getCollection()->pluck('brand')->filter()->unique('id')
-			                   ->values()->pluck('name', 'id')->map(function ($name, $index) {
-					return "<option value='".$index."'>".$name."</option>";
-				})->prepend("<option value=''>All Brands</option>");
+			                   ->values()
+			                   ->pluck('name', 'id')
+			                   ->map(function ($name, $index) {
+				                   return "<option value='".$index."'>".$name."</option>";
+			                   })->prepend("<option value=''>All Brands</option>");
 
 			$suppliers = Supplier::query()->whereHas('products', function ($query) use ($filtered) {
 				return $query->whereIn('id', $filtered->getCollection()->pluck('id')->values());
@@ -97,6 +105,68 @@
 					return view('common.adjustments.index_row', ['adjustment' => $adjustment])->render();
 				}),
 				'pagination'  => $adjustments->hasPages() ? $adjustments->withQueryString()->links('pagination::simple')->render() : '',
+			]);
+		}
+
+		public function brandProducts(BrandListFilterRequest $request, Brand $brand) {
+			$input = $request->validated();
+//			dd($input);
+			$products = $brand->products()->when($request->filled('category_id'), function ($query) use ($input) {
+				$query->whereHas('category', function ($q) use ($input) {
+					$q->where('id', $input['category_id']);
+				});
+			})->when($request->filled('search'), function ($query) use ($input) {
+				$query->where(function ($q) use ($input) {
+					$q->where('name', 'LIKE', "%".$input['search']."%")
+					  ->orWhere('sku', 'LIKE', "%".$input['search']."%");
+				});
+			})->when($request->filled('warehouse_id'), function ($query) use ($input) {
+				$query->whereHas('inventories', function ($q) use ($input) {
+					$q->where('warehouse_id', $input['warehouse_id']);
+				});
+			})->get()->map(function (Product $product) {
+				return view('partials.brands.product_card', ['product' => $product])->render();
+			});
+			return response()->json([
+				'success' => $products->isNotEmpty(),
+				'results' => $products->implode('')
+			], $products->isNotEmpty() ? 200 : 404);
+		}
+
+		/**
+		 * Filters Sale Orders into Index page when a filter value changes
+		 *
+		 * @throws Throwable
+		 */
+		public function sales(SalesIndexFilterRequest $request): JsonResponse {
+			$input = $request->validated();
+
+			// 1. Store active filter inputs in the session
+			$request->session()->put('sales_filters', $input);
+
+			$sales = SalesOrder::query()
+			                   ->when($request->filled('search'), function ($query) use ($input) {
+				                   $query->where(function ($q) use ($input) {
+					                   $q->where('order_number', 'like', "%".$input['search']."%")
+					                     ->orWhereHas('customer', function ($customerQuery) use ($input) {
+						                     $customerQuery->where('name', 'like', "%".$input['search']."%");
+					                     });
+				                   });
+			                   })->when($request->filled('status'), function ($query) use ($input) {
+					$query->where('status_id', $input['status']);
+				})->when($request->filled('payment_status'), function ($query) use ($input) {
+					$query->where('payment_status_id', $input['payment_status']);
+				})->when($request->filled('date'), function ($query) use ($input) {
+					$query->whereDate('order_date', $input['date']);
+				})->latest()->paginate($request->session()->get('per_page', 25))
+			                   ->setPath(route('inventory.sales.index'));
+
+			// Render rows partial
+			$sales->through(fn(SalesOrder $sale) => view('partials.sales.filter_row', ['sale' => $sale])->render());
+
+			return response()->json([
+				'rows'       => $sales->getCollection()->implode(''),
+				'pagination' => view('partials.sales.pagination', ['sales' => $sales])->render(),
 			]);
 		}
 	}

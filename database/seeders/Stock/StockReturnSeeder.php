@@ -8,6 +8,7 @@
 	use App\Models\Supplier;
 	use App\Models\User;
 	use App\Models\Warehouse;
+	use Carbon\Carbon;
 	use Illuminate\Database\Seeder;
 	use Illuminate\Support\Collection;
 	use Illuminate\Support\Str;
@@ -29,22 +30,34 @@
 				return;
 			}
 
-			Collection::range(1, 24)->each(function (int $i) use ($warehouses, $users, $customers, $suppliers) {
+			// Χρήση copy() για να μη "εκτοξευθεί" η ημερομηνία στο μέλλον
+			$action_day = Carbon::today()->subDays(mt_rand(1, 30));
+
+			Collection::range(1, 24)->each(function (int $i) use (
+				$warehouses,
+				$users,
+				$customers,
+				$suppliers,
+				$action_day
+			) {
 				$type = fake()->randomElement([Customer::class, Supplier::class]);
-				$targetId = ($type === Customer::class) ? $customers->random() : $suppliers->random();
 
-				// Χρήση copy() για να μη "εκτοξευθεί" η ημερομηνία στο μέλλον
-				$date = now()->subDays(mt_rand(1, 30));
-
-				StockReturn::query()->create([
+				$action = StockReturn::query()->create([
 					'returnable_type' => $type,
-					'returnable_id'   => $targetId,
+					'returnable_id'   => ($type === Customer::class) ? $customers->random() : $suppliers->random(),
+					'return_number'   => StockReturn::generateReturnNumber(),
 					'warehouse_id'    => $warehouses->random(),
 					'status'          => fake()->randomElement(StockReturnStatus::cases())->value,
-					'return_date'     => $date->format('Y-m-d'),
+					'return_date'     => $action_day->addDays(mt_rand(1, $i)),
 					'tracking_number' => 'TRK-'.Str::upper(fake()->regexify('[A-Z]{2}[0-9]{9}GR')),
 					'carrier'         => fake()->randomElement(['FedEx', 'UPS', 'DHL', 'ΕΛΤΑ']),
 					'created_by'      => $users->random(),
+					'created_at'      => $action_day->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
+					'updated_at'      => $action_day->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
+				]);
+
+				$action->update([
+					'rma_number' => StockReturn::generateRmaNumber($action),
 				]);
 			});
 			$this->command->info('Seeded 24 Return Headers.');

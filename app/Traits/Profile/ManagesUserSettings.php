@@ -13,8 +13,10 @@
 		 * Display the user preferences settings page.
 		 */
 		public function settings(Request $request): Factory|View {
+			$user = $request->user();
+
 			$preferences = session('preferences', [
-				'per_page'    => $request->user()->per_page ?? 15,
+				'per_page'    => $user->account?->per_page ?? 15, // <--- Access via account relation
 				'timezone'    => config('app.timezone', 'Europe/Athens'),
 				'locale'      => 'el',
 				'date_format' => 'd/m/Y',
@@ -35,11 +37,12 @@
 
 			$user = $request->user();
 
-			// Update database user record
-			$user->account()->update([
-				'per_page' => $validated['per_page'],
-				// Add 'timezone' or JSON column 'preferences' here as needed
-			]);
+			// Update database account record
+			if ($user->account) {
+				$user->account->update([
+					'per_page' => $validated['per_page'],
+				]);
+			}
 
 			// Update session state for instant access
 			session(['preferences' => $validated]);

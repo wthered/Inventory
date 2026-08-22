@@ -17,7 +17,7 @@
 				$table->string('email')->nullable();
 				$table->string('phone');
 				$table->string('website')->nullable();
-				$table->string('tax_number')->nullable();
+				$table->unsignedInteger('tax_number')->nullable();
 				$table->text('address')->nullable();
 				$table->string('city')->nullable();
 				$table->string('state')->nullable();

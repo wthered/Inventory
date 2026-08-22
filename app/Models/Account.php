@@ -2,9 +2,9 @@
 
 	namespace App\Models;
 
+	use Illuminate\Database\Eloquent\Casts\Attribute;
 	use Illuminate\Database\Eloquent\Model;
 	use Illuminate\Database\Eloquent\Relations\BelongsTo;
-	use Illuminate\Database\Eloquent\Casts\Attribute;
 
 	class Account extends Model {
 		public    $incrementing = false;
@@ -18,6 +18,7 @@
 			'phone',
 			'avatar',
 			'is_active',
+			'per_page',
 			'last_login_at'
 		];
 
@@ -27,7 +28,7 @@
 		 */
 		protected function fullName(): Attribute {
 			return Attribute::make(
-				get: fn () => $this->first_name." ".$this->last_name,
+				get: fn() => $this->first_name." ".$this->last_name,
 			);
 		}
 

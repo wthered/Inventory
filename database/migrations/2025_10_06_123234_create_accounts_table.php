@@ -16,6 +16,7 @@
 				$table->unsignedBigInteger('phone')->nullable();
 				$table->string('avatar')->nullable();
 				$table->boolean('is_active')->default(true);
+				$table->unsignedTinyInteger('per_page')->default(15);
 				$table->timestamp('last_login_at')->nullable();
 				$table->timestamps();
 				$table->foreign('username')->references('name')->on('users')->cascadeOnDelete()->cascadeOnUpdate();

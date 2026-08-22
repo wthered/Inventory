@@ -36,6 +36,7 @@
 		 * @throws Exception|Throwable
 		 */
 		public function created(Model $item): void {
+			dd(__METHOD__);
 			if ($item instanceof StockTransferItem) {
 				// ONLY execute the OUT movement from the source warehouse.
 				// The items are now leaving Warehouse A.
@@ -43,8 +44,8 @@
 					productId: $item->product_id,
 					quantity: $item->quantity_requested,
 					type: TransactionType::OUT->value,
-					reason: 'transfer_out',
-					warehouseId: $item->movement->source_warehouse_id,
+					reason: TransactionReason::TRANSFER_OUT->value,
+//					warehouseId: $item->movement->source_warehouse_id,
 					locationId: $item->source_location_id,
 					batchNumber: $item->batch_number,
 					reference: $item
@@ -74,6 +75,7 @@
 		 * @throws Exception|Throwable
 		 */
 		public function updated(Model $item): void {
+			dd(__METHOD__);
 			if (!$this->shouldProcess($item)) {
 				return;
 			}
@@ -94,8 +96,8 @@
 					productId: $item->product_id,
 					quantity: abs($diff), // Πάντα θετικός αριθμός για την execute
 					type: $type,
-					reason: TransactionReason::TRANSFER_OUT->value, // Χρήση του σωστού Enum value
-					warehouseId: $item->movement->source_warehouse_id,
+					reason: TransactionReason::TRANSFER_OUT->value,
+//					warehouseId: $item->movement->source_warehouse_id,
 					locationId: $item->source_location_id,
 					batchNumber: $item->batch_number,
 					reference: $item
@@ -112,12 +114,13 @@
 					$type = ($type === TransactionType::IN->value) ? TransactionType::OUT->value : TransactionType::IN->value;
 				}
 
+				dd($item);
 				$this->movementService->execute(
 					productId: $item->product_id,
 					quantity: abs($diff),
 					type: $type,
 					reason: TransactionReason::DATA_ENTRY->value,
-					warehouseId: $this->movementService->resolveWarehouseId($item),
+//					warehouseId: $this->movementService->resolveWarehouseId($item),
 					locationId: $item->getOriginal('location_id'),
 					reference: $item
 				);
@@ -133,6 +136,7 @@
 		 * @throws Exception|Throwable
 		 */
 		public function deleted(Model $item): void {
+			dd(__METHOD__);
 			if (!$this->shouldProcess($item)) {
 				return;
 			}
@@ -145,7 +149,7 @@
 					quantity: $item->quantity_requested,
 					type: TransactionType::IN->value,
 					reason: 'transfer_reversal',
-					warehouseId: $item->movement->source_warehouse_id,
+//					warehouseId: $item->movement->source_warehouse_id,
 					locationId: $item->source_location_id,
 					reference: $item
 				);

@@ -181,7 +181,7 @@
                             <label>Shipping Date</label>
                             <span class="info-value">
                                 <i class="fas fa-calendar-alt"></i>
-                                {{ $sale->shipping_date ?? 'Not scheduled' }}
+                                {{ $sale->shipping_date ? $sale->shipping_date->format('l, j F Y') : 'Not scheduled' }}
                             </span>
                         </div>
                     </div>

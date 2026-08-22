@@ -22,6 +22,7 @@
 		public float                 $cost_price;
 		public float                 $selling_price;
 		public ?float                $discount_price;
+		public float                 $tax_percent;
 		public ProductUnit           $unit;
 		public int                   $weight;
 		public int                   $min_stock_level;
@@ -59,6 +60,8 @@
 			$this->cost_price = (float) $this->product->cost_price;
 			$this->selling_price = (float) $this->product->selling_price;
 			$this->discount_price = $this->product->discount_price ? (float) $this->product->discount_price : null;
+			$this->tax_percent = $this->product->tax_percent ?? 24;
+
 			$this->unit = $this->product->unit instanceof ProductUnit
 				? $this->product->unit
 				: ProductUnit::from($this->product->unit);

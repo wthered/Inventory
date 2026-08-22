@@ -2,11 +2,13 @@
 
 	namespace Database\Seeders\Orders;
 
+	use App\DataTransferObjects\Warehouse\WarehouseDTO;
 	use App\Enums\Sales\SalesOrderStatus;
 	use App\Models\Product;
 	use App\Models\Sales\SalesOrder;
-	use App\Models\WarehouseLocation;
+	use App\Models\Warehouse;
 	use Illuminate\Database\Seeder;
+	use Illuminate\Support\Collection;
 
 	class SalesOrderItemSeeder extends Seeder {
 		/**
@@ -18,7 +20,12 @@
 
 			// Παίρνουμε διαθέσιμα προϊόντα και τοποθεσίες αποθήκης
 			$products = Product::all();
-			$locations = WarehouseLocation::all()->pluck('id')->toArray();
+//			$locations = WarehouseLocation::all()->pluck('id');
+
+			// Warehouses is a collection of Warehouse DTOs
+			$warehouses = Warehouse::query()->get()->map(function (Warehouse $warehouse) {
+				return WarehouseDTO::fromModel($warehouse);
+			});
 
 			if ($products->isEmpty()) {
 				$this->command->warn('Δεν βρέθηκαν προϊόντα. Παρακαλώ τρέξτε πρώτα τον ProductSeeder.');
@@ -26,8 +33,19 @@
 			}
 
 			foreach ($sales as $sale) {
-				// Παίρνουμε τυχαία προϊόντα (π.χ. 1 έως 4) για αυτή την παραγγελία
-				$randomProducts = $products->random(mt_rand(1, 4));
+				// Initialize Random Product
+				$randomProducts = Collection::empty();
+
+				// 1. Filter products belonging to the sales order warehouse
+				$products = Product::query()->whereHas('warehouses', function ($query) use ($sale) {
+					$query->where('warehouses.id', $sale->warehouse_id);
+				})->get();
+
+				// 2. Safely pick random items without exceeding available count
+				if ($products->isNotEmpty()) {
+					$count = min($products->count(), mt_rand(1, 4));
+					$randomProducts = $products->random($count);
+				}
 
 				foreach ($randomProducts as $product) {
 					$qtyOrdered = rand(2, 12);
@@ -44,20 +62,23 @@
 					}
 
 					// Τυχαίο ποσοστό έκπτωσης (0%, 5%, 10%, 20%)
-					$discountRate = collect([0, 5, 10, 20])->random();
+					$discountRate = Collection::make([0, 5, 10, 15, 20])->random();
 
 					// Υπολογισμός της αξίας της έκπτωσης ανά μονάδα προϊόντος
-					$unitPrice = $product->price ?? mt_rand(10, 500); // Χρήση τιμής προϊόντος ή fallback
+					$unitPrice = $product->cost_price ?? mt_rand(10, 500); // Χρήση τιμής προϊόντος ή fallback
 					$discountAmountPerUnit = $unitPrice * ($discountRate / 100);
 					$totalDiscountAmount = $discountAmountPerUnit * $qtyOrdered;
+
+					// Getting all locations in specific location
+					$locations = $product->locations()->wherePivot('warehouse_id', $sale->warehouse_id)->pluck('warehouse_locations.id');
 
 					// Εισαγωγή μέσω της σχέσης $sale->items()
 					$sale->items()->create([
 						'product_id'       => $product->id,
 						'batch_number'     => collect([
-							null, 'BATCH-'.mt_rand(128, 999), 'LOT-'.mt_rand(2026, 2030)
+							null, 'BATCH-'.mt_rand(100, 999), 'LOT-'.mt_rand(2026, 2030)
 						])->random(),
-						'location_id'      => !empty($locations) ? collect($locations)->random() : null,
+						'location_id'      => $locations->isNotEmpty() ? $locations->random() : null,
 						'quantity_ordered' => $qtyOrdered,
 						'quantity_shipped' => $qtyShipped,
 						'unit_price'       => $unitPrice,
@@ -98,5 +119,6 @@
 				'tax_amount'      => $taxAmount,
 				'grand_total'     => $grandTotal,
 			]);
+			$this->command->getOutput()->write('Updating Order totals for sale '.$sale->id."...\r");
 		}
 	}

@@ -2,10 +2,12 @@
 
 	namespace Database\Seeders\inventories\Concerns;
 
+	use App\DataTransferObjects\ProductDTO;
 	use App\Enums\Inventory\TransactionReason;
 	use App\Enums\Inventory\TransactionType;
 	use App\Models\Inventories\InventoryTransaction;
 	use App\Models\Purchases\PurchaseOrder;
+	use Carbon\Carbon;
 	use Illuminate\Support\Collection;
 	use Illuminate\Support\Facades\DB;
 
@@ -28,14 +30,17 @@
 				return;
 			}
 
+			// 5 years, 7 months, and 8 days ago or less
+			$transaction_time = Carbon::today()->subDays($randomLocations->count());
+
 			foreach (Collection::range(1, $randomLocations->count())->shuffle() as $location_index) {
-				$product = $products->random();
+				$product = new ProductDTO($products->random());
 
 				// 2. Διαλέγουμε τυχαία από τη συλλογή που είναι ήδη στη μνήμη (PHP random)
 				$location = $randomLocations->random();
 
-				$qty  = rand(32, 256);
-				$cost = $product->cost_price ?? rand(10, 50);
+				$qty = mt_rand(1, $product->current_stock);
+				$cost = $product->cost_price ?? mt_rand(10, 50);
 
 				$this->list->push([
 					'batch_number'    => InventoryTransaction::generateTransactionNumber('PUR'),
@@ -52,14 +57,10 @@
 					'reference_type'  => PurchaseOrder::class,
 					'reference_id'    => $poIds->random(),
 					'created_by'      => $users->random(),
-					'created_at'      => now()->subDays(mt_rand(30, 60)),
-					'updated_at'      => now()->addDays(mt_rand(30, 60))->setHours(mt_rand(0, 23))->setMinutes(mt_rand(0, 59))->setSeconds(mt_rand(0, 59)),
+					'created_at'      => $transaction_time,
+					'updated_at'      => $transaction_time->addHours(mt_rand(1, 23))->addMinutes(mt_rand(1, 59))->addSeconds(mt_rand(1, 59)),
 				]);
 
-				// Χρήση static:: για να βρει το constant του ParentSeeder
-//				if ($this->list->count() >= static::BATCH_SIZE) {
-//					$this->flushList();
-//				}
 			}
 
 			$this->flushList();

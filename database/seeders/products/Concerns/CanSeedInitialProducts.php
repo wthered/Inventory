@@ -33,8 +33,7 @@
 				$brands = Category::query()->find($category)->brands()->pluck('id');
 
 				for ($i = 0; $i < 16; $i++) {
-					$uniqueId = Str::uuid7()->toString();
-					$shortId = substr(explode('-', $uniqueId)[0], 0, 8);
+					$shortId = Str::lower(Str::random(8));
 					$product_time = Carbon::now();
 
 					// Δημιουργία ρεαλιστικού ονόματος
@@ -43,7 +42,7 @@
 
 					$costPrice = fake()->randomFloat(2, 5, 512);
 					$sellingPrice = fake()->randomFloat(2, 0.75 * $costPrice, 1.25 * $costPrice);
-					$stock = ['min' => fake()->numberBetween(8, 1024)];
+					$stock = ['min' => fake()->numberBetween(1024, 16 * 1024)];
 					$stock['max'] = $stock['min'] + mt_rand(256, 4096);
 					$stock['current'] = mt_rand($stock['min'], $stock['max']);
 
@@ -58,6 +57,7 @@
 						'cost_price'      => $costPrice,
 						'selling_price'   => $sellingPrice,
 						'discount_price'  => fake()->boolean() ? fake()->randomFloat(2, 0.66 * $sellingPrice, 0.75 * $sellingPrice) : $sellingPrice,
+						'tax_percent'     => fake()->randomElement([6, 13, 24]),
 						'unit'            => fake()->randomElement(['pcs', 'kg', 'liter', 'pack']),
 						'weight'          => fake()->numberBetween(10, 4096),
 						'track_inventory' => fake()->boolean(90),
@@ -74,14 +74,14 @@
 						'updated_at' => $product_time->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
 					]);
 
-//					if ($this->list->count() >= static::BATCH_SIZE) {
-//						Product::insertOrIgnore($this->list->toArray());
-//						$this->list = collect();
-//					}
+					if ($this->list->count() >= static::BATCH_SIZE) {
+						Product::query()->insert($this->list->toArray());
+						$this->list = Collection::empty();
+					}
 				}
 
 				$this->list->chunk(self::BATCH_SIZE)->each(function (Collection $chunk) {
-					Product::query()->insertOrIgnore($chunk->toArray());
+					Product::query()->insert($chunk->toArray());
 				});
 				$this->list = collect();
 			}

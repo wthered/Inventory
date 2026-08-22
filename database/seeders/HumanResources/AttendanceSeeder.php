@@ -67,7 +67,7 @@
 						$forgotToCheckOut = fake()->boolean(5);
 
 						if (empty($forgotToCheckOut)) {
-							$checkOut = $date->copy()->setTime(17, 55, 0)->addMinutes(mt_rand(0, 35));
+							$checkOut = $date->copy()->setTime(17, mt_rand(45, 59), 0)->addMinutes(mt_rand(1, 35))->setSeconds(mt_rand(1, 59));
 						}
 					}
 
@@ -92,7 +92,7 @@
 					// Live ενημέρωση στην ίδια γραμμή
 					$this->command->getOutput()->write("\rProcessing Employee #".$employee->id." for date: ".$date->toDateString()."\r");
 				}
-				$this->command->info("[Employee #".$employee->id."] End of employee #".$employee_key."/".$employees->count());
+				$this->command->info("[Employee #".$employee->id."] End of employee #".$employee_key."/".$employees->count() + 1);
 			}
 		}
 	}

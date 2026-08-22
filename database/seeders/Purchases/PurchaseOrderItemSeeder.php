@@ -2,11 +2,11 @@
 
 	namespace Database\Seeders\Purchases;
 
+	use App\DataTransferObjects\ProductDTO;
 	use App\Enums\Purchases\PurchaseOrderStatus;
 	use App\Models\Product;
 	use App\Models\Purchases\PurchaseOrder;
 	use App\Models\Purchases\PurchaseOrderItem;
-	use App\Models\WarehouseLocation;
 	use Carbon\Carbon;
 	use Database\Seeders\ParentSeeder;
 	use Illuminate\Support\Collection;
@@ -31,14 +31,18 @@
 				$products = Product::all();
 
 				// Φέρνουμε τα διαθέσιμα Bins (Warehouse Locations) για να αντιστοιχίσουμε κατά την παραλαβή
-				$locations = WarehouseLocation::pluck('id')->toArray();
+//				$locations = WarehouseLocation::query()->pluck('id');
 
-				PurchaseOrder::all()->each(function (PurchaseOrder $order) use ($products, $locations) {
+				PurchaseOrder::all()->each(function (PurchaseOrder $order) use ($products) {
 					$this->list = Collection::empty();
 					$orderSubtotal = 0;
 
 					// Τυχαία 3 έως 12 προϊόντα ανά αγορά
-					$selectedProducts = $products->random(mt_rand(3, 12));
+					$selectedProducts = Collection::make($products->random(mt_rand(3, 12)))->map(function (
+						Product $product
+					) {
+						return new ProductDTO($product);
+					});
 
 					foreach ($selectedProducts as $productModel) {
 						$quantityOrdered = mt_rand(10, 200);
@@ -53,6 +57,7 @@
 							$quantityReceived = 0;
 						}
 
+//						$unitPrice = $productModel->cost_price > 0 ? $productModel->cost_price : round(mt_rand(500, 4500) / 100, 2);
 						$unitPrice = $productModel->cost_price > 0 ? $productModel->cost_price : round(mt_rand(500, 4500) / 100, 2);
 						$discountRate = fake()->randomElement([0.00, 5.00, 7.5, 10.00]); // Ποσοστό έκπτωσης
 
@@ -63,13 +68,15 @@
 						$orderTime = Carbon::parse($order->order_date)->setHours(rand(0, 23))->setMinutes(rand(0, 59))->setSeconds(mt_rand(0, 59));
 						$productDate = today()->subDays(mt_rand(0, 365));
 
+//						dd($productModel->locations->isNotEmpty());
+
 						$this->list->push([
 							'purchase_order_id'  => $order->id,
 							'product_id'         => $productModel->id,
-							'batch_number'       => $quantityReceived > 0 ? 'BAT-'.$orderTime->format('Ymd').'-'.Str::upper(Str::random(3)) : null,
+							'batch_number'       => $quantityReceived > 0 ? 'BAT-'.$orderTime->format('Y-m-d').'-'.Str::upper(Str::random(3)) : null,
 							'manufacturing_date' => $productDate,
 							'expiry_date'        => $productDate->addDays(mt_rand(0, 365)),
-							'location_id'        => $quantityReceived > 0 ? fake()->randomElement($locations) : null,
+							'location_id'        => $quantityReceived > 0 && $productModel->locations->isNotEmpty() ? $productModel->locations->random() : null,
 							'quantity_ordered'   => $quantityOrdered,
 							'quantity_received'  => $quantityReceived,
 							'unit_price'         => $unitPrice,
@@ -80,7 +87,7 @@
 					}
 
 					// Bulk insert τα items της συγκεκριμένης παραγγελίας
-					PurchaseOrderItem::insert($this->list->toArray());
+					PurchaseOrderItem::query()->insert($this->list->toArray());
 
 					// Υπολογισμός και ακριβής ενημέρωση της Master εγγραφής με βάση τα πραγματικά items
 					$taxAmount = $orderSubtotal * 0.24;

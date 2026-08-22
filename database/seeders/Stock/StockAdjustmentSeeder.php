@@ -2,20 +2,18 @@
 
 	namespace Database\Seeders\Stock;
 
+	use App\DataTransferObjects\Warehouse\WarehouseDTO;
 	use App\Enums\Inventory\AdjustmentReason;
 	use App\Enums\Inventory\AdjustmentType;
 	use App\Enums\Inventory\MovementStatus;
-	use App\Enums\Inventory\TransferStatus;
 	use App\Models\Category;
 	use App\Models\Product;
 	use App\Models\StockAdjustment;
-	use App\Models\StockAdjustmentItem;
 	use App\Models\User;
 	use App\Models\Warehouse;
 	use App\Models\WarehouseLocation;
 	use Carbon\Carbon;
 	use Database\Seeders\ParentSeeder;
-	use Illuminate\Database\Seeder;
 	use Illuminate\Support\Collection;
 	use Illuminate\Support\Str;
 
@@ -25,7 +23,7 @@
 		 */
 		public function run(): void {
 			$warehouses = Warehouse::all();
-			$users = User::pluck('id');
+			$users = User::query()->pluck('id');
 
 			$parentCategories = Category::query()->whereNull('parent_id')->with('children')->orderBy('sort_order')->pluck('id');
 
@@ -38,11 +36,11 @@
 
 				$parentCategory = $parentCategories->shuffle()->random();
 				$categories = [
-					'parent' => $parentCategory,
+					'parent'   => $parentCategory,
 					'children' => Category::query()->where('parent_id', $parentCategory)->pluck('id'),
 				];
 
-				$products = Product::whereHas('category', function ($query) use ($categories) {
+				$products = Product::query()->whereHas('category', function ($query) use ($categories) {
 					$query->whereIn('id', $categories['children']);
 				})->get();
 
@@ -56,8 +54,8 @@
 					$createdAt = Carbon::now(config('app.timezone'))->subDays(mt_rand(1, today()->dayOfYear));
 					$status = fake()->randomElement(MovementStatus::cases());
 
-					$adjustment = StockAdjustment::create([
-						'adjustment_number' => 'ADJ-' . Str::padLeft($i, 2, '0') . '-' . Str::upper(Str::random(8)),
+					$adjustment = StockAdjustment::query()->create([
+						'adjustment_number' => 'ADJ-'.Str::padLeft($i, 2, '0').'-'.Str::upper(Str::random(8)),
 						'warehouse_id'      => $warehouse->id,
 						'adjustment_date'   => $createdAt,
 						'status'            => $status->value,
@@ -76,7 +74,11 @@
 					// 8 - 16 items ανά adjustment είναι υπεραρκετά
 					$itemsCount = mt_rand(8, 16);
 
-					Collection::range(1, $itemsCount)->each(function () use ($adjustment, $warehouseLocations, $products) {
+					Collection::range(1, $itemsCount)->each(function () use (
+						$adjustment,
+						$warehouseLocations,
+						$products
+					) {
 						$product = $products->random();
 						$type = fake()->randomElement([AdjustmentType::INCREASE, AdjustmentType::DECREASE]);
 						$reasons = $type === AdjustmentType::INCREASE ? AdjustmentReason::increaseReasons() : AdjustmentReason::decreaseReasons();
@@ -93,8 +95,10 @@
 						]);
 					});
 
-					$this->command->info("Created Adjustment " . $adjustment->adjustment_number." with ".Str::padLeft($itemsCount, 2)." items into " . $warehouse->name . ".");
+					$this->command->getOutput()->write("Created Adjustment ".$adjustment->adjustment_number." with ".Str::padLeft($itemsCount, 2)." items\r");
 				});
+				$this->command->getOutput()->write("\n");
+				$this->command->info('End of Adjustments for '.WarehouseDTO::fromModel($warehouse)->name);
 			});
 		}
 	}

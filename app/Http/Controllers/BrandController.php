@@ -195,10 +195,8 @@
 //			                   ->orderBy('name')
 //			                   ->get();
 
-			$products = $this->service->search($input);
-
 			// 1. Μετατρέπουμε τα δεδομένα σε option tags
-			$options = $products->map(function (Product $product) {
+			$options = $this->service->search($input)->map(function (Product $product) {
 				return "<option value='".$product->id."'>".$product->name." (SKU: ".$product->sku.")</option>";
 			});
 

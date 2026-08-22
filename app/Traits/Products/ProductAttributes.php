@@ -4,6 +4,7 @@
 
 	use App\Enums\Stock\ProductStockStatus;
 	use Illuminate\Database\Eloquent\Casts\Attribute;
+	use Illuminate\Support\Str;
 
 	trait ProductAttributes {
 		/**
@@ -65,5 +66,16 @@
 					return ProductStockStatus::NORMAL;
 				}
 			);
+		}
+
+		/**
+		 * Generate a batch number for inventory tracking.
+		 *
+		 * @param  float  $chance  Percentage probability of having a batch (0-100)
+		 */
+		public static function generateBatchNumber(float $chance = 70): ?string {
+			return fake()->boolean($chance)
+				? 'BAT-'.Str::upper(Str::random(5))
+				: null;
 		}
 	}

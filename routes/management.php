@@ -174,6 +174,7 @@
 	*/
 	Route::post('products/filter', [FilterController::class, 'products'])->name('products.filter');
 	Route::post('adjustments/filter', [FilterController::class, 'adjustments'])->name('adjustments.filter');
+	Route::post('brands/{brand}/products/filter', [FilterController::class, 'brandProducts']);
 
 	// Sovereign Countries REST Resource
 	Route::resource('countries', CountryController::class);

@@ -2,7 +2,12 @@
 
 	namespace Database\Seeders;
 
-	use Database\Seeders\HumanResources\AttendanceSeeder;
+	use App\Models\Brand;
+	use App\Models\Category;
+	use App\Models\Inventories\Inventory;
+	use App\Models\Product;
+	use App\Models\Sales\SalesOrder;
+	use App\Models\Sales\SalesOrderItem;
 	use Database\Seeders\HumanResources\DepartmentSeeder;
 	use Database\Seeders\HumanResources\EmployeeSeeder;
 	use Database\Seeders\HumanResources\LeaveRequestSeeder;
@@ -51,6 +56,8 @@
 				SupplierSeeder::class,
 			]);
 
+			$this->command->info("Have seeded ".Product::query()->count()." in ".Category::query()->count()." categories and ".Brand::query()->count()." brands");
+
 			// --- 2. Locations & Αρχικό Απόθεμα ---
 			$this->call([
 				InventorySeeder::class,
@@ -64,6 +71,14 @@
 			]);
 
 			// --- 4. Sales Workflow (Προαιρετικό αλλά καλό) ---
+//			$this->call([
+//				SalesOrderSeeder::class,
+//				SalesOrderItemSeeder::class,
+//				SalesOrderHistorySeeder::class,
+//			]);
+			SalesOrder::unsetEventDispatcher();
+			SalesOrderItem::unsetEventDispatcher();
+
 			$this->call([
 				SalesOrderSeeder::class,
 				SalesOrderItemSeeder::class,
@@ -90,7 +105,7 @@
 				PositionSeeder::class,
 				EmployeeSeeder::class,
 				LeaveRequestSeeder::class,
-				AttendanceSeeder::class,
+				//				AttendanceSeeder::class,
 			]);
 
 			Schema::enableForeignKeyConstraints();
@@ -100,5 +115,18 @@
 				InventoryAuditSeeder::class,
 				InventoryMovementLogSeeder::class,
 			]);
+
+			// Fix negative inventory quantities post-seeding
+			Inventory::query()->where('available_quantity', '<', 0)
+			         ->get()
+			         ->each(function (Inventory $inventory) {
+				         $absAvailable = abs($inventory->available_quantity);
+				         $last_update = $inventory->updated_at;
+
+				         $inventory->update([
+					         'quantity'   => round($absAvailable + (mt_rand(0, 500) / 100) * $absAvailable),
+					         'updated_at' => $last_update,
+				         ]);
+			         });
 		}
 	}

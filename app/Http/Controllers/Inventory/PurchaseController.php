@@ -2,15 +2,17 @@
 
 	namespace App\Http\Controllers\Inventory;
 
+	use App\DataTransferObjects\ProductDTO;
 	use App\Enums\Purchases\PurchaseOrderStatus;
 	use App\Http\Controllers\Controller;
 	use App\Http\Requests\Purchases\OrderUpdateRequest;
 	use App\Models\Category;
-	use App\Models\Product;
 	use App\Models\Purchases\PurchaseOrder;
+	use App\Models\Purchases\PurchaseOrderItem;
 	use App\Models\Supplier;
 	use App\Models\Warehouse;
 	use Illuminate\Http\Request;
+	use Illuminate\Support\Collection;
 	use Illuminate\Support\Facades\DB;
 
 	class PurchaseController extends Controller {
@@ -59,36 +61,21 @@
 		 * Show the form for editing the specified resource.
 		 */
 		public function edit(PurchaseOrder $purchase) {
-			// Φορτώνουμε τα προϊόντα της συγκεκριμένης παραγγελίας για να έχουμε πρόσβαση στα category_id και brand_id τους
-			$purchaseProducts = $purchase->items->pluck('product_id');
-//			dd($purchaseProducts);
-
-			$products = Product::query();
+			$purchase->load(['items']);
+			$products = Collection::empty();
 
 			if ($purchase->items->isNotEmpty()) {
-				$products->where(function ($query) use ($purchase) {
-					$products = Product::whereIn('id', $purchase->items->pluck('product_id'))->get();
-					foreach ($products as $index => $product) {
-						// Για το πρώτο προϊόν χρησιμοποιούμε 'where', για τα επόμενα 'orWhere'
-//						$method = ($index === 0) ? 'where' : 'orWhere';
-
-						$query->where(function ($subQuery) use ($product) {
-							$subQuery->where('category_id', $product->category_id)
-							         ->where('brand_id', $product->brand_id);
-						});
-					}
+				$products = $purchase->items->map(function (PurchaseOrderItem $item) {
+					return new ProductDTO($item->product_id);
 				});
-			} else {
-				// Αν η παραγγελία δεν έχει καθόλου προϊόντα, επιστρέφουμε άδειο Collection
-				$products->whereRaw('1 = 0');
 			}
 
 			return view('purchases.edit', [
 				'order'      => $purchase,
 				'suppliers'  => Supplier::all(),
 				'warehouses' => Warehouse::all(),
-				'categories' => Category::with('brands')->get(),
-				'products'   => $products->get(), // Εκτέλεση του query
+				'categories' => Category::query()->whereNull('parent_id')->with(['children'])->get(),
+				'products'   => $products,
 			]);
 		}
 

@@ -498,7 +498,7 @@
 
 		// Hair Dryers & Styling Tools
 		[
-			'name'           => 'Dyson',
+			'name'           => 'Dyson Hair',
 			'slug'           => 'dyson-hair',
 			'description'    => 'Innovative hair dryers and styling tools with advanced technology.',
 			'logo'           => 'dyson.png',

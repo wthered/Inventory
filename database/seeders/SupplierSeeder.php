@@ -59,7 +59,7 @@
 						'email'          => $supplier['email'] ?? null,
 						'phone'          => $supplier['phone'] ?? fake()->regexify('(2[0-9]{9}|69[0-9]{8})'),
 						'website'        => $supplier['website'] ?? null,
-						'tax_number'     => isset($supplier['tax_number']) ? (string) $supplier['tax_number'] : null,
+						'tax_number'     => $supplier['tax_number'] ?? null,
 						'address'        => $supplier['address'] ?? null,
 						'city'           => $supplier['city'] ?? null,
 						'state'          => $supplier['state'] ?? null,

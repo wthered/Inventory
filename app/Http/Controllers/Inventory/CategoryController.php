@@ -113,7 +113,7 @@
 		}
 
 		public function filterBrands(FilterBrandsRequest $request, Category $category) {
-			return $category->brands()
+			return $category->brands()->whereHas('products')
 			                ->pluck('name', 'id')
 			                ->map(function ($name, $id) {
 				                return "<option value='".$id."'>".$name."</option>";
@@ -124,8 +124,6 @@
 
 		public function filter(CategoryFilterRequest $request, Category $category) {
 			$category->load(['brands', 'children']);
-
-//			dd($request->validated());
 
 			// Extract child category IDs once to keep queries clean and efficient
 			$children = $category->children()->pluck('id');
