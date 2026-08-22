@@ -45,7 +45,7 @@
 					});
 
 					foreach ($selectedProducts as $productModel) {
-						$quantityOrdered = mt_rand(10, 200);
+						$quantityOrdered = mt_rand(12, 256);
 
 						// Αν η παραγγελία είναι "Received" (Status 6), τότε quantity_received = quantity_ordered
 						// Αν είναι "Partially Received" (Status 5), βάζουμε ένα τυχαίο μικρότερο νούμερο
@@ -76,7 +76,7 @@
 							'batch_number'       => $quantityReceived > 0 ? 'BAT-'.$orderTime->format('Y-m-d').'-'.Str::upper(Str::random(3)) : null,
 							'manufacturing_date' => $productDate,
 							'expiry_date'        => $productDate->addDays(mt_rand(0, 365)),
-							'location_id'        => $quantityReceived > 0 && $productModel->locations->isNotEmpty() ? $productModel->locations->random() : null,
+							'location_id'        => $quantityReceived > 0 && $productModel->locations->isNotEmpty() ? $productModel->locations->random()->id : null,
 							'quantity_ordered'   => $quantityOrdered,
 							'quantity_received'  => $quantityReceived,
 							'unit_price'         => $unitPrice,

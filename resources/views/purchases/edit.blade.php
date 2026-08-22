@@ -118,6 +118,26 @@
 							<span class="invalid-feedback">{{ $message }}</span>
 							@enderror
 						</div>
+
+						<div class="form-group">
+							<label for="status_id" class="form-label">Initial Status <span
+									class="text-error">*</span></label>
+							<select name="status_id" id="status_id"
+							        class="form-select @error('status_id') is-invalid @enderror" required>
+								@foreach($statuses::cases() as $status)
+									{{-- Restrict initial creation to early stage statuses if desired --}}
+									@if(in_array($status, [$statuses::DRAFT, $statuses::AWAITING_APPROVAL, $statuses::APPROVED]))
+										<option
+											value="{{ $status->value }}" @selected(old('status_id', \App\Enums\Purchases\PurchaseOrderStatus::DRAFT->value) == $status->value)>
+											{{ $status->label() }}
+										</option>
+									@endif
+								@endforeach
+							</select>
+							@error('status_id')
+							<span class="invalid-feedback">{{ $message }}</span>
+							@enderror
+						</div>
 					</div>
 				</div>
 			</div>
@@ -147,6 +167,7 @@
 						</thead>
 						<tbody id="items-tbody">
 						@forelse(old('items', $order->items) as $index => $item)
+							{{ dd($products->get($index)) }}
 							<tr class="item-row" data-index="{{ $index }}">
 								{{-- Column 1: Product Details (Cascading selectors) --}}
 								<td>
@@ -160,7 +181,8 @@
 												@foreach($categories as $parent)
 													<optgroup label="{{ $parent->name }}">
 														@foreach($parent->children as $child)
-															<option value="{{ $child->id }}">
+															<option value="{{ $child->id }}"
+																@selected( (int) $child->id === ((int) $products->get($index)?->category->id ?? 0) )>
 																{{ $child->name }}
 															</option>
 														@endforeach
@@ -177,12 +199,10 @@
 											<select name="items[{{ $index }}][brand_id]"
 											        class="form-select brand-select @error("items.".$index.".brand_id") is-invalid @enderror"
 											        {{ $item->product->category->brands->isEmpty() ? 'disabled' : '' }} required>
-												<option value="">
-
-												</option>
+												<option value="">Brands in this Category</option>
 												@foreach($item->product->category->brands as $brand)
 													<option
-														value="{{ $brand->id }}" {{ $item->product->brand_id == $brand->id ? 'selected' : '' }}>
+														value="{{ $brand->id }}" @selected($products->get($index)->brand->id == $brand->id ) >
 														{{ $brand->name }}
 													</option>
 												@endforeach

@@ -11,49 +11,63 @@
 	trait CanSeedInitialProducts {
 
 		protected function insertInitialProducts(): Carbon {
-			$this->command->info('Creating initial product records...');
+			$initialTime = Carbon::now(config('app.timezone'));
+			$this->command->info('['.$initialTime->format('H:i:s').'] Creating initial product records...');
 
 			$categories = Category::query()->has('brands')->with('brands:id')->pluck('id');
-			$initialTime = Carbon::now(config('app.timezone'));
 			$dataMap = $this->getCategoryDataMap();
 
-			foreach ($categories as $category) {
+			// Prepare your shuffled collection of Category IDs
+			$categoriesList = Category::query()->pluck('id')->shuffle();
 
-				// 1. Παίρνουμε ένα τυχαίο KEY (string) ως default
+			while ($categoriesList->isNotEmpty()) {
+				// Pick a random key currently present in the collection
+				$randomKey = $categoriesList->keys()->random();
+
+				// Remove and return the category ID at that key
+				$categoryId = $categoriesList->pull($randomKey);
+
+				// Resolve data type group
 				$dataType = array_rand($dataMap);
-
-				// 2. Αναζήτηση αν η κατηγορία ανήκει σε συγκεκριμένο group
 				foreach ($dataMap as $key => $map) {
-					if (in_array($category, $map['cats'])) {
+					if (in_array($categoryId, $map['cats'])) {
 						$dataType = $key;
 						break;
 					}
 				}
 
-				$brands = Category::query()->find($category)->brands()->pluck('id');
+				// Fetch brands attached to this category
+				$brands = Category::query()->find($categoryId)->brands()->pluck('id');
+				if ($brands->isEmpty()) {
+					continue;
+				}
 
-				for ($i = 0; $i < 16; $i++) {
+				// Build product records (2 * 1,197 * 877 = 2,099,538 products)
+				for ($i = 1; $i <= 2 * $categories->count() * $brands->count(); $i++) {
 					$shortId = Str::lower(Str::random(8));
-					$product_time = Carbon::now();
+					$productTime = Carbon::now();
 
-					// Δημιουργία ρεαλιστικού ονόματος
 					$baseName = fake()->randomElement($dataMap[$dataType]['names']);
 					$productName = $baseName.' '.fake()->numerify().' '.Str::upper(fake()->word());
 
 					$costPrice = fake()->randomFloat(2, 5, 512);
 					$sellingPrice = fake()->randomFloat(2, 0.75 * $costPrice, 1.25 * $costPrice);
-					$stock = ['min' => fake()->numberBetween(1024, 16 * 1024)];
-					$stock['max'] = $stock['min'] + mt_rand(256, 4096);
-					$stock['current'] = mt_rand($stock['min'], $stock['max']);
+
+					$minStock = fake()->numberBetween(1024, 16 * 1024);
+					$maxStock = $minStock + mt_rand(256, 4096);
+					$brandId = $brands->random();
+
+					// EAN-13 Barcode: 1 (prefix '2') + 4 (Cat ID) + 3 (Brand ID) + 5 (Seq) = 13 digits
+					$barcode = sprintf('2%04d%03d%05d', $categoryId, $brandId, (($i - 1) % 99999) + 1);
 
 					$this->list->push([
 						'sku'             => Str::upper(fake()->bothify('SKU-####-????-').$shortId),
 						'slug'            => Str::slug($productName).'-'.Str::upper($shortId),
-						'barcode'         => fake()->ean13(),
+						'barcode'         => $barcode,
 						'name'            => $productName,
 						'description'     => fake()->paragraph(),
-						'category_id'     => $category,
-						'brand_id'        => $brands->random(),
+						'category_id'     => $categoryId,
+						'brand_id'        => $brandId,
 						'cost_price'      => $costPrice,
 						'selling_price'   => $sellingPrice,
 						'discount_price'  => fake()->boolean() ? fake()->randomFloat(2, 0.66 * $sellingPrice, 0.75 * $sellingPrice) : $sellingPrice,
@@ -61,34 +75,37 @@
 						'unit'            => fake()->randomElement(['pcs', 'kg', 'liter', 'pack']),
 						'weight'          => fake()->numberBetween(10, 4096),
 						'track_inventory' => fake()->boolean(90),
-						'min_stock_level' => $stock['min'],
-						'current_stock'   => $stock['current'],
-						'max_stock_level' => $stock['max'],
-						'reorder_point'   => mt_rand($stock['min'], $stock['max']),
+						'min_stock_level' => $minStock,
+						'current_stock'   => mt_rand($minStock, $maxStock),
+						'max_stock_level' => $maxStock,
+						'reorder_point'   => mt_rand($minStock, $maxStock),
 						'is_active'       => fake()->boolean(95),
-
-						// Παραγωγή specs βάσει τύπου
 						'specifications'  => json_encode($this->generateSpecifications($dataType)),
-
-						'created_at' => $product_time->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
-						'updated_at' => $product_time->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
+						'created_at'      => $productTime->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59)),
+						'updated_at'      => $productTime->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59)),
 					]);
 
-					if ($this->list->count() >= static::BATCH_SIZE) {
-						Product::query()->insert($this->list->toArray());
+					// Batch insert every 2 * 1024 items to prevent MySQL parameter limits
+					// Seeding breaks at 2978 rows per batch
+					if ($this->list->count() >= 2048) {
+						$this->list->chunk(self::BATCH_SIZE)->each(function (Collection $chunk) {
+							Product::query()->insert($chunk->toArray());
+						});
+
 						$this->list = Collection::empty();
 					}
 				}
 
+				$this->command->getOutput()->write("[Category #".$randomKey." / ".$categoriesList->count()."] Assigned products in category: #".$categoryId."...\r");
+			}
+
+			// Final flush for any remaining items left in memory
+			if ($this->list->isNotEmpty()) {
 				$this->list->chunk(self::BATCH_SIZE)->each(function (Collection $chunk) {
 					Product::query()->insert($chunk->toArray());
 				});
-				$this->list = collect();
-			}
 
-			if ($this->list->isNotEmpty()) {
-				Product::query()->insertOrIgnore($this->list->toArray());
-				$this->list = collect();
+				$this->list = Collection::empty();
 			}
 
 			return $initialTime;

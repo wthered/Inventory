@@ -16,7 +16,7 @@
 		public function run(): void {
 			$users = User::query()->pluck('id')->toArray();
 
-			// 1. Μαζικό Insert Προϊόντων (Όπως το είχες)
+			// 1. Μαζικό Insert Προϊόντων
 			$initialTime = $this->insertInitialProducts();
 
 			// 2. Fetch Images μια φορά

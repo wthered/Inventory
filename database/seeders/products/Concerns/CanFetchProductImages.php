@@ -13,8 +13,8 @@
 			$imagePool = collect();
 			$client    = new Client();
 
-			// Φέρνουμε μερικές σελίδες για ποικιλία (π.χ. 5 σελίδες = ~100 εικόνες)
-			for ($page = 1; $page <= 5; $page++) {
+			// Φέρνουμε μερικές σελίδες για ποικιλία (π.χ. 8 σελίδες = ~160 εικόνες)
+			for ($page = 1; $page <= 8; $page++) {
 				try {
 					$response = $client->request('GET', 'https://api.themoviedb.org/3/movie/now_playing?page=' . $page, [
 						'headers' => [

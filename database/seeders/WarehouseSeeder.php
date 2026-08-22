@@ -15,8 +15,7 @@
 			$users = User::role(['admin', 'warehouse_manager'])->pluck('id')->sort()->unique()->values();
 
 			// 1. Δημιουργούμε τις αποθήκες
-			$warehouses = Warehouse::factory()->count(mt_rand(8, 24))->create()->each(function ($warehouse) use ($users
-			) {
+			$warehouses = Warehouse::factory()->count(mt_rand(8, 24))->create()->each(function ($warehouse) use ($users) {
 				if ($users->isNotEmpty()) {
 					$warehouse->update([
 						'manager_id' => $users->random()

@@ -30,7 +30,7 @@
 
 			// Δημιουργία τυχαίου αριθμού παραγγελιών αγοράς
 			for ($order = 0; $order <= mt_rand(128, 512); $order++) {
-				$orderDate = fake()->dateTimeBetween('-6 months');
+				$orderDate = Carbon::instance(fake()->dateTimeBetween('-6 months'));
 
 				// Αρχικά οικονομικά δεδομένα (θα ενημερωθούν σωστά αφού μπουν τα items αν χρειαστεί,
 				// αλλά βάζουμε ρεαλιστικές τιμές βάσης)
@@ -40,21 +40,21 @@
 
 				$expected = fake()->optional(0.8)->dateTimeBetween($orderDate, '+2 weeks');
 				PurchaseOrder::query()->create([
-					'po_number'       => 'PO-' . $orderDate->format('Ymd') . '-' . Str::upper(Str::random(4)),
+					'po_number'       => 'PO-'.$orderDate->format('Ymd').'-'.Str::upper(Str::random(4)),
 					'supplier_id'     => fake()->randomElement($suppliers),
 					'warehouse_id'    => fake()->randomElement($warehouses),
 					'status_id'       => fake()->randomElement(PurchaseOrderStatus::openStatuses()),
-					'order_date'      => $orderDate, // Το Eloquent θα το μετατρέψει αυτόματα σε Y-m-d λόγω του cast
+					'order_date'      => $orderDate->format('Y-m-d'),
 					'expected_date'   => $expected,
-					'received_at'     => fake()->boolean() ? Carbon::parse($orderDate)->addDays(mt_rand(1, 180)) : null,
+					'received_at'     => fake()->boolean() ? $orderDate->copy()->addDays(mt_rand(1, 180)) : null,
 					'subtotal'        => $subtotal,
 					'tax_amount'      => $tax,
 					'discount_amount' => $discount,
 					'grand_total'     => $subtotal + $tax - $discount,
 					'created_by'      => fake()->randomElement($staffUsers),
 					'notes'           => fake()->optional(0.3)->sentence(),
-					'created_at'      => Carbon::now()->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
-					'updated_at'      => Carbon::now()->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
+					'created_at'      => $orderDate,
+					'updated_at'      => $orderDate->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
 				]);
 			}
 

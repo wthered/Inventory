@@ -5,6 +5,7 @@
 	use App\DataTransferObjects\ProductDTO;
 	use App\Enums\Purchases\PurchaseOrderStatus;
 	use App\Http\Controllers\Controller;
+	use App\Http\Requests\Purchases\OrderStoreRequest;
 	use App\Http\Requests\Purchases\OrderUpdateRequest;
 	use App\Models\Category;
 	use App\Models\Purchases\PurchaseOrder;
@@ -14,14 +15,15 @@
 	use Illuminate\Http\Request;
 	use Illuminate\Support\Collection;
 	use Illuminate\Support\Facades\DB;
+	use Throwable;
 
 	class PurchaseController extends Controller {
 		/**
 		 * Display a listing of the resource.
 		 */
-		public function index() {
+		public function index(Request $request) {
 			return view('purchases.index', [
-				'orders' => PurchaseOrder::query()->paginate(25),
+				'orders' => PurchaseOrder::query()->paginate($request->session()->get('per_page', 25)),
 			]);
 		}
 
@@ -29,14 +31,19 @@
 		 * Show the form for creating a new resource.
 		 */
 		public function create() {
-			//
+			return view('purchases.create', [
+				'suppliers'  => Supplier::query()->get(),
+				'warehouses' => Warehouse::query()->get(),
+				'categories' => Category::query()->with(['children'])->get(),
+				'statuses'   => PurchaseOrderStatus::class,
+			]);
 		}
 
 		/**
 		 * Store a newly created resource in storage.
 		 */
-		public function store(Request $request) {
-			//
+		public function store(OrderStoreRequest $request) {
+			dd($request->validated());
 		}
 
 		/**
@@ -70,19 +77,22 @@
 				});
 			}
 
+//			dd($products->get(1));
+
 			return view('purchases.edit', [
 				'order'      => $purchase,
 				'suppliers'  => Supplier::all(),
 				'warehouses' => Warehouse::all(),
 				'categories' => Category::query()->whereNull('parent_id')->with(['children'])->get(),
 				'products'   => $products,
+				'statuses'   => PurchaseOrderStatus::class,
 			]);
 		}
 
 		/**
 		 * Update the specified resource in storage.
 		 *
-		 * @throws \Throwable
+		 * @throws Throwable
 		 */
 		public function update(OrderUpdateRequest $request, PurchaseOrder $purchase) {
 			// Παίρνουμε τα validated δεδομένα

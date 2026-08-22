@@ -3,6 +3,7 @@
 	namespace Database\Seeders\inventories\Concerns;
 
 	use App\DataTransferObjects\ProductDTO;
+	use App\Models\Product;
 	use Carbon\Carbon;
 	use Illuminate\Support\Collection;
 	use Illuminate\Support\Facades\DB;
@@ -26,6 +27,9 @@
 					  $generatedInBatch = [];
 
 					  foreach ($locations->shuffle() as $location) {
+						  if ($products->isEmpty()) {
+							  $products = Product::query()->pluck('id');
+						  }
 						  $product = new ProductDTO($products->random());
 
 						  // Ensure base stock value is valid
@@ -59,9 +63,9 @@
 								  'unit_cost'          => $product->cost_price,
 								  'total_cost'         => $totalCost,
 								  'batch_number'       => $batchNumber,
-								  'manufacturing_date' => Carbon::now()->subMonths(mt_rand(0, 12))->subDays(mt_rand(0, 30))->format('Y-m-d'),
-								  'expiry_date'        => Carbon::now()->addYears(mt_rand(1, 5))->addMonths(mt_rand(0, 12))->format('Y-m-d'),
-								  'created_at'         => Carbon::now()->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59)),
+								  'manufacturing_date' => Carbon::now()->subMonths(mt_rand(0, 12))->subDays(mt_rand(0, 30)),
+								  'expiry_date'        => Carbon::now()->addYears(mt_rand(1, 5))->addMonths(mt_rand(0, 11)),
+								  'created_at'         => Carbon::now()->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
 								  'updated_at'         => Carbon::now(),
 							  ];
 
@@ -89,8 +93,8 @@
 					  }
 				  });
 
-				$this->command->info("\nEnd of Warehouse ".$key."/ ".$warehouses->count().": Warehouse ".$warehouse->id." or ".$warehouse->name."......");
 				$warehouses->forget($key);
+				$this->command->info("\nEnd of Warehouse #".$warehouse->id." or ".$warehouse->name." with ".$warehouses->count()." left to be done......");
 			}
 
 			// ✅ Recalculate current_stock as SUM(available_quantity) to maintain matching values
@@ -103,8 +107,8 @@
 					DB::statement("
 					UPDATE products p
 					INNER JOIN (
-						SELECT product_id, SUM(available_quantity) as calculated_stock 
-						FROM inventories 
+						SELECT product_id, SUM(available_quantity) as calculated_stock
+						FROM inventories
 						WHERE product_id IN (".implode(',', array_map('intval', $chunk)).")
 						GROUP BY product_id
 					) inv ON p.id = inv.product_id
