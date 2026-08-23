@@ -16,7 +16,14 @@
 	--color-primary-rgb    : 59, 130, 246;
 	--color-primary-hover  : #2563eb;
 
+	/* Standard Error Palette */
 	--color-error          : #ef4444;
+	--color-error-hover    : #dc2626;
+	--color-error-focus    : rgba(239, 68, 68, 0.25);
+	--color-error-rgb      : 239, 68, 68;
+
+	/* Primary Focus State (Assuming a default primary blue like #3b82f6) */
+	--color-primary-focus  : rgba(59, 130, 246, 0.25);
 	--color-warning        : #f59e0b;
 	--color-border         : #374151;
 	--color-input-bg       : var(--color-surface);
