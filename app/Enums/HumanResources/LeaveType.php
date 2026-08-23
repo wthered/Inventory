@@ -13,6 +13,6 @@
 		 * Επιστρέφει τη μεταφρασμένη ονομασία βάσει του active locale.
 		 */
 		public function label(): string {
-			return __("human_resources.leave_types.{$this->value}");
+			return __("human_resources.leave_types.".$this->value);
 		}
 	}

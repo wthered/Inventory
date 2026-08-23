@@ -6,20 +6,25 @@
 	use App\Http\Requests\HumanResources\StoreDepartmentRequest;
 	use App\Http\Requests\HumanResources\UpdateDepartmentRequest;
 	use App\Models\HumanResources\Department;
+	use App\Models\HumanResources\Employee;
 
 	class DepartmentController extends Controller {
 		/**
 		 * Display a listing of the resource.
 		 */
 		public function index() {
-			//
+			return view('hr.departments.index', [
+				'departments' => Department::all(),
+			]);
 		}
 
 		/**
 		 * Show the form for creating a new resource.
 		 */
 		public function create() {
-			//
+			return view('hr.departments.create', [
+				'employees' => Employee::query()->get(),
+			]);
 		}
 
 		/**
@@ -33,14 +38,19 @@
 		 * Display the specified resource.
 		 */
 		public function show(Department $department) {
-			//
+			return view('hr.departments.show', [
+				'department' => $department,
+			]);
 		}
 
 		/**
 		 * Show the form for editing the specified resource.
 		 */
 		public function edit(Department $department) {
-			//
+			return view('hr.departments.edit', [
+				'department' => $department,
+				'employees'  => Employee::query()->get(),
+			]);
 		}
 
 		/**

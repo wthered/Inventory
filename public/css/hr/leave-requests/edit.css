@@ -1,0 +1,98 @@
+/* Card & Section Layout */
+.form-card {
+	background-color: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-lg);
+	padding: var(--space-xl);
+	box-shadow: var(--shadow-md);
+}
+
+.form-section {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-md);
+}
+
+.form-section-title {
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: var(--color-text-primary);
+	display: flex;
+	align-items: center;
+	gap: var(--space-sm);
+}
+
+.form-section-title i {
+	color: var(--color-primary);
+}
+
+/* Form Grid */
+.form-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: var(--space-lg);
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.form-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-xs);
+}
+
+.form-group.full-width {
+	grid-column: 1 / -1;
+}
+
+/* Controls & Labels */
+.form-label {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--color-text-secondary);
+	display: inline-block;
+}
+
+.form-label.required::after {
+	content: " *";
+	color: var(--color-error);
+	font-weight: bold;
+}
+
+/* Custom Select Arrow Styling */
+select.form-control {
+	appearance: none;
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3c9ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+	background-repeat: no-repeat;
+	background-position: right var(--space-md, 0.75rem) center;
+	background-size: 1rem;
+	padding-right: var(--space-xl, 2.5rem);
+	cursor: pointer;
+}
+
+textarea.form-control {
+	resize: vertical;
+	min-height: 70px;
+}
+
+/* Validation Feedback Styles */
+.form-control.is-invalid {
+	border-color: var(--color-error);
+	box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+}
+
+.form-error {
+	font-size: 0.775rem;
+	color: var(--color-error);
+}
+
+/* Footer Actions */
+.form-actions {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: var(--space-md);
+	margin-top: var(--space-xl);
+	padding-top: var(--space-md);
+	border-top: 1px solid var(--color-border);
+}
