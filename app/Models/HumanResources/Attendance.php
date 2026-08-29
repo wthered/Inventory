@@ -2,6 +2,7 @@
 
 	namespace App\Models\HumanResources;
 
+	use App\Enums\HumanResources\EmployeeAttendanceStatus;
 	use App\Models\Warehouse;
 	use Illuminate\Database\Eloquent\Factories\HasFactory;
 	use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,8 @@
 			'check_in',
 			'check_out',
 			'overtime_hours',
+			'status',
+			'notes',
 		];
 
 		protected $casts = [
@@ -24,6 +27,7 @@
 			'check_in'       => 'datetime',
 			'check_out'      => 'datetime',
 			'overtime_hours' => 'decimal:2',
+			'status'         => EmployeeAttendanceStatus::class,
 		];
 
 		/**

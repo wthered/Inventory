@@ -1,13 +1,12 @@
 <?php
 
-	namespace App\Models;
+	namespace App\Models\Finance;
 
-	use Illuminate\Database\Eloquent\Factories\HasFactory;
+	use App\Models\Product;
 	use Illuminate\Database\Eloquent\Model;
 	use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 	class InvoiceItem extends Model {
-		use HasFactory;
 
 		protected $fillable = [
 			'invoice_id',

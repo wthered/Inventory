@@ -21,10 +21,8 @@
 			'position_id',
 			'warehouse_id',
 			'employee_code',
-			'first_name',
-			'last_name',
-			'phone',
 			'hire_date',
+			'termination_date',
 			'is_active',
 		];
 

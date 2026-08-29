@@ -1,7 +1,9 @@
 <?php
 
-	namespace App\Models;
+	namespace App\Models\Finance;
 
+	use App\Models\Customer;
+	use App\Models\HasFactory;
 	use Illuminate\Database\Eloquent\Model;
 	use Illuminate\Database\Eloquent\Relations\BelongsTo;
 	use Illuminate\Database\Eloquent\Relations\HasMany;

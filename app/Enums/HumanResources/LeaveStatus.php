@@ -40,4 +40,24 @@
 				self::PENDING, self::APPROVED, self::REJECTED, self::CANCELLED => '#ffffff',
 			};
 		}
+
+		// Inside App\Enums\HumanResources\LeaveStatus
+
+		public function badgeClass(): string {
+			return match ($this) {
+				self::APPROVED  => 'badge-success',
+				self::PENDING   => 'badge-warning',
+				self::REJECTED  => 'badge-danger',
+				self::CANCELLED => 'badge-secondary',
+			};
+		}
+
+		public function icon(): string {
+			return match ($this) {
+				self::APPROVED  => 'fas fa-check',
+				self::PENDING   => 'fas fa-hourglass-half',
+				self::REJECTED  => 'fas fa-times',
+				self::CANCELLED => 'fas fa-ban',
+			};
+		}
 	}

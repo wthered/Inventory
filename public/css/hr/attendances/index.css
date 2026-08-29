@@ -1,4 +1,12 @@
-/* Toolbar Container Card */
+/* ==========================================================================
+   HR Attendance Records Stylesheet
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Filters & Search Toolbar (.toolbar-card, .toolbar-form)
+   -------------------------------------------------------------------------- */
+
+/* Container Card */
 .toolbar-card {
 	background-color : var(--color-surface);
 	border           : 1px solid var(--color-border);
@@ -14,7 +22,7 @@
 	gap         : var(--space-md);
 }
 
-/* Filter Controls Layout */
+/* Form Input Controls (.filter-item) */
 .filter-item {
 	display        : flex;
 	flex-direction : column;
@@ -35,7 +43,7 @@
 	width : 100%;
 }
 
-/* Custom Select Dropdown Arrow */
+/* Custom Dropdown Arrow styling for selects */
 select.form-control {
 	appearance          : none;
 	background-image    : url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3c9ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -46,7 +54,7 @@ select.form-control {
 	cursor              : pointer;
 }
 
-/* Filter Action Buttons Group */
+/* Toolbar Action Buttons (.filter-actions) */
 .filter-actions {
 	display     : flex;
 	align-items : center;
@@ -74,7 +82,33 @@ select.form-control {
 	color            : #ffffff;
 }
 
-/* Time Badges & Typography Extensions */
+/* --------------------------------------------------------------------------
+   2. Data Table Container & Card (.table-card, .data-table)
+   -------------------------------------------------------------------------- */
+
+/* Outer Table Container Card */
+.table-card {
+	background-color : var(--color-surface);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-lg);
+	box-shadow       : var(--shadow-sm);
+	overflow         : hidden;
+}
+
+/* --------------------------------------------------------------------------
+   3. Table Content & Badges (td, .time-badge, .badge)
+   -------------------------------------------------------------------------- */
+
+/* Typography Helpers */
+.d-block {
+	display : block;
+}
+
+.font-mono {
+	font-family : var(--font-mono), sans-serif;
+}
+
+/* Clock In / Out Time Indicators */
 .time-badge {
 	display     : inline-flex;
 	align-items : center;
@@ -92,15 +126,7 @@ select.form-control {
 	color : var(--color-error);
 }
 
-.d-block {
-	display : block;
-}
-
-.font-mono {
-	font-family : var(--font-mono), sans-serif;
-}
-
-/* Attendance Status Badges */
+/* Status Badges - Core Base */
 .badge {
 	display        : inline-flex;
 	align-items    : center;
@@ -113,6 +139,7 @@ select.form-control {
 	letter-spacing : 0.03em;
 }
 
+/* Status Badges - Generic Theme Variants */
 .badge-success {
 	background-color : rgba(16, 185, 129, 0.15);
 	color            : var(--color-accent);
@@ -143,7 +170,76 @@ select.form-control {
 	border           : 1px solid var(--color-border);
 }
 
-/* Responsive Rules */
+/* Status Badges - EmployeeAttendanceStatus Enum Variants */
+.badge-status-present {
+	background-color : rgba(16, 185, 129, 0.15);
+	color            : var(--color-accent);
+	border           : 1px solid var(--color-accent);
+}
+
+.badge-status-absent {
+	background-color : rgba(239, 68, 68, 0.15);
+	color            : var(--color-error);
+	border           : 1px solid var(--color-error);
+}
+
+.badge-status-late {
+	background-color : rgba(245, 158, 11, 0.15);
+	color            : var(--color-warning);
+	border           : 1px solid var(--color-warning);
+}
+
+.badge-status-on_leave {
+	background-color : rgba(59, 130, 246, 0.15);
+	color            : var(--color-primary);
+	border           : 1px solid var(--color-primary);
+}
+
+.badge-status-half_day {
+	background-color : var(--color-bg-alt);
+	color            : var(--color-text-muted);
+	border           : 1px solid var(--color-border);
+}
+
+/* --------------------------------------------------------------------------
+   4. Table Empty States (.table-empty-state)
+   -------------------------------------------------------------------------- */
+
+/* In-table Empty State Row */
+.table-empty-state {
+	padding          : var(--space-xl) var(--space-md);
+	text-align       : center;
+	background-color : var(--color-surface);
+}
+
+.empty-icon {
+	font-size     : 2.5rem;
+	color         : var(--color-text-muted);
+	margin-bottom : var(--space-sm);
+	opacity       : 0.6;
+}
+
+.empty-state-text {
+	margin      : 0;
+	font-size   : 0.95rem;
+	font-weight : 500;
+	color       : var(--color-text-muted);
+}
+
+/* Standalone Container Empty State */
+.table-card > .empty-state-text {
+	padding     : var(--space-xl) var(--space-md);
+	text-align  : center;
+	margin      : 0;
+	font-size   : 0.95rem;
+	font-weight : 500;
+	color       : var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   5. Responsive Rules (@media)
+   -------------------------------------------------------------------------- */
+
 @media (max-width : 768px) {
 	.toolbar-form {
 		flex-direction : column;

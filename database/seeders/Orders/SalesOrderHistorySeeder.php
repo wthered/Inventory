@@ -145,6 +145,7 @@
 						'updated_at'  => $orderDate,
 					]);
 				}
+				$this->command->getOutput()->write('Finished history of Sale #'.$sale->id);
 			}
 		}
 	}

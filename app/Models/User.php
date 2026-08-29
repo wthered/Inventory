@@ -5,6 +5,7 @@
 	// use Illuminate\Contracts\Auth\MustVerifyEmail;
 	use App\Models\HumanResources\Employee;
 	use App\Models\Inventories\InventoryAudit;
+	use App\Traits\HasUserScope;
 	use Illuminate\Database\Eloquent\Factories\HasFactory;
 	use Illuminate\Database\Eloquent\Relations\HasMany;
 	use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -13,7 +14,7 @@
 	use Spatie\Permission\Traits\HasRoles;
 
 	class User extends Authenticatable {
-		use HasFactory, Notifiable, HasRoles;
+		use HasFactory, Notifiable, HasRoles, HasUserScope;
 
 		/**
 		 * The attributes that are mass assignable.

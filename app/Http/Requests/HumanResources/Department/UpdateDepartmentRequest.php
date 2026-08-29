@@ -1,11 +1,11 @@
 <?php
 
-	namespace App\Http\Requests\HumanResources;
+	namespace App\Http\Requests\HumanResources\Department;
 
 	use Illuminate\Contracts\Validation\ValidationRule;
 	use Illuminate\Foundation\Http\FormRequest;
 
-	class StorePositionRequest extends FormRequest {
+	class UpdateDepartmentRequest extends FormRequest {
 		/**
 		 * Determine if the user is authorized to make this request.
 		 */

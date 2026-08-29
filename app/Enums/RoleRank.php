@@ -2,6 +2,8 @@
 
 	namespace App\Enums;
 
+	use Illuminate\Support\Str;
+
 	enum RoleRank: int {
 		case ADMIN = 100;
 
@@ -10,6 +12,7 @@
 		case SALES_MANAGER        = 85;
 		case PURCHASE_MANAGER     = 80;
 		case FINANCIAL_CONTROLLER = 75;
+		case HR_MANAGER           = 70;
 
 		// Supervisors / Team Leads (50-79)
 		case WAREHOUSE_SUPERVISOR = 60;
@@ -22,18 +25,6 @@
 		case STORE_CASHIER        = 10;
 
 		public function label(): string {
-			return match ($this) {
-				self::ADMIN                => 'System Administrator',
-				self::WAREHOUSE_MANAGER    => 'Warehouse Manager',
-				self::SALES_MANAGER        => 'Sales Manager',
-				self::PURCHASE_MANAGER     => 'Purchase Manager',
-				self::FINANCIAL_CONTROLLER => 'Financial Controller',
-				self::WAREHOUSE_SUPERVISOR => 'Warehouse Supervisor',
-				self::SALES_SUPERVISOR     => 'Sales Supervisor',
-				self::ACCOUNTANT           => 'Accountant',
-				self::INVENTORY_CLERK      => 'Inventory Clerk',
-				self::SALES_REPRESENTATIVE => 'Sales Representative',
-				self::STORE_CASHIER        => 'Store Cashier',
-			};
+			return __('human_resources.employee_roles.'.Str::lower($this->name));
 		}
 	}

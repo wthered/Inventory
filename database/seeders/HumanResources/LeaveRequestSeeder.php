@@ -25,6 +25,7 @@
 					'employee_id' => $employee->id,
 					'approved_by' => $users->isNotEmpty() && fake()->boolean(mt_rand(66, 75)) ? $users->random()->id : null,
 				]);
+				$this->command->getOutput()->write("Just created a leave request for employee ".$employee->id."...\r");
 			}
 		}
 	}

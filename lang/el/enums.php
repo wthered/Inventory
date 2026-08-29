@@ -10,6 +10,14 @@
 			'void'           => 'Ακυρώθηκε',
 		],
 
+		'transaction_status' => [
+			'pending'    => 'Σε Εκκρεμότητα',
+			'completed'  => 'Ολοκληρώθηκε',
+			'failed'     => 'Απέτυχε',
+			'refunded'   => 'Επιστράφηκε',
+			'reconciled' => 'Συμφωνήθηκε',
+		],
+
 		'sales_order_status' => [
 			'draft'      => 'Πρόχειρο',
 			'pending'    => 'Σε Εκκρεμότητα',

@@ -13,6 +13,7 @@
 	use Carbon\Carbon;
 	use Illuminate\Database\Seeder;
 	use Illuminate\Support\Collection;
+	use Illuminate\Support\Str;
 
 	class SalesOrderSeeder extends Seeder {
 		public function run(): void {
@@ -58,7 +59,7 @@
 				$order_date = $current_date->copy();
 
 				$order = SalesOrder::query()->create([
-					'order_number'      => 'SALE-'.$order_date->format('Y-m-d').'-'.str_pad($index, 4, '0', STR_PAD_LEFT),
+					'order_number'      => 'SALE-'.$order_date->format('Y-m-d').'-'.Str::upper(Str::random(4)),
 					'customer_id'       => $customers->random(),
 					'warehouse_id'      => $warehouses->random(),
 					'status_id'         => SalesOrderStatus::DRAFT->value,

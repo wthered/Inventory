@@ -23,7 +23,7 @@
 			$imagePool = $this->fetchImagePool();
 
 			// 3. Επεξεργασία ανά 512 προϊόντα (Memory Safe)
-			Product::query()->chunkById(self::BATCH_SIZE, function ($products) use ($users, $imagePool) {
+			Product::query()->chunkById(self::BATCH_SIZE, function ($products) use ($users, $imagePool, $initialTime) {
 				$bar = $this->command->getOutput()->createProgressBar($products->count());
 				$terminal = new Terminal();
 				$bar->setBarWidth($terminal->getWidth() - 32);
@@ -34,8 +34,8 @@
 						$images = $imagePool->random(mt_rand(6, 16))->map(fn($url) => [
 							'image_location' => $url,
 							'is_default'     => false,
-							'created_at'     => now(),
-							'updated_at'     => now()->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
+							'created_at'     => $product->created_at,
+							'updated_at'     => $product->updated_at,
 						]);
 
 						$product->images()->createMany($images->toArray());

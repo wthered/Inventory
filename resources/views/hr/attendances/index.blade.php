@@ -41,41 +41,65 @@
 
 		<!-- Filters & Search Toolbar -->
 		<div class="toolbar-card">
-			<form action="{{ route('hr.attendances.index') }}" method="GET" class="toolbar-form" id="attendance-filter-form">
+			<form action="{{ route('hr.attendances.index') }}" method="GET" class="toolbar-form"
+			      id="attendance-filter-bar">
 
 				<!-- Date Filter -->
 				<div class="filter-item">
-					<label for="date" class="filter-label">Date</label>
+					<label for="att_date_start" class="filter-label">Start Date</label>
 					<input type="date"
-					       id="date"
-					       name="date"
-					       value="{{ request('date', date('Y-m-d')) }}"
-					       class="form-control">
+					       id="att_date_start"
+					       name="date_start"
+					       min="2021-08-30"
+					       max="{{ today()->format('Y-m-d') }}"
+					       value="{{ request()->input('date_start', date('Y-m-d')) }}"
+					       class="form-control filter-input">
+					<span class="error-text" id="error-att_date_start"></span>
+				</div>
+
+				<div class="filter-item">
+					<label for="att_date_final" class="filter-label">Final Date</label>
+					<input type="date"
+					       id="att_date_final"
+					       name="date_final"
+					       min="2021-08-31"
+					       max="{{ today()->format('Y-m-d') }}"
+					       value="{{ date('Y-m-d') }}"
+					       class="form-control filter-input">
+					<span class="error-text" id="error-att_date_final"></span>
 				</div>
 
 				<!-- Employee Search / Dropdown -->
 				<div class="filter-item">
 					<label for="employee_id" class="filter-label">Employee</label>
-					<select name="employee_id" id="employee_id" class="form-control select-filter">
+					<select name="employee_id" id="employee_id" class="form-control select-filter filter-input">
 						<option value="">All Employees</option>
-						@foreach($employees as $employee)
-							<option value="{{ $employee->id }}" {{ request('employee_id') == $employee->id ? 'selected' : '' }}>
-								{{ $employee->last_name }} {{ $employee->first_name }} ({{ $employee->employee_code }})
-							</option>
+						@foreach($employeeGroups as $warehouseName => $employees)
+							<optgroup label="{{ $warehouseName }}">
+								@foreach($employees as $employee)
+									<option value="{{ $employee->id }}">
+										{{ $employee->user?->account->full_name }} ({{ $employee->employee_code }})
+									</option>
+								@endforeach
+							</optgroup>
 						@endforeach
 					</select>
+					<span class="error-text" id="error-employee_id"></span>
 				</div>
 
 				<!-- Status Dropdown -->
 				<div class="filter-item">
-					<label for="status" class="filter-label">Status</label>
-					<select name="status" id="status" class="form-control select-filter">
+					<label for="att_status" class="filter-label">Status</label>
+					<select name="status" id="att_status" class="form-control select-filter filter-input">
 						<option value="">All Statuses</option>
-						<option value="present" {{ request('status') === 'present' ? 'selected' : '' }}>Present</option>
-						<option value="late" {{ request('status') === 'late' ? 'selected' : '' }}>Late</option>
-						<option value="absent" {{ request('status') === 'absent' ? 'selected' : '' }}>Absent</option>
-						<option value="half_day" {{ request('status') === 'half_day' ? 'selected' : '' }}>Half Day</option>
+						@foreach($statuses::cases() as $status)
+							<option
+								value="{{ $status->value }}" {{ request('status') === $status->value ? 'selected' : '' }}>
+								{{ $status->label() }}
+							</option>
+						@endforeach
 					</select>
+					<span class="error-text" id="error-att_status"></span>
 				</div>
 
 				<!-- Filter Actions -->
@@ -84,7 +108,7 @@
 						<i class="fas fa-filter"></i> Filter
 					</button>
 
-					@if(request()->hasAny(['date', 'employee_id', 'status']))
+					@if(request()->hasAny(['date_start', 'date_final', 'employee_id', 'status']))
 						<a href="{{ route('hr.attendances.index') }}" class="btn-reset" title="Clear Filters">
 							<i class="fas fa-times"></i> Clear
 						</a>
@@ -93,8 +117,8 @@
 			</form>
 		</div>
 
-		<!-- Attendance Data Table -->
-		<div class="table-card">
+		<!-- Attendance Data Table Container -->
+		<div class="table-card" id="attendance-table-container">
 			<div class="table-wrapper">
 				<table class="data-table">
 					<thead>
@@ -103,7 +127,7 @@
 						<th>Employee</th>
 						<th>Clock In</th>
 						<th>Clock Out</th>
-						<th>Total Hours</th>
+						<th>Overtime Hours</th>
 						<th>Status</th>
 						<th class="text-right">Actions</th>
 					</tr>
@@ -112,56 +136,49 @@
 					@forelse($attendances as $attendance)
 						<tr>
 							<td class="td-id">
-								{{ \Carbon\Carbon::parse($attendance->date)->format('M d, Y') }}
+								{{ $attendance->work_date->format('d-m-Y') }}
 							</td>
 							<td class="td-name">
-								{{ $attendance->employee->last_name }} {{ $attendance->employee->first_name }}
-								<small class="text-muted d-block">{{ $attendance->employee->employee_code }}</small>
+								{{ $attendance->employee->user->account->full_name }}
+								<small class="text-muted d-block">
+									{{ $attendance->employee->employee_code }}
+								</small>
 							</td>
 							<td>
 								<span class="time-badge">
 									<i class="far fa-clock icon-in"></i>
-									{{ $attendance->clock_in ? \Carbon\Carbon::parse($attendance->clock_in)->format('H:i') : '--:--' }}
+									{{ $attendance->check_in ? $attendance->check_in->format('H:i') : '--:--' }}
 								</span>
 							</td>
 							<td>
 								<span class="time-badge">
 									<i class="far fa-clock icon-out"></i>
-									{{ $attendance->clock_out ? \Carbon\Carbon::parse($attendance->clock_out)->format('H:i') : '--:--' }}
+									{{ $attendance->check_out ? $attendance->check_out->format('H:i') : '--:--' }}
 								</span>
 							</td>
 							<td>
 								<span class="font-mono">
-									{{ $attendance->total_hours ? number_format($attendance->total_hours, 2) . ' hrs' : '-' }}
+									{{ $attendance->overtime_hours ? number_format($attendance->overtime_hours, 2) . ' hrs' : '-' }}
 								</span>
 							</td>
 							<td>
-								@switch($attendance->status)
-									@case('present')
-										<span class="badge badge-success"><i class="fas fa-check"></i> Present</span>
-										@break
-									@case('late')
-										<span class="badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Late</span>
-										@break
-									@case('absent')
-										<span class="badge badge-danger"><i class="fas fa-times"></i> Absent</span>
-										@break
-									@case('half_day')
-										<span class="badge badge-info"><i class="fas fa-adjust"></i> Half Day</span>
-										@break
-									@default
-										<span class="badge badge-secondary">{{ ucfirst($attendance->status) }}</span>
-								@endswitch
+								<span class="font-mono">
+									{{ $attendance->status->label() }}
+								</span>
 							</td>
 							<td class="actions-cell text-right">
 								<div class="action-buttons-group">
 									@can('attendance.update')
-										<a href="{{ route('hr.attendances.edit', $attendance->id) }}" class="btn-action btn-edit" title="Edit Log">
+										<a href="{{ route('hr.attendances.edit', ['employee' => $attendance->employee, 'date' => $attendance->work_date]) }}"
+										   class="btn-action btn-edit" title="Edit Log">
 											<i class="fas fa-pencil-alt"></i>
 										</a>
 									@endcan
 									@can('attendance.delete')
-										<form action="{{ route('hr.attendances.destroy', $attendance->id) }}" method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this log?');">
+										<form
+											action="{{ route('hr.attendances.destroy', ['employee' => $attendance->employee]) }}"
+											method="POST" class="inline-form"
+											onsubmit="return confirm('Are you sure you want to delete this log?');">
 											@csrf
 											@method('DELETE')
 											<button type="submit" class="btn-action btn-delete" title="Delete Log">
@@ -193,4 +210,8 @@
 		</div>
 
 	</div>
+@endsection
+
+@section('scripts')
+	<script src="{{ asset('js/employees/attendances/filter.js') }}"></script>
 @endsection

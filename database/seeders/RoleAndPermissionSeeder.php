@@ -23,6 +23,12 @@
 				'user.view', 'user.create', 'user.update', 'user.delete',
 				'role.view', 'role.create', 'role.update', 'role.delete',
 
+				// HR & Employee permissions
+				'employee.view', 'employee.create', 'employee.update', 'employee.delete', 'employee.manage_details',
+				'leave_request.view', 'leave_request.create', 'leave_request.update', 'leave_request.delete', 'leave_request.approve',
+				'attendance.view', 'attendance.manage',
+				'department.manage', 'position.manage',
+
 				// Product & Master Data permissions
 				'product.view', 'product.create', 'product.update', 'product.delete',
 				'category.view', 'category.create', 'category.update', 'category.delete',
@@ -44,8 +50,7 @@
 				'stock_transfer.view', 'stock_transfer.create', 'stock_transfer.update', 'stock_transfer.delete',
 				'stock_transfer.approve', 'stock_transfer.receive',
 
-				'stock_adjustment.view', 'stock_adjustment.create', 'stock_adjustment.update',
-				'stock_adjustment.delete',
+				'stock_adjustment.view', 'stock_adjustment.create', 'stock_adjustment.update', 'stock_adjustment.delete',
 				'stock_adjustment.approve',
 
 				'stock_count.view', 'stock_count.create', 'stock_count.update', 'stock_count.delete',
@@ -55,7 +60,7 @@
 				'payment.view', 'payment.create', 'payment.update', 'payment.delete',
 
 				// Reports & Logs
-				'report.view', 'report.financial', 'report.inventory', 'report.sales', 'report.purchase',
+				'report.view', 'report.financial', 'report.inventory', 'report.sales', 'report.purchase', 'report.hr',
 				'settings.view', 'settings.update',
 				'activity_log.view', 'activity_log.delete',
 			];
@@ -139,7 +144,22 @@
 			]);
 
 			// ==========================================
-			// 6. WAREHOUSE SUPERVISOR (Rank: 60)
+			// 6. HR MANAGER (Rank: 70)
+			// ==========================================
+			$hrManager = Role::query()->firstOrCreate([
+				'name' => 'hr_manager', 'guard_name' => 'web', 'rank' => RoleRank::HR_MANAGER->value
+			]);
+			$hrManager->syncPermissions([
+				'profile.view',
+				'employee.view', 'employee.create', 'employee.update', 'employee.delete', 'employee.manage_details',
+				'leave_request.view', 'leave_request.create', 'leave_request.approve', 'leave_request.delete',
+				'attendance.view', 'attendance.manage',
+				'department.manage', 'position.manage',
+				'report.view', 'report.hr',
+			]);
+
+			// ==========================================
+			// 7. WAREHOUSE SUPERVISOR (Rank: 60)
 			// ==========================================
 			$warehouseSupervisor = Role::query()->firstOrCreate([
 				'name' => 'warehouse_supervisor', 'guard_name' => 'web', 'rank' => RoleRank::WAREHOUSE_SUPERVISOR->value
@@ -154,7 +174,7 @@
 			]);
 
 			// ==========================================
-			// 7. SALES SUPERVISOR (Rank: 55)
+			// 8. SALES SUPERVISOR (Rank: 55)
 			// ==========================================
 			$salesSupervisor = Role::query()->firstOrCreate([
 				'name' => 'sales_supervisor', 'guard_name' => 'web', 'rank' => RoleRank::SALES_SUPERVISOR->value
@@ -168,7 +188,7 @@
 			]);
 
 			// ==========================================
-			// 8. ACCOUNTANT (Rank: 30)
+			// 9. ACCOUNTANT (Rank: 30)
 			// ==========================================
 			$accountant = Role::query()->firstOrCreate([
 				'name' => 'accountant', 'guard_name' => 'web', 'rank' => RoleRank::ACCOUNTANT->value
@@ -182,7 +202,7 @@
 			]);
 
 			// ==========================================
-			// 9. INVENTORY CLERK (Rank: 25)
+			// 10. INVENTORY CLERK (Rank: 25)
 			// ==========================================
 			$inventoryClerk = Role::query()->firstOrCreate([
 				'name' => 'inventory_clerk', 'guard_name' => 'web', 'rank' => RoleRank::INVENTORY_CLERK->value
@@ -196,7 +216,7 @@
 			]);
 
 			// ==========================================
-			// 10. SALES REPRESENTATIVE (Rank: 20)
+			// 11. SALES REPRESENTATIVE (Rank: 20)
 			// ==========================================
 			$salesRep = Role::query()->firstOrCreate([
 				'name' => 'sales_representative', 'guard_name' => 'web', 'rank' => RoleRank::SALES_REPRESENTATIVE->value
@@ -209,7 +229,7 @@
 			]);
 
 			// ==========================================
-			// 11. STORE CASHIER (Rank: 10)
+			// 12. STORE CASHIER (Rank: 10)
 			// ==========================================
 			$cashier = Role::query()->firstOrCreate([
 				'name' => 'store_cashier', 'guard_name' => 'web', 'rank' => RoleRank::STORE_CASHIER->value

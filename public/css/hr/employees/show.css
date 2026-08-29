@@ -1,204 +1,451 @@
-/* Layout & Container */
+/* ==========================================================================
+   1. Layout & Containers
+   ========================================================================== */
 .profile-layout {
-	display: grid;
-	grid-template-columns: 320px 1fr;
-	gap: var(--space-xl, 1.5rem);
-	align-items: start;
-}
-
-@media (max-width: 992px) {
-	.profile-layout {
-		grid-template-columns: 1fr;
-	}
+	display               : grid;
+	grid-template-columns : 320px 1fr;
+	gap                   : var(--space-xl);
+	align-items           : start;
 }
 
 .header-actions {
-	display: flex;
-	align-items: center;
-	gap: var(--space-md, 0.75rem);
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-md);
 }
 
-.profile-sidebar, .profile-content {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-xl, 1.5rem);
+.profile-sidebar,
+.profile-content {
+	display        : flex;
+	flex-direction : column;
+	gap            : var(--space-xl);
 }
 
-/* Base Card Styling */
+/* ==========================================================================
+   2. Card Components & Headers
+   ========================================================================== */
 .info-card {
-	background-color: var(--color-surface, #ffffff);
-	border: 1px solid var(--color-border, #d1d5db);
-	border-radius: var(--radius-lg, 0.5rem);
-	padding: var(--space-xl, 1.5rem);
-	box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+	background-color : var(--color-surface);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-lg);
+	padding          : var(--space-xl);
+	box-shadow       : var(--shadow-sm);
 }
 
 .info-card.align-center {
-	text-align: center;
+	text-align : center;
+}
+
+.card-header-wrapper {
+	display         : flex;
+	align-items     : center;
+	justify-content : space-between;
+	gap             : 1rem;
+	margin-bottom   : 1rem;
+	padding-bottom  : 0.5rem;
+	border-bottom   : 1px solid var(--color-border, #e5e7eb);
+}
+
+.card-header-wrapper .card-title {
+	margin-bottom : 0;
 }
 
 .card-title {
-	font-size: 1.1rem;
-	font-weight: 600;
-	color: var(--color-text-primary, #1f2937);
-	margin-bottom: var(--space-lg, 1.25rem);
-	display: flex;
-	align-items: center;
-	gap: var(--space-sm, 0.5rem);
+	font-size     : 1.1rem;
+	font-weight   : 600;
+	color         : var(--color-text-primary);
+	margin-bottom : var(--space-lg);
+	display       : flex;
+	align-items   : center;
+	gap           : var(--space-sm);
 }
 
 .card-title i {
-	color: var(--color-primary, #3b82f6);
+	color : var(--color-primary);
 }
 
 .card-divider {
-	border: 0;
-	border-top: 1px solid var(--color-border, #e5e7eb);
-	margin: var(--space-lg, 1.25rem) 0;
+	border     : 0;
+	border-top : 1px solid var(--color-border);
+	margin     : var(--space-lg) 0;
 }
 
-/* Sidebar Profile Card */
+/* ==========================================================================
+   3. Sidebar Profile & Information Details
+   ========================================================================== */
 .avatar-circle {
-	width: 80px;
-	height: 80px;
-	border-radius: 50%;
-	background-color: var(--color-primary, #3b82f6);
-	color: #ffffff;
-	font-size: 1.75rem;
-	font-weight: bold;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin: 0 auto var(--space-md, 1rem) auto;
+	width            : 80px;
+	height           : 80px;
+	border-radius    : 50%;
+	background-color : var(--color-primary, #0056b3);
+	color            : #ffffff;
+	display          : flex;
+	align-items      : center;
+	justify-content  : center;
+	font-size        : 1.5rem;
+	font-weight      : 600;
+	margin           : 0 auto 1rem;
+	overflow         : hidden;
+}
+
+.avatar-circle .avatar-img {
+	width      : 100%;
+	height     : 100%;
+	object-fit : cover;
 }
 
 .profile-name {
-	font-size: 1.25rem;
-	font-weight: 700;
-	color: var(--color-text-primary, #1f2937);
-	margin: 0 0 0.25rem 0;
+	font-size   : 1.25rem;
+	font-weight : 700;
+	color       : var(--color-text-primary);
+	margin      : 0 0 0.25rem 0;
 }
 
 .profile-role {
-	font-size: 0.875rem;
-	color: var(--color-text-secondary, #6b7280);
-	margin-bottom: var(--space-sm, 0.5rem);
+	font-size     : 0.875rem;
+	color         : var(--color-text-secondary);
+	margin-bottom : var(--space-sm);
 }
 
-/* Quick Details List */
 .quick-details {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-md, 1rem);
-	text-align: left;
+	display        : flex;
+	flex-direction : column;
+	gap            : var(--space-md);
+	text-align     : left;
 }
 
 .detail-item {
-	display: flex;
-	align-items: center;
-	gap: var(--space-md, 0.75rem);
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-md);
 }
 
 .detail-item i {
-	font-size: 1.1rem;
-	color: var(--color-text-muted, #9ca3af);
-	width: 20px;
-	text-align: center;
+	font-size  : 1.1rem;
+	color      : var(--color-text-muted);
+	width      : 20px;
+	text-align : center;
 }
 
 .item-label {
-	display: block;
-	font-size: 0.75rem;
-	color: var(--color-text-secondary, #6b7280);
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
+	display        : block;
+	font-size      : 0.75rem;
+	color          : var(--color-text-secondary);
+	text-transform : uppercase;
+	letter-spacing : 0.05em;
 }
 
-/* Information Grid */
 .info-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-	gap: var(--space-lg, 1.25rem);
+	display               : grid;
+	grid-template-columns : repeat(auto-fit, minmax(220px, 1fr));
+	gap                   : var(--space-lg);
 }
 
 .info-group {
-	display: flex;
-	flex-direction: column;
-	gap: 0.25rem;
+	display        : flex;
+	flex-direction : column;
+	gap            : 0.25rem;
 }
 
 .info-group.full-width {
-	grid-column: 1 / -1;
+	grid-column : 1 / -1;
 }
 
 .info-label {
-	font-size: 0.775rem;
-	font-weight: 600;
-	color: var(--color-text-secondary, #6b7280);
-	text-transform: uppercase;
+	font-size      : 0.775rem;
+	font-weight    : 600;
+	color          : var(--color-text-secondary);
+	text-transform : uppercase;
 }
 
 .info-value {
-	font-size: 0.95rem;
-	color: var(--color-text-primary, #1f2937);
-	font-weight: 500;
+	font-size   : 0.95rem;
+	color       : var(--color-text-primary);
+	font-weight : 500;
 }
 
 .code-font {
-	font-family: monospace;
-	letter-spacing: 0.05em;
+	font-family    : var(--font-mono), sans-serif;
+	letter-spacing : 0.05em;
 }
 
-/* Data Tables */
+/* ==========================================================================
+   4. Filter Section
+   ========================================================================== */
+.filter-bar {
+	display               : grid;
+	grid-template-columns : repeat(auto-fit, minmax(140px, 1fr));
+	align-items           : center;
+	gap                   : var(--space-md);
+	padding               : var(--space-md);
+	background-color      : var(--color-bg-alt);
+	border                : 1px solid var(--color-border);
+	border-radius         : var(--radius-md);
+}
+
+.filter-group {
+	display        : flex;
+	flex-direction : column;
+	gap            : var(--space-xs);
+}
+
+.filter-group label {
+	font-size      : 0.75rem;
+	font-weight    : 600;
+	color          : var(--color-text-muted);
+	text-transform : uppercase;
+	letter-spacing : 0.05em;
+}
+
+.filter-input {
+	width            : 100%;
+	padding          : 0.5rem 0.75rem;
+	font-size        : 0.875rem;
+	background-color : var(--color-input-bg);
+	color            : var(--color-input-text);
+	border           : 1px solid var(--color-border);
+	border-radius    : var(--radius-md);
+	outline          : none;
+	transition       : border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-input:hover {
+	border-color : var(--color-text-muted);
+}
+
+.filter-input:focus {
+	border-color : var(--color-primary);
+	box-shadow   : 0 0 0 3px var(--color-primary-focus);
+}
+
+.filter-input[type="date"]::-webkit-calendar-picker-indicator {
+	filter : invert(0.8);
+	cursor : pointer;
+}
+
+.filter-actions-inline {
+	display     : flex;
+	align-items : center;
+	gap         : var(--space-xs);
+	min-width   : max-content;
+}
+
+/* ==========================================================================
+   5. Modals & Form Layouts
+   ========================================================================== */
+.modal-backdrop {
+	position         : fixed;
+	top              : 0;
+	left             : 0;
+	width            : 100vw;
+	height           : 100vh;
+	background-color : rgba(0, 0, 0, 0.5);
+	z-index          : 1050;
+	display          : flex;
+	align-items      : center;
+	justify-content  : center;
+	padding          : 1rem;
+}
+
+.modal-dialog {
+	background-color : var(--color-surface, #ffffff);
+	border-radius    : var(--radius-lg, 8px);
+	box-shadow       : 0 10px 25px rgba(0, 0, 0, 0.2);
+	width            : 100%;
+	max-width        : 500px;
+	max-height       : 90vh;
+	overflow-y       : auto;
+	position         : relative;
+	z-index          : 1051;
+	display          : flex;
+	flex-direction   : column;
+}
+
+.modal-header {
+	display         : flex;
+	align-items     : center;
+	justify-content : space-between;
+	padding         : var(--space-lg) var(--space-xl);
+	border-bottom   : 1px solid var(--color-border, #e5e7eb);
+}
+
+.modal-header .modal-title {
+	font-size   : 1.15rem;
+	font-weight : 600;
+	color       : var(--color-text-primary);
+	margin      : 0;
+}
+
+.modal-body {
+	padding  : var(--space-xl);
+	overflow : auto;
+	flex     : 1 1 auto;
+}
+
+.modal-footer {
+	display          : flex;
+	align-items      : center;
+	justify-content  : flex-end;
+	gap              : var(--space-md);
+	padding          : var(--space-lg) var(--space-xl);
+	border-top       : 1px solid var(--color-border, #e5e7eb);
+	background-color : var(--color-bg-alt, #f9fafb);
+	border-radius    : 0 0 var(--radius-lg, 8px) var(--radius-lg, 8px);
+}
+
+.modal-close,
+.modal-close-btn {
+	background  : transparent;
+	border      : 0;
+	font-size   : 1.25rem;
+	color       : var(--color-text-muted);
+	cursor      : pointer;
+	padding     : 0.25rem;
+	line-height : 1;
+	transition  : color 0.15s ease;
+}
+
+.modal-close:hover,
+.modal-close-btn:hover {
+	color : var(--color-text-primary);
+}
+
+/* Modal Form Layouts & Inputs */
+.form-group {
+	display        : flex;
+	flex-direction : column;
+	gap            : var(--space-xs, 0.375rem);
+	margin-bottom  : var(--space-md, 1rem);
+}
+
+.form-group:last-child {
+	margin-bottom : 0;
+}
+
+.form-group label {
+	font-size   : 0.875rem;
+	font-weight : 600;
+	color       : var(--color-text-primary);
+}
+
+.form-select,
+.form-control {
+	width            : 100%;
+	padding          : 0.5rem 0.75rem;
+	font-size        : 0.875rem;
+	background-color : var(--color-input-bg, #ffffff);
+	color            : var(--color-input-text, #1f2937);
+	border           : 1px solid var(--color-border, #d1d5db);
+	border-radius    : var(--radius-md, 6px);
+	outline          : none;
+	transition       : border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-select {
+	appearance          : auto;
+	cursor              : pointer;
+	background-position : right 0.75rem center;
+}
+
+.form-select:hover,
+.form-control:hover {
+	border-color : var(--color-text-muted, #9ca3af);
+}
+
+.form-select:focus,
+.form-control:focus {
+	border-color : var(--color-primary, #0056b3);
+	box-shadow   : 0 0 0 3px var(--color-primary-focus, rgba(0, 86, 179, 0.25));
+}
+
+/* ==========================================================================
+   6. Data Tables & Status Badges
+   ========================================================================== */
 .data-table {
-	width: 100%;
-	border-collapse: collapse;
-	text-align: left;
-	font-size: 0.875rem;
+	width           : 100%;
+	border-collapse : collapse;
+	text-align      : left;
+	font-size       : 0.875rem;
 }
 
 .data-table th {
-	padding: 0.75rem;
-	border-bottom: 2px solid var(--color-border, #e5e7eb);
-	color: var(--color-text-secondary, #6b7280);
-	font-weight: 600;
+	padding       : 0.75rem;
+	border-bottom : 2px solid var(--color-border);
+	color         : var(--color-text-secondary);
+	font-weight   : 600;
 }
 
 .data-table td {
-	padding: 0.75rem;
-	border-bottom: 1px solid var(--color-border, #e5e7eb);
-	color: var(--color-text-primary, #1f2937);
+	padding       : 0.75rem;
+	border-bottom : 1px solid var(--color-border);
+	color         : var(--color-text-primary);
 }
 
 .empty-state-text {
-	font-size: 0.875rem;
-	color: var(--color-text-muted, #9ca3af);
-	font-style: italic;
-	margin: 0;
+	font-size  : 0.875rem;
+	color      : var(--color-text-muted);
+	font-style : italic;
+	margin     : 0;
 }
 
-/* Badges */
+.pagination-container {
+	margin-top      : var(--space-md);
+	display         : flex;
+	justify-content : flex-end;
+}
+
 .badge {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.35rem;
-	padding: 0.25rem 0.625rem;
-	border-radius: 9999px;
-	font-size: 0.75rem;
-	font-weight: 600;
+	display       : inline-flex;
+	align-items   : center;
+	gap           : 0.35rem;
+	padding       : 0.25rem 0.625rem;
+	border-radius : var(--radius-full);
+	font-size     : 0.75rem;
+	font-weight   : 600;
 }
 
-.badge-success, .status-approved {
-	background-color: #d1fae5;
-	color: #065f46;
+.badge-success,
+.status-approved {
+	background-color : rgba(var(--color-accent-rgb), 0.15);
+	color            : var(--color-accent);
 }
 
-.badge-danger, .status-rejected {
-	background-color: #fee2e2;
-	color: #991b1b;
+.badge-danger,
+.status-rejected {
+	background-color : rgba(var(--color-error-rgb), 0.15);
+	color            : var(--color-error);
 }
 
 .status-pending {
-	background-color: #fef3c7;
-	color: #92400e;
+	background-color : rgba(var(--color-warning-rgb), 0.15);
+	color            : var(--color-warning);
+}
+
+/* ==========================================================================
+   7. Utilities
+   ========================================================================== */
+.mb-3 {
+	margin-bottom : var(--space-md);
+}
+
+/* ==========================================================================
+   8. Media Queries (Responsive Breakpoints)
+   ========================================================================== */
+@media (max-width : 992px) {
+	.profile-layout {
+		grid-template-columns : 1fr;
+	}
+}
+
+@media (max-width : 576px) {
+	.card-header-wrapper {
+		flex-direction : column;
+		align-items    : flex-start;
+		gap            : 0.75rem;
+	}
+
+	.card-header-wrapper .btn-sm {
+		width      : 100%;
+		text-align : center;
+	}
 }

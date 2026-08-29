@@ -3,8 +3,8 @@
 	namespace App\Http\Controllers\HumanResources;
 
 	use App\Http\Controllers\Controller;
-	use App\Http\Requests\HumanResources\StoreDepartmentRequest;
-	use App\Http\Requests\HumanResources\UpdateDepartmentRequest;
+	use App\Http\Requests\HumanResources\Department\StoreDepartmentRequest;
+	use App\Http\Requests\HumanResources\Department\UpdateDepartmentRequest;
 	use App\Models\HumanResources\Department;
 	use App\Models\HumanResources\Employee;
 

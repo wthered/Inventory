@@ -4,7 +4,9 @@
 
 	use App\Http\Requests\Brands\BrandListFilterRequest;
 	use App\Http\Requests\Customers\CustomerIndexFilterRequest;
-	use App\Http\Requests\Employees\EmployeeFilterRequest;
+	use App\Http\Requests\Filters\Employees\EmployeeAttendancesFilterRequest;
+	use App\Http\Requests\Filters\Employees\EmployeeLeavesFilterRequest;
+	use App\Http\Requests\HumanResources\Employees\EmployeeFilterRequest;
 	use App\Http\Requests\Products\FilterProductsRequest;
 	use App\Http\Requests\Sales\SalesIndexFilterRequest;
 	use App\Http\Requests\Stocks\StockAdjustments\FilterAdjustmentsRequest;
@@ -17,6 +19,7 @@
 	use App\Models\Supplier;
 	use App\Services\Filters\ProductFilterService;
 	use Illuminate\Http\JsonResponse;
+	use Illuminate\Pagination\Paginator;
 	use Throwable;
 
 	class FilterController extends Controller {
@@ -242,5 +245,48 @@
 		public function employees(EmployeeFilterRequest $request) {
 			$input = $request->validated();
 			dd($input);
+		}
+
+		public function attendances(EmployeeAttendancesFilterRequest $request, Employee $employee) {
+			$input = $request->validated();
+			$page = $request->input('att_page', 1);
+
+			Paginator::currentPageResolver(function () use ($page) {
+				return $page;
+			});
+
+			$attendances = $employee->attendances()
+			                        ->when($request->filled('date_start'), function ($query) use ($input) {
+				                        $query->whereDate('work_date', '>', $input['date_start']);
+			                        })->when($request->filled('date_final'), function ($query) use ($input) {
+					$query->whereDate('work_date', '<', $input['date_final']);
+				})->when($request->filled('status'), function ($query) use ($input) {
+					$query->where('status', $input['status']);
+				})->paginate($request->session()->get('per_page'), ['*'], 'att_page');
+
+			return response()->json([
+				'attendances' => view('partials.employees.attendance_rows', [
+					'attendances' => $attendances,
+				])->render(),
+			]);
+		}
+
+		public function leaves(EmployeeLeavesFilterRequest $request, Employee $employee) {
+			$input = $request->validated();
+			$leaves = $employee->leaveRequests()->when($request->filled('leave_date_start'), function ($query) use (
+				$input
+			) {
+				$query->whereDate('start_date', '>', $input['leave_date_start']);
+			})->when($request->filled('leave_date_final'), function ($query) use ($input) {
+				$query->whereDate('end_date', '<', $input['leave_date_final']);
+			})->when($request->filled('status'), function ($query) use ($input) {
+				$query->where('status', $input['leave_status']);
+			})->when($request->filled('leave_type'), function ($query) use ($input) {
+				$query->where('leave_type', $input['leave_type']);
+			})->paginate($request->session()->get('per_page'), ['*'], 'leave_page');
+
+			return response()->json([
+				'leaves' => view('partials.employees.leave_rows', ['leaveRequests' => $leaves])->render(),
+			]);
 		}
 	}

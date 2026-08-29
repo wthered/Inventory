@@ -5,11 +5,13 @@
 	use App\Enums\Financial\PaymentStatus;
 	use App\Enums\Sales\SalesOrderStatus;
 	use App\Models\Customer;
+	use App\Models\Finance\Payment;
 	use App\Models\User;
 	use App\Models\Warehouse;
 	use Illuminate\Database\Eloquent\Model;
 	use Illuminate\Database\Eloquent\Relations\BelongsTo;
 	use Illuminate\Database\Eloquent\Relations\HasMany;
+	use Illuminate\Database\Eloquent\Relations\MorphMany;
 	use Illuminate\Database\Eloquent\SoftDeletes;
 
 	// Προσθήκη για τη σχέση με τον User
@@ -73,6 +75,26 @@
 		 */
 		public function warehouse(): BelongsTo {
 			return $this->belongsTo(Warehouse::class);
+		}
+
+		public function payments(): MorphMany {
+			return $this->morphMany(Payment::class, 'payable');
+		}
+
+		/**
+		 * Υπολογισμός συνολικών εισπράξεων για τη συγκεκριμένη παραγγελία.
+		 */
+		public function totalPaid(): float
+		{
+			return (float) $this->payments()->where('status', 'completed')->sum('amount');
+		}
+
+		/**
+		 * Υπόλοιπο προς είσπραξη.
+		 */
+		public function remainingBalance(): float
+		{
+			return $this->grand_total - $this->totalPaid();
 		}
 
 		/**

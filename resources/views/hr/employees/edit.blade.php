@@ -1,6 +1,6 @@
 @extends('templates.general')
 
-@section('title', 'Edit Employee: ' . $employee->first_name . ' ' . $employee->last_name)
+@section('title', 'Edit Employee: ' . $employee->user->account->full_name)
 
 @section('styles')
 	<link rel="stylesheet" href="{{ asset('css/hr/employees/edit.css') }}"/>
@@ -14,7 +14,7 @@
 			<div class="header-title-group">
 				<h1>
 					<i class="fas fa-user-edit icon-accent"></i> Edit
-					Employee: {{ $employee->first_name }} {{ $employee->last_name }}
+					Employee: {{ $employee->user->account->full_name }}
 				</h1>
 				<p class="subtitle">Update the employee's main information and personal details</p>
 			</div>
@@ -62,22 +62,11 @@
 					</div>
 
 					<div class="form-group">
-						<label for="hire_date" class="form-label required">Hire Date</label>
-						<input type="date"
-						       id="hire_date"
-						       name="hire_date"
-						       value="{{ old('hire_date', optional($employee->hire_date)->format('Y-m-d')) }}"
-						       class="form-control @error('hire_date') is-invalid @enderror"
-						       required>
-						@error('hire_date') <span class="form-error">{{ $message }}</span> @enderror
-					</div>
-
-					<div class="form-group">
 						<label for="first_name" class="form-label required">First Name</label>
 						<input type="text"
 						       id="first_name"
 						       name="first_name"
-						       value="{{ old('first_name', $employee->first_name) }}"
+						       value="{{ old('first_name', $employee->user->account->first_name) }}"
 						       class="form-control @error('first_name') is-invalid @enderror"
 						       required>
 						@error('first_name') <span class="form-error">{{ $message }}</span> @enderror
@@ -88,7 +77,7 @@
 						<input type="text"
 						       id="last_name"
 						       name="last_name"
-						       value="{{ old('last_name', $employee->last_name) }}"
+						       value="{{ old('last_name', $employee->user->account->last_name) }}"
 						       class="form-control @error('last_name') is-invalid @enderror"
 						       required>
 						@error('last_name') <span class="form-error">{{ $message }}</span> @enderror
@@ -155,9 +144,31 @@
 						<input type="text"
 						       id="phone"
 						       name="phone"
-						       value="{{ old('phone', $employee->phone) }}"
+						       value="{{ old('phone', $employee->user->account->phone) }}"
 						       class="form-control @error('phone') is-invalid @enderror">
 						@error('phone') <span class="form-error">{{ $message }}</span> @enderror
+					</div>
+
+					<div class="form-group">
+						<label for="hire_date" class="form-label required">Hire Date</label>
+						<input type="date"
+						       id="hire_date"
+						       name="hire_date"
+						       value="{{ old('hire_date', optional($employee->hire_date)->format('Y-m-d')) }}"
+						       class="form-control @error('hire_date') is-invalid @enderror"
+						       required>
+						@error('hire_date') <span class="form-error">{{ $message }}</span> @enderror
+					</div>
+
+					<div class="form-group">
+						<label for="termination_date" class="form-label required">Hire Date</label>
+						<input type="date"
+						       id="termination_date"
+						       name="termination_date"
+						       value="{{ old('termination_date', optional($employee->hire_date)->format('Y-m-d')) }}"
+						       class="form-control @error('termination_date') is-invalid @enderror"
+						       required>
+						@error('termination_date') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
 
 					<div class="form-group form-group-checkbox">
@@ -179,7 +190,8 @@
 				<div class="form-grid">
 					<div class="form-group">
 						<label for="afm" class="form-label">AFM (Tax ID)</label>
-						<input type="text" id="afm" name="afm" value="{{ old('afm', $employee->afm) }}" maxlength="15"
+						<input type="text" id="afm" name="afm" value="{{ old('afm', $employee->detail->afm) }}"
+						       maxlength="15"
 						       class="form-control">
 						@error('afm') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
@@ -187,7 +199,7 @@
 					<div class="form-group">
 						<label for="social_security" class="form-label">AMKA (Social Security)</label>
 						<input type="text" id="social_security" name="social_security"
-						       value="{{ old('social_security', $employee->social_security) }}" maxlength="16"
+						       value="{{ old('social_security', $employee->detail->social_security) }}" maxlength="16"
 						       class="form-control">
 						@error('social_security') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
@@ -195,7 +207,7 @@
 					<div class="form-group">
 						<label for="id_card_number" class="form-label">ID Card Number</label>
 						<input type="text" id="id_card_number" name="id_card_number"
-						       value="{{ old('id_card_number', $employee->id_card_number) }}"
+						       value="{{ old('id_card_number', $employee->detail->id_card_number) }}"
 						       maxlength="20" class="form-control">
 						@error('id_card_number') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
@@ -203,21 +215,22 @@
 					<div class="form-group">
 						<label for="birth_date" class="form-label">Date of Birth</label>
 						<input type="date" id="birth_date" name="birth_date"
-						       value="{{ old('birth_date', optional($employee->birth_date)->format('Y-m-d')) }}"
+						       value="{{ old('birth_date', optional($employee->detail->birth_date)->format('Y-m-d')) }}"
 						       class="form-control">
 						@error('birth_date') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
 
 					<div class="form-group full-width">
 						<label for="address" class="form-label">Street Address</label>
-						<input type="text" id="address" name="address" value="{{ old('address', $employee->address) }}"
+						<input type="text" id="address" name="address"
+						       value="{{ old('address', $employee->detail->address) }}"
 						       class="form-control">
 						@error('address') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
 
 					<div class="form-group">
 						<label for="city" class="form-label">City</label>
-						<input type="text" id="city" name="city" value="{{ old('city', $employee->city) }}"
+						<input type="text" id="city" name="city" value="{{ old('city', $employee->detail->city) }}"
 						       class="form-control">
 						@error('city') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
@@ -225,14 +238,14 @@
 					<div class="form-group">
 						<label for="postal_code" class="form-label">Postal Code</label>
 						<input type="text" id="postal_code" name="postal_code"
-						       value="{{ old('postal_code', $employee->postal_code) }}"
+						       value="{{ old('postal_code', $employee->detail->postal_code) }}"
 						       maxlength="10" class="form-control">
 						@error('postal_code') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
 
 					<div class="form-group full-width">
 						<label for="iban" class="form-label">IBAN Account</label>
-						<input type="text" id="iban" name="iban" value="{{ old('iban', $employee->iban) }}"
+						<input type="text" id="iban" name="iban" value="{{ old('iban', $employee->detail->iban) }}"
 						       maxlength="34"
 						       class="form-control" placeholder="GR...">
 						@error('iban') <span class="form-error">{{ $message }}</span> @enderror
@@ -250,16 +263,64 @@
 					<div class="form-group">
 						<label for="emergency_contact_name" class="form-label">Contact Person Name</label>
 						<input type="text" id="emergency_contact_name" name="emergency_contact_name"
-						       value="{{ old('emergency_contact_name', $employee->emergency_contact_name) }}"
+						       value="{{ old('emergency_contact_name', $employee->detail->emergency_contact_name) }}"
 						       class="form-control">
 					</div>
 
 					<div class="form-group">
 						<label for="emergency_contact_phone" class="form-label">Contact Person Phone</label>
 						<input type="text" id="emergency_contact_phone" name="emergency_contact_phone"
-						       value="{{ old('emergency_contact_phone', $employee->emergency_contact_phone) }}"
+						       value="{{ old('emergency_contact_phone', $employee->detail->emergency_contact_phone) }}"
 						       class="form-control">
 					</div>
+				</div>
+			</div>
+
+			<hr class="form-divider">
+
+			<!-- Section 4: Employee Leave Requests -->
+			<div class="form-section">
+				<h2 class="form-section-title"><i class="fas fa-calendar-alt"></i> Employee Leave Requests</h2>
+
+				<div class="table-responsive">
+					<table class="table align-middle">
+						<thead>
+						<tr>
+							<th>Type</th>
+							<th>Start Date</th>
+							<th>End Date</th>
+							<th>Days</th>
+							<th>Status</th>
+							<th class="text-end">Actions</th>
+						</tr>
+						</thead>
+						<tbody>
+						@forelse($employee->leaveRequests as $leave)
+							<tr>
+								<td>{{ $leave->leave_type->label() }}</td>
+								<td>{{ $leave->start_date->format('d/m/Y') }}</td>
+								<td>{{ $leave->end_date->format('d/m/Y') }}</td>
+								<td>{{ $leave->total_days }}</td>
+								<td>
+										<span class="badge badge-{{ $leave->status->value }}">
+											{{ $leave->status->label() }}
+										</span>
+								</td>
+								<td class="text-end">
+									<a href="{{ route('hr.leaves.edit', $leave->id) }}" class="btn-sm btn-secondary">
+										<i class="fas fa-edit"></i> Edit Status
+									</a>
+								</td>
+							</tr>
+						@empty
+							<tr>
+								<td colspan="6" class="text-center text-muted">No leave requests found for this
+									employee.
+								</td>
+							</tr>
+						@endforelse
+						</tbody>
+					</table>
 				</div>
 			</div>
 

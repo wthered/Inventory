@@ -3,15 +3,15 @@
 		<td class="font-mono td-id">#{{ $employee->employee_code ?? $employee->id }}</td>
 		<td>
 			<div class="td-name">
-				{{ $employee->full_name }}
+				{{ $employee->user->account->full_name }}
 			</div>
 			@if($employee->job_title)
 				<div class="td-description">{{ $employee->job_title }}</div>
 			@endif
 		</td>
 		<td>
-			<div>{{ $employee->phone }}</div>
-			@if($employee->email)
+			<div>{{ $employee->user->account->phone }}</div>
+			@if($employee->user->email)
 				<div class="td-description">{{ $employee->email }}</div>
 			@endif
 		</td>
@@ -23,7 +23,7 @@
 			@endif
 		</td>
 		<td>
-			@if($employee->is_active)
+			@if($employee->user->account->is_active)
 				<span class="badge-count"
 				      style="color: var(--color-accent); border-color: var(--color-accent);">Active</span>
 			@else

@@ -1,4 +1,10 @@
-/* Toolbar Container Card */
+/* ==========================================================================
+   LEAVE REQUESTS MODULE STYLES (index.css)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. TOOLBAR & FILTER CONTAINER
+   -------------------------------------------------------------------------- */
 .toolbar-card {
 	background-color : var(--color-surface);
 	border           : 1px solid var(--color-border);
@@ -14,7 +20,9 @@
 	gap         : var(--space-md);
 }
 
-/* Filter Controls Layout */
+/* --------------------------------------------------------------------------
+   2. FILTER INPUTS & CONTROLS
+   -------------------------------------------------------------------------- */
 .filter-item {
 	display        : flex;
 	flex-direction : column;
@@ -35,7 +43,7 @@
 	width : 100%;
 }
 
-/* Custom Select Dropdown Arrow */
+/* Custom Select Dropdown Arrow Override */
 select.form-control {
 	appearance          : none;
 	background-image    : url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3c9ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -74,7 +82,9 @@ select.form-control {
 	color            : #ffffff;
 }
 
-/* Type Pill & Custom Elements */
+/* --------------------------------------------------------------------------
+   3. STATUS BADGES & TYPE PILLS
+   -------------------------------------------------------------------------- */
 .type-pill {
 	display          : inline-block;
 	padding          : 0.2rem 0.5rem;
@@ -86,15 +96,6 @@ select.form-control {
 	border           : 1px solid var(--color-border);
 }
 
-.d-block {
-	display : block;
-}
-
-.font-mono {
-	font-family : var(--font-mono), sans-serif;
-}
-
-/* Status Badges */
 .badge {
 	display        : inline-flex;
 	align-items    : center;
@@ -131,7 +132,57 @@ select.form-control {
 	border           : 1px solid var(--color-border);
 }
 
-/* Responsive Rules */
+/* --------------------------------------------------------------------------
+   4. TABLE EMPTY STATE
+   -------------------------------------------------------------------------- */
+/* Disable hover effect on rows displaying the empty state */
+.data-table tbody tr:has(.table-empty-state):hover {
+	background-color : transparent;
+}
+
+.table-empty-state {
+	text-align : center !important;
+	padding    : 4rem 1.5rem !important;
+	color      : var(--color-text-muted);
+}
+
+.empty-state-container {
+	display         : inline-flex;
+	flex-direction  : column;
+	align-items     : center;
+	justify-content : center;
+	gap             : var(--space-xs);
+	margin          : 0 auto;
+}
+
+.table-empty-state .empty-icon {
+	font-size     : 2.75rem;
+	color         : var(--color-border);
+	margin-bottom : var(--space-sm);
+	display       : block;
+}
+
+.table-empty-state p {
+	margin      : 0;
+	font-size   : 0.95rem;
+	font-weight : 500;
+	color       : var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   5. UTILITY CLASSES
+   -------------------------------------------------------------------------- */
+.d-block {
+	display : block;
+}
+
+.font-mono {
+	font-family : var(--font-mono), sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   6. RESPONSIVE BREAKPOINTS
+   -------------------------------------------------------------------------- */
 @media (max-width : 768px) {
 	.toolbar-form {
 		flex-direction : column;

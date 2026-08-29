@@ -16,7 +16,7 @@
 			$user = $request->user();
 
 			$preferences = session('preferences', [
-				'per_page'    => $user->account?->per_page ?? 15, // <--- Access via account relation
+				'per_page'    => $user->account?->per_page ?? $request->session()->get('per_page', config('preferences.pagination.per_page')),
 				'timezone'    => config('app.timezone', 'Europe/Athens'),
 				'locale'      => 'el',
 				'date_format' => 'd/m/Y',

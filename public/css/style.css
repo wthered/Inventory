@@ -1,6 +1,24 @@
 /* --- Root Variables (DARK THEME - UNIFIED) --- */
 :root {
-	/* --- COLOR PALETTE (DARK THEME) --- */
+	/* --- BRAND & ACCENT COLORS --- */
+	--color-primary        : #3b82f6;
+	--color-primary-hover  : #2563eb;
+	--color-primary-rgb    : 59, 130, 246;
+	--color-primary-focus  : rgba(var(--color-primary-rgb), 0.25);
+
+	--color-accent         : #10b981;
+	--color-accent-rgb     : 16, 185, 129;
+
+	/* --- FEEDBACK & STATUS COLORS --- */
+	--color-error          : #ef4444;
+	--color-error-hover    : #dc2626;
+	--color-error-rgb      : 239, 68, 68;
+	--color-error-focus    : rgba(var(--color-error-rgb), 0.25);
+
+	--color-warning        : #f59e0b;
+	--color-warning-rgb    : 245, 158, 11;
+
+	/* --- DARK NEUTRAL PALETTE & SURFACES --- */
 	--color-bg             : #0f172a;
 	--color-surface        : #1f2937;
 	--color-bg-alt         : #111827;
@@ -10,27 +28,14 @@
 	--color-text-secondary : #e5e7eb;
 	--color-text-muted     : #9ca3af;
 
-	--color-accent         : #10b981;
-	--color-primary        : #3b82f6;
-	/* RGB version for transparency */
-	--color-primary-rgb    : 59, 130, 246;
-	--color-primary-hover  : #2563eb;
-
-	/* Standard Error Palette */
-	--color-error          : #ef4444;
-	--color-error-hover    : #dc2626;
-	--color-error-focus    : rgba(239, 68, 68, 0.25);
-	--color-error-rgb      : 239, 68, 68;
-
-	/* Primary Focus State (Assuming a default primary blue like #3b82f6) */
-	--color-primary-focus  : rgba(59, 130, 246, 0.25);
-	--color-warning        : #f59e0b;
 	--color-border         : #374151;
+
+	/* --- INPUT & FORM OVERRIDES --- */
 	--color-input-bg       : var(--color-surface);
 	--color-input-surface  : var(--color-surface);
 	--color-input-text     : var(--color-text-primary);
 
-	/* --- BORDER RADIUS --- */
+	/* --- BORDER RADIUS SCALE --- */
 	--radius-sm            : 0.25rem;
 	--radius-md            : 0.5rem;
 	--radius-lg            : 0.75rem;
@@ -77,16 +82,16 @@ body.sidebar-open #box {
 
 body #box {
 	padding    : var(--space-xl);
-	transition : margin-left 0.3s ease; /* Αλλαγή από left σε margin-left */
+	transition : margin-left 0.3s ease;
 	min-height : calc(100vh - 60px);
 }
 
 #box {
-	flex : 1 0 auto; /* Σπρώχνει το footer κάτω αν το περιεχόμενο είναι λίγο */
+	flex : 1 0 auto;
 }
 
 /* ==========================================================================
-   SHARED WMS COMPONENT UTILITIES (Move to main app/layout.css)
+   SHARED WMS COMPONENT UTILITIES
    ========================================================================== */
 
 /* Layout & Structure */
@@ -128,6 +133,7 @@ body #box {
 }
 
 /* Base Form Inputs & Controls */
+/* Base Form Inputs & Controls */
 .form-control {
 	width            : 100%;
 	padding          : 0.625rem 0.875rem;
@@ -142,14 +148,31 @@ body #box {
 
 .form-control:focus {
 	border-color : var(--color-primary);
-	box-shadow   : 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+	box-shadow   : 0 0 0 3px var(--color-primary-focus);
+}
+
+/* --- Validation & Error States --- */
+.filter-input.is-invalid,
+.form-control.is-invalid {
+	border-color : var(--color-error);
+}
+
+.filter-input.is-invalid:focus,
+.form-control.is-invalid:focus {
+	box-shadow : 0 0 0 3px var(--color-error-focus);
+}
+
+.error-text {
+	display     : block;
+	font-size   : 0.75rem;
+	color       : var(--color-error);
+	margin-top  : var(--space-xs);
+	font-weight : 500;
 }
 
 .form-control::placeholder {
 	color : var(--color-text-muted);
 }
-
-/* //Base Form Inputs & Controls */
 
 /* Buttons & Triggers */
 .btn-primary {
@@ -170,7 +193,7 @@ body #box {
 }
 
 .btn-primary:hover {
-	background-color : #2563eb;
+	background-color : var(--color-primary-hover);
 }
 
 .btn-primary:active {
@@ -270,7 +293,7 @@ body #box {
 .btn-show:hover {
 	color            : var(--color-accent);
 	border-color     : var(--color-accent);
-	background-color : rgba(16, 185, 129, 0.1);
+	background-color : rgba(var(--color-accent-rgb), 0.1);
 }
 
 .btn-edit {
@@ -280,7 +303,7 @@ body #box {
 .btn-edit:hover {
 	color            : var(--color-primary);
 	border-color     : var(--color-primary);
-	background-color : rgba(59, 130, 246, 0.1);
+	background-color : rgba(var(--color-primary-rgb), 0.1);
 }
 
 .btn-delete {
@@ -288,7 +311,7 @@ body #box {
 }
 
 .btn-delete:hover {
-	background-color : rgba(239, 68, 68, 0.1);
+	background-color : rgba(var(--color-error-rgb), 0.1);
 	border-color     : var(--color-error);
 }
 
@@ -305,13 +328,13 @@ body #box {
 }
 
 .alert-success {
-	background-color : rgba(16, 185, 129, 0.1);
+	background-color : rgba(var(--color-accent-rgb), 0.1);
 	border           : 1px solid var(--color-accent);
 	color            : var(--color-accent);
 }
 
 .alert-danger {
-	background-color : rgba(239, 68, 68, 0.1);
+	background-color : rgba(var(--color-error-rgb), 0.1);
 	border           : 1px solid var(--color-error);
 	color            : var(--color-error);
 }
@@ -391,7 +414,7 @@ a.badge-count {
 }
 
 a.badge-count:hover {
-	background-color : rgba(59, 130, 246, 0.15);
+	background-color : rgba(var(--color-primary-rgb), 0.15);
 	color            : var(--color-primary);
 	border-color     : var(--color-primary);
 }
@@ -402,7 +425,7 @@ a.badge-count:hover {
 	font-weight      : 700;
 	text-transform   : uppercase;
 	letter-spacing   : 0.05em;
-	background-color : rgba(239, 68, 68, 0.15); /* Απαλό error tint */
+	background-color : rgba(var(--color-error-rgb), 0.15);
 	color            : var(--color-error);
 	border           : 1px solid var(--color-error);
 	padding          : 0.25rem 0.625rem;
@@ -438,10 +461,10 @@ a.badge-count:hover {
 	border-top       : 1px solid var(--color-border);
 }
 
-/* Desktop: Όταν είναι ανοιχτή η sidebar, σπρώξε το περιεχόμενο */
+/* Responsive Sidebar Layout Toggle */
 @media (min-width : 768px) {
 	body.sidebar-open #box {
 		margin-left : 16rem;
-		width       : auto; /* Αφήνουμε το browser να υπολογίσει το πλάτος */
+		width       : auto;
 	}
 }

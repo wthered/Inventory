@@ -51,12 +51,18 @@
 					<!-- Employee Selection -->
 					<div class="form-group full-width">
 						<label for="employee_id" class="form-label required">Employee</label>
-						<select name="employee_id" id="employee_id" class="form-control @error('employee_id') is-invalid @enderror" required>
+						<select name="employee_id" id="employee_id"
+						        class="form-control @error('employee_id') is-invalid @enderror" required>
 							<option value="">-- Select Employee --</option>
-							@foreach($employees as $employee)
-								<option value="{{ $employee->id }}" {{ old('employee_id') == $employee->id ? 'selected' : '' }}>
-									{{ $employee->last_name }} {{ $employee->first_name }} ({{ $employee->employee_code }})
-								</option>
+							@foreach($employeeGroups as $warehouseName => $people)
+								<optgroup label="{{ $warehouseName }}">
+									@foreach($people as $person)
+										<option value="{{ $person->id }}"
+											@selected(intval(old('employee_id')) === intval($person->id))>
+											{{ $person->user?->account->full_name }} ({{ $person->employee_code }})
+										</option>
+									@endforeach
+								</optgroup>
 							@endforeach
 						</select>
 						@error('employee_id') <span class="form-error">{{ $message }}</span> @enderror
@@ -74,24 +80,13 @@
 						@error('date') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
 
-					<!-- Attendance Status -->
-					<div class="form-group">
-						<label for="status" class="form-label required">Status</label>
-						<select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
-							<option value="present" {{ old('status') === 'present' ? 'selected' : '' }}>Present</option>
-							<option value="late" {{ old('status') === 'late' ? 'selected' : '' }}>Late</option>
-							<option value="half_day" {{ old('status') === 'half_day' ? 'selected' : '' }}>Half Day</option>
-							<option value="absent" {{ old('status') === 'absent' ? 'selected' : '' }}>Absent</option>
-						</select>
-						@error('status') <span class="form-error">{{ $message }}</span> @enderror
-					</div>
-
 					<!-- Clock In -->
 					<div class="form-group">
 						<label for="clock_in" class="form-label">Clock In Time</label>
 						<input type="time"
 						       id="clock_in"
 						       name="clock_in"
+						       step="1"
 						       value="{{ old('clock_in') }}"
 						       class="form-control @error('clock_in') is-invalid @enderror">
 						@error('clock_in') <span class="form-error">{{ $message }}</span> @enderror
@@ -103,9 +98,26 @@
 						<input type="time"
 						       id="clock_out"
 						       name="clock_out"
+						       step="1"
 						       value="{{ old('clock_out') }}"
 						       class="form-control @error('clock_out') is-invalid @enderror">
 						@error('clock_out') <span class="form-error">{{ $message }}</span> @enderror
+					</div>
+
+					<!-- Attendance Status -->
+					<div class="form-group">
+						<label for="status" class="form-label required">Status</label>
+						<select name="status" id="status" class="form-control @error('status') is-invalid @enderror"
+						        required>
+							<option value="">-- Select Status --</option>
+							@foreach($statuses::cases() as $status)
+								<option
+									value="{{ $status->value }}" @selected(old('status', $statuses::PRESENT->value) === $status->value)>
+									{{ $status->label() }}
+								</option>
+							@endforeach
+						</select>
+						@error('status') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
 
 					<!-- Remarks / Notes -->

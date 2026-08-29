@@ -1,6 +1,6 @@
 @extends('templates.general')
 
-@section('title', 'Attendance Record #' . $attendance->id)
+@section('title', 'Attendance for Employee #' . $employee->id)
 
 @section('styles')
 	<link rel="stylesheet" href="{{ asset('css/hr/attendances/show.css') }}"/>
@@ -15,15 +15,43 @@
 				<h1>
 					<i class="fas fa-clock icon-accent"></i> Attendance Record
 				</h1>
-				<p class="subtitle">Record #{{ $attendance->id }} &bull; {{ \Carbon\Carbon::parse($attendance->date)->format('F d, Y') }}</p>
+				<p class="subtitle">Record for employee
+					#{{ $employee->id }} &bull; {{ $attendance->work_date->format('F d, Y') }}</p>
 			</div>
 
 			<div class="action-buttons-group">
+				<!-- 1. Pagination Group (Prev / Next side-by-side) -->
+				@if($isPrevDisabled)
+					<button class="btn-secondary disabled" disabled title="Previous work date is before hire date">
+						<i class="fas fa-chevron-left"></i> Previous Work Date
+					</button>
+				@else
+					<a href="{{ route('hr.attendances.show', ['employee' => $employee->id, 'date' => $prevWorkDate->format('Y-m-d')]) }}"
+					   class="btn-secondary" title="{{ $prevWorkDate->format('l, j F Y') }}">
+						<i class="fas fa-chevron-left"></i> Previous Work Date
+					</a>
+				@endif
+
+				@if($isNextDisabled)
+					<button class="btn-secondary disabled" disabled title="Next Work Date is in the future">
+						Next Work Date <i class="fas fa-chevron-right"></i>
+					</button>
+				@else
+					<a href="{{ route('hr.attendances.show', ['employee' => $employee->id, 'date' => $nextWorkDate->format('Y-m-d')]) }}"
+					   class="btn-secondary" title="{{ $nextWorkDate->format('l, j F Y') }}">
+						Next Work Date <i class="fas fa-chevron-right"></i>
+					</a>
+				@endif
+
+				<!-- 2. Context Actions -->
 				<a href="{{ route('hr.attendances.index') }}" class="btn-secondary">
 					<i class="fas fa-arrow-left"></i> Back to List
 				</a>
+
+				<!-- 3. Primary Mutation Action (Far Right) -->
 				@can('attendance.update')
-					<a href="{{ route('hr.attendances.edit', $attendance->id) }}" class="btn-primary">
+					<a href="{{ route('hr.attendances.edit', ['employee' => $employee->id, 'date' => $attendance->work_date->format('Y-m-d')]) }}"
+					   class="btn-primary">
 						<i class="fas fa-edit"></i> Edit Log
 					</a>
 				@endcan
@@ -37,31 +65,19 @@
 			<div class="details-header-bar">
 				<div class="user-meta">
 					<div class="avatar-circle">
-						{{ strtoupper(substr($attendance->employee->first_name, 0, 1) . substr($attendance->employee->last_name, 0, 1)) }}
+						<img src="{{ $employee->user->account->avatar_url }}"
+						     alt="{{ $employee->user->account->full_name }} Avatar">
 					</div>
 					<div class="user-info">
-						<h3>{{ $attendance->employee->first_name }} {{ $attendance->employee->last_name }}</h3>
+						<h3>{{ $employee->user->account->full_name }}</h3>
 						<span class="user-role">{{ $attendance->employee->position->title ?? 'No Position Assigned' }} ({{ $attendance->employee->employee_code }})</span>
 					</div>
 				</div>
 
 				<div class="status-indicator">
-					@switch($attendance->status)
-						@case('present')
-							<span class="badge badge-success"><i class="fas fa-check"></i> Present</span>
-							@break
-						@case('late')
-							<span class="badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Late</span>
-							@break
-						@case('absent')
-							<span class="badge badge-danger"><i class="fas fa-times"></i> Absent</span>
-							@break
-						@case('half_day')
-							<span class="badge badge-info"><i class="fas fa-adjust"></i> Half Day</span>
-							@break
-						@default
-							<span class="badge badge-secondary">{{ ucfirst($attendance->status) }}</span>
-					@endswitch
+					<span class="badge {{ $attendance->status->badgeClass() }}">
+						<i class="{{ $attendance->status->icon() }}"></i> {{ $attendance->status->label() }}
+					</span>
 				</div>
 			</div>
 
@@ -71,20 +87,21 @@
 				<div class="info-grid">
 					<div class="info-item">
 						<span class="info-label">Date</span>
-						<span class="info-value text-highlight">{{ \Carbon\Carbon::parse($attendance->date)->format('M d, Y') }}</span>
+						<span
+							class="info-value text-highlight">{{ $attendance->work_date->format('M d, Y') }}</span>
 					</div>
 					<div class="info-item">
 						<span class="info-label">Clock In Time</span>
 						<span class="info-value font-mono">
 							<i class="far fa-clock icon-in"></i>
-							{{ $attendance->clock_in ? \Carbon\Carbon::parse($attendance->clock_in)->format('H:i:s') : '--:--:--' }}
+							{{ $attendance->check_in ? $attendance->check_in->format('H:i:s') : '--:--:--' }}
 						</span>
 					</div>
 					<div class="info-item">
 						<span class="info-label">Clock Out Time</span>
 						<span class="info-value font-mono">
 							<i class="far fa-clock icon-out"></i>
-							{{ $attendance->clock_out ? \Carbon\Carbon::parse($attendance->clock_out)->format('H:i:s') : '--:--:--' }}
+							{{ $attendance->check_out ? $attendance->check_out->format('H:i:s') : '--:--:--' }}
 						</span>
 					</div>
 					<div class="info-item">
@@ -95,7 +112,8 @@
 					</div>
 					<div class="info-item full-width">
 						<span class="info-label">Notes / Remarks</span>
-						<span class="info-value">{{ $attendance->notes ?? 'No remarks provided for this entry.' }}</span>
+						<span
+							class="info-value">{{ $attendance->notes ?? 'No remarks provided for this entry.' }}</span>
 					</div>
 				</div>
 			</div>

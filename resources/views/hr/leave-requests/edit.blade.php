@@ -1,6 +1,6 @@
 @extends('templates.general')
 
-@section('title', 'Edit Leave Request #' . $leaveRequest->id)
+@section('title', 'Edit Leave Request #' . $leaf->id)
 
 @section('styles')
 	<link rel="stylesheet" href="{{ asset('css/hr/leave-requests/edit.css') }}"/>
@@ -15,11 +15,11 @@
 				<h1>
 					<i class="fas fa-plane-departure icon-accent"></i> Edit Leave Request
 				</h1>
-				<p class="subtitle">Modify leave parameters or process status for Request #{{ $leaveRequest->id }}</p>
+				<p class="subtitle">Modify leave parameters or process status for Request #{{ $leaf->id }}</p>
 			</div>
 
 			<div class="action-buttons-group">
-				<a href="{{ route('hr.leave-requests.index') }}" class="btn-secondary">
+				<a href="{{ route('hr.leaves.index') }}" class="btn-secondary">
 					<i class="fas fa-arrow-left"></i> Back to List
 				</a>
 			</div>
@@ -41,7 +41,7 @@
 		@endif
 
 		<!-- Form Card -->
-		<form action="{{ route('hr.leave-requests.update', $leaveRequest->id) }}" method="POST" class="form-card">
+		<form action="{{ route('hr.leaves.update', ['leaf' => $leaf->id]) }}" method="POST" class="form-card">
 			@csrf
 			@method('PUT')
 
@@ -54,12 +54,18 @@
 					<!-- Employee Selection -->
 					<div class="form-group full-width">
 						<label for="employee_id" class="form-label required">Employee</label>
-						<select name="employee_id" id="employee_id" class="form-control @error('employee_id') is-invalid @enderror" required>
-							<option value="">-- Select Employee --</option>
-							@foreach($employees as $employee)
-								<option value="{{ $employee->id }}" {{ old('employee_id', $leaveRequest->employee_id) == $employee->id ? 'selected' : '' }}>
-									{{ $employee->last_name }} {{ $employee->first_name }} ({{ $employee->employee_code }})
-								</option>
+						<select name="employee_id" id="employee_id"
+						        class="form-control @error('employee_id') is-invalid @enderror" required>
+							<option value="" disabled>-- Select Employee --</option>
+							@foreach($employees as $warehouseName => $group)
+								<optgroup label="{{ $warehouseName }}">
+									@foreach($group as $employee)
+										<option
+											value="{{ $employee->id }}" {{ old('employee_id', $leaf->employee_id) == $employee->id ? 'selected' : '' }}>
+											{{ $employee->user?->account->full_name }} ({{ $employee->employee_code }})
+										</option>
+									@endforeach
+								</optgroup>
 							@endforeach
 						</select>
 						@error('employee_id') <span class="form-error">{{ $message }}</span> @enderror
@@ -68,11 +74,13 @@
 					<!-- Leave Type -->
 					<div class="form-group">
 						<label for="leave_type_id" class="form-label required">Leave Type</label>
-						<select name="leave_type_id" id="leave_type_id" class="form-control @error('leave_type_id') is-invalid @enderror" required>
+						<select name="leave_type_id" id="leave_type_id"
+						        class="form-control @error('leave_type_id') is-invalid @enderror" required>
 							<option value="">-- Select Category --</option>
-							@foreach($leaveTypes as $type)
-								<option value="{{ $type->id }}" {{ old('leave_type_id', $leaveRequest->leave_type_id) == $type->id ? 'selected' : '' }}>
-									{{ $type->name }}
+							@foreach($leaveTypes::cases() as $type)
+								<option
+									value="{{ $type->value }}" {{ old('leave_type_id', $leaf->leave_type->value) == $type->value ? 'selected' : '' }}>
+									{{ $type->label() }}
 								</option>
 							@endforeach
 						</select>
@@ -82,11 +90,14 @@
 					<!-- Status -->
 					<div class="form-group">
 						<label for="status" class="form-label required">Status</label>
-						<select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
-							<option value="pending" {{ old('status', $leaveRequest->status) === 'pending' ? 'selected' : '' }}>Pending</option>
-							<option value="approved" {{ old('status', $leaveRequest->status) === 'approved' ? 'selected' : '' }}>Approved</option>
-							<option value="rejected" {{ old('status', $leaveRequest->status) === 'rejected' ? 'selected' : '' }}>Rejected</option>
-							<option value="cancelled" {{ old('status', $leaveRequest->status) === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+						<select name="status" id="status" class="form-control @error('status') is-invalid @enderror"
+						        required>
+							@foreach($leaveStatus::cases() as $status)
+								<option
+									value="{{ $status->value }}" {{ old('status', $leaf->status) === $status->value ? 'selected' : '' }}>
+									{{ $status->label() }}
+								</option>
+							@endforeach
 						</select>
 						@error('status') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
@@ -97,7 +108,7 @@
 						<input type="date"
 						       id="start_date"
 						       name="start_date"
-						       value="{{ old('start_date', \Carbon\Carbon::parse($leaveRequest->start_date)->format('Y-m-d')) }}"
+						       value="{{ old('start_date', $leaf->start_date->format('Y-m-d')) }}"
 						       class="form-control @error('start_date') is-invalid @enderror"
 						       required>
 						@error('start_date') <span class="form-error">{{ $message }}</span> @enderror
@@ -109,7 +120,7 @@
 						<input type="date"
 						       id="end_date"
 						       name="end_date"
-						       value="{{ old('end_date', \Carbon\Carbon::parse($leaveRequest->end_date)->format('Y-m-d')) }}"
+						       value="{{ old('end_date', $leaf->end_date->format('Y-m-d')) }}"
 						       class="form-control @error('end_date') is-invalid @enderror"
 						       required>
 						@error('end_date') <span class="form-error">{{ $message }}</span> @enderror
@@ -122,7 +133,7 @@
 						          name="reason"
 						          rows="3"
 						          class="form-control @error('reason') is-invalid @enderror"
-						          placeholder="Details provided by employee">{{ old('reason', $leaveRequest->reason) }}</textarea>
+						          placeholder="Details provided by employee">{{ old('reason', $leaf->reason) }}</textarea>
 						@error('reason') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
 
@@ -133,7 +144,7 @@
 						          name="rejection_reason"
 						          rows="2"
 						          class="form-control @error('rejection_reason') is-invalid @enderror"
-						          placeholder="State the reason if rejecting this request">{{ old('rejection_reason', $leaveRequest->rejection_reason) }}</textarea>
+						          placeholder="State the reason if rejecting this request">{{ old('rejection_reason', $leaf->rejection_reason) }}</textarea>
 						@error('rejection_reason') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
 
@@ -142,7 +153,7 @@
 
 			<!-- Form Action Footer -->
 			<div class="form-actions">
-				<a href="{{ route('hr.leave-requests.index') }}" class="btn-secondary">Cancel</a>
+				<a href="{{ route('hr.leaves.index') }}" class="btn-secondary">Cancel</a>
 				<button type="submit" class="btn-primary">
 					<i class="fas fa-save"></i> Save Changes
 				</button>

@@ -3,6 +3,7 @@
 @section('title', 'Employee Profile: ' . $employee->full_name)
 
 @section('styles')
+	<link rel="stylesheet" href="{{ asset('css/pagination.css') }}"/>
 	<link rel="stylesheet" href="{{ asset('css/hr/employees/show.css') }}"/>
 @endsection
 
@@ -13,7 +14,7 @@
 		<div class="page-header">
 			<div class="header-title-group">
 				<h1>
-					<i class="fas fa-id-card icon-accent"></i> {{ $employee->full_name }}
+					<i class="fas fa-id-card icon-accent"></i> {{ $employee->user->account->full_name }}
 				</h1>
 				<p class="subtitle">Employee Code: <strong>{{ $employee->employee_code }}</strong></p>
 			</div>
@@ -35,7 +36,9 @@
 			<div class="profile-sidebar">
 				<div class="info-card align-center">
 					<div class="avatar-circle">
-						<span>{{ strtoupper(substr($employee->first_name, 0, 1) . substr($employee->last_name, 0, 1)) }}</span>
+						<img src="{{ $employee->user->account->avatar_url }}"
+						     alt="{{ $employee->user->account->full_name }} Avatar"
+						     class="avatar-img">
 					</div>
 					<h2 class="profile-name">{{ $employee->full_name }}</h2>
 					<p class="profile-role">{{ optional($employee->position)->title ?? 'No Position Assigned' }}</p>
@@ -77,6 +80,13 @@
 							<div>
 								<span class="item-label">Hire Date</span>
 								<strong>{{ optional($employee->hire_date)->format('d/m/Y') ?? '-' }}</strong>
+							</div>
+						</div>
+						<div class="detail-item">
+							<i class="fas fa-calendar-alt"></i>
+							<div>
+								<span class="item-label">Termination Date</span>
+								<strong>{{ optional($employee->termination_date)->format('d/m/Y') ?? '-' }}</strong>
 							</div>
 						</div>
 					</div>
@@ -147,73 +157,126 @@
 					</div>
 				</div>
 
-				<!-- Recent Leave Requests -->
+				<!-- Leave Requests Section -->
 				<div class="info-card">
-					<h3 class="card-title"><i class="fas fa-plane-departure"></i> Recent Leave Requests</h3>
-					@if($employee->leaveRequests && $employee->leaveRequests->count() > 0)
-						<table class="data-table">
-							<thead>
-							<tr>
-								<th>Type</th>
-								<th>Start Date</th>
-								<th>End Date</th>
-								<th>Days</th>
-								<th>Status</th>
-							</tr>
-							</thead>
-							<tbody>
-							@foreach($employee->leaveRequests->take(5) as $leave)
-								<tr>
-									<td>{{ $leave->leave_type->value ?? $leave->leave_type }}</td>
-									<td>{{ optional($leave->start_date)->format('d/m/Y') }}</td>
-									<td>{{ optional($leave->end_date)->format('d/m/Y') }}</td>
-									<td>{{ $leave->total_days }}</td>
-									<td>
-											<span
-												class="badge status-{{ strtolower($leave->status->value ?? $leave->status) }}">
-												{{ $leave->status->value ?? $leave->status }}
-											</span>
-									</td>
-								</tr>
-							@endforeach
-							</tbody>
-						</table>
-					@else
-						<p class="empty-state-text">No leave requests logged for this employee.</p>
-					@endif
+					<div class="card-header-wrapper mb-3">
+						<h3 class="card-title"><i class="fas fa-plane-departure"></i> Leave Requests</h3>
+						<button type="button" class="btn-sm btn-primary" id="btn-open-leave-modal">
+							<i class="fas fa-plus"></i> Request Leave
+						</button>
+					</div>
+
+					<!-- Filter Bar Wrapper -->
+					<div class="filter-bar mb-3" id="leave-filter-bar">
+						<div class="filter-group">
+							<label for="leave_type">Type</label>
+							<select name="leave_type" id="leave_type" class="filter-input">
+								<option value="">All Types</option>
+								@foreach($types::cases() as $type)
+									<option value="{{ $type->value }}">{{ $type->label() }}</option>
+								@endforeach
+							</select>
+							<span class="error-text" id="error-leave_type"></span>
+						</div>
+
+						<div class="filter-group">
+							<label for="leave_status">Status</label>
+							<select name="leave_status" id="leave_status" class="filter-input">
+								<option value="">All Statuses</option>
+								@foreach($leaves::cases() as $status)
+									<option value="{{ $status->value }}">{{ $status->label() }}</option>
+								@endforeach
+							</select>
+							<span class="error-text" id="error-leave_status"></span>
+						</div>
+
+						<div class="filter-group">
+							<label for="leave_date_from">From</label>
+							<input type="date" name="leave_date_from" id="leave_date_from" class="filter-input"
+							       value="{{ $employee->hire_date->format('Y-m-d') }}"
+							>
+							<span class="error-text" id="error-leave_date_from"></span>
+						</div>
+
+						<div class="filter-group">
+							<label for="leave_date_to">To</label>
+							<input type="date" name="leave_date_to" id="leave_date_to" class="filter-input"
+							       value="{{ today()->format('Y-m-d') }}">
+							<span class="error-text" id="error-leave_date_to"></span>
+						</div>
+					</div>
+
+					<!-- Table Output Container -->
+					<div id="leave-table-container">
+						@include('partials.employees.leave_rows', ['leaveRequests' => $leaveRequests])
+					</div>
 				</div>
 
-				<!-- Recent Attendance -->
+				<!-- Attendance Records Section -->
 				<div class="info-card">
-					<h3 class="card-title"><i class="fas fa-clock"></i> Recent Attendance Records</h3>
-					@if($employee->attendances->isNotEmpty())
-						<table class="data-table">
-							<thead>
-							<tr>
-								<th>Date</th>
-								<th>Check In</th>
-								<th>Check Out</th>
-								<th>Overtime</th>
-							</tr>
-							</thead>
-							<tbody>
-							@foreach($employee->attendances->sortByDesc('work_date')->take(5) as $attendance)
-								<tr>
-									<td>{{ optional($attendance->work_date)->format('d/m/Y') }}</td>
-									<td>{{ optional($attendance->check_in)->format('H:i') }}</td>
-									<td>{{ optional($attendance->check_out)->format('H:i') ?? '-' }}</td>
-									<td>{{ $attendance->overtime_hours > 0 ? $attendance->overtime_hours . ' hrs' : '-' }}</td>
-								</tr>
-							@endforeach
-							</tbody>
-						</table>
-					@else
-						<p class="empty-state-text">No attendance entries recorded yet.</p>
-					@endif
+					<div class="card-header-wrapper mb-3">
+						<h3 class="card-title"><i class="fas fa-clock"></i> Attendance Records</h3>
+						<button type="button" class="btn-sm btn-primary" id="btn-open-attendance-modal">
+							<i class="fas fa-plus"></i> Log Attendance
+						</button>
+					</div>
+
+					<!-- Attendance Filter Bar Wrapper -->
+					<div class="filter-bar mb-3" id="attendance-filter-bar">
+						<!-- Hidden employee reference -->
+						<input type="hidden" name="employee_id" id="employee_id" value="{{ $employee->id }}">
+
+						<div class="filter-group">
+							<label for="att_status">Status</label>
+							<select name="att_status" id="att_status" class="filter-input">
+								<option value="">All Statuses</option>
+								@foreach($statuses::cases() as $status)
+									<option value="{{ $status->value }}">
+										{{ $status->label() }}
+									</option>
+								@endforeach
+							</select>
+							<span class="error-text" id="error-att_status"></span>
+						</div>
+
+						<div class="filter-group">
+							<label for="att_date_start">From Date</label>
+							<input type="date" name="att_date_start" id="att_date_start" class="filter-input"
+							       value="{{ $employee->hire_date->format('Y-m-d') }}"
+							       min="{{ $employee->hire_date->format('Y-m-d') }}"
+							       max="{{ today()->format('Y-m-d') }}"
+							>
+							<span class="error-text" id="error-att_date_start"></span>
+						</div>
+
+						<div class="filter-group">
+							<label for="att_date_final">To Date</label>
+							<input type="date" name="att_date_final" id="att_date_final" class="filter-input"
+							       value="{{ today()->format('Y-m-d') }}"
+							       min="{{ $employee->hire_date->format('Y-m-d') }}"
+							       max="{{ today()->format('Y-m-d') }}"
+							>
+							<span class="error-text" id="error-att_date_final"></span>
+						</div>
+					</div>
+
+					<!-- Attendance Table Output Container -->
+					<div id="attendance-table-container">
+						@include('partials.employees.attendance_rows', [
+							'attendances' => $attendances,
+						])
+					</div>
 				</div>
 
 			</div>
 		</div>
 
 	</div>
+	@include('partials.employees.show.modals', ['employee' => $employee])
+@endsection
+
+@section('scripts')
+	<script src="{{ asset('js/employees/attendances/filter.js') }}"></script>
+	<script src="{{ asset('js/employees/leaves/filter.js') }}"></script>
+	<script src="{{ asset('js/employees/show/modals.js') }}"></script>
 @endsection

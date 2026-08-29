@@ -1,6 +1,6 @@
 @extends('templates.general')
 
-@section('title', 'Edit Attendance Log')
+@section('title', 'Edit Attendance Log for ' . request('date'))
 
 @section('styles')
 	<link rel="stylesheet" href="{{ asset('css/hr/attendances/edit.css') }}"/>
@@ -15,7 +15,8 @@
 				<h1>
 					<i class="fas fa-clock icon-accent"></i> Edit Attendance Log
 				</h1>
-				<p class="subtitle">Modify clock-in/out timestamps and attendance status for #{{ $attendance->id }}</p>
+				<p class="subtitle">Modify clock-in/out timestamps and attendance status for #{{ $employee->id }}
+					on {{ request('date') }}</p>
 			</div>
 
 			<div class="action-buttons-group">
@@ -41,7 +42,8 @@
 		@endif
 
 		<!-- Form Card -->
-		<form action="{{ route('hr.attendances.update', $attendance->id) }}" method="POST" class="form-card">
+		<form action="{{ route('hr.attendances.update', ['employee' => $employee, 'date' => $date]) }}" method="POST"
+		      class="form-card">
 			@csrf
 			@method('PUT')
 
@@ -54,12 +56,18 @@
 					<!-- Employee Selection -->
 					<div class="form-group full-width">
 						<label for="employee_id" class="form-label required">Employee</label>
-						<select name="employee_id" id="employee_id" class="form-control @error('employee_id') is-invalid @enderror" required>
+						<select name="employee_id" id="employee_id"
+						        class="form-control @error('employee_id') is-invalid @enderror" required>
 							<option value="">-- Select Employee --</option>
-							@foreach($employees as $employee)
-								<option value="{{ $employee->id }}" {{ old('employee_id', $attendance->employee_id) == $employee->id ? 'selected' : '' }}>
-									{{ $employee->last_name }} {{ $employee->first_name }} ({{ $employee->employee_code }})
-								</option>
+							@foreach($employeeGroups as $warehouseName => $people)
+								<optgroup label="{{ $warehouseName }}">
+									@foreach($people as $person)
+										<option value="{{ $person->id }}"
+											@selected(intval(old('employee_id', $employee->id)) === intval($person->id))>
+											{{ $person->user?->account->full_name }} ({{ $person->employee_code }})
+										</option>
+									@endforeach
+								</optgroup>
 							@endforeach
 						</select>
 						@error('employee_id') <span class="form-error">{{ $message }}</span> @enderror
@@ -68,25 +76,9 @@
 					<!-- Attendance Date -->
 					<div class="form-group">
 						<label for="date" class="form-label required">Date</label>
-						<input type="date"
-						       id="date"
-						       name="date"
-						       value="{{ old('date', \Carbon\Carbon::parse($attendance->date)->format('Y-m-d')) }}"
-						       class="form-control @error('date') is-invalid @enderror"
-						       required>
+						<input type="date" id="date" name="date" value="{{ old('date', $date) }}"
+						       class="form-control @error('date') is-invalid @enderror" required>
 						@error('date') <span class="form-error">{{ $message }}</span> @enderror
-					</div>
-
-					<!-- Status Selection -->
-					<div class="form-group">
-						<label for="status" class="form-label required">Status</label>
-						<select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
-							<option value="present" {{ old('status', $attendance->status) === 'present' ? 'selected' : '' }}>Present</option>
-							<option value="late" {{ old('status', $attendance->status) === 'late' ? 'selected' : '' }}>Late</option>
-							<option value="absent" {{ old('status', $attendance->status) === 'absent' ? 'selected' : '' }}>Absent</option>
-							<option value="half_day" {{ old('status', $attendance->status) === 'half_day' ? 'selected' : '' }}>Half Day</option>
-						</select>
-						@error('status') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
 
 					<!-- Clock In Time -->
@@ -94,9 +86,10 @@
 						<label for="clock_in" class="form-label">Clock In</label>
 						<input type="time"
 						       id="clock_in"
-						       name="clock_in"
-						       value="{{ old('clock_in', $attendance->clock_in ? \Carbon\Carbon::parse($attendance->clock_in)->format('H:i') : '') }}"
-						       class="form-control @error('clock_in') is-invalid @enderror">
+						       name="check_in"
+						       step="1"
+						       value="{{ old('check_in', $attendance->check_in->format('H:i:s')) }}"
+						       class="form-control @error('check_in') is-invalid @enderror">
 						@error('clock_in') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
 
@@ -105,10 +98,27 @@
 						<label for="clock_out" class="form-label">Clock Out</label>
 						<input type="time"
 						       id="clock_out"
-						       name="clock_out"
-						       value="{{ old('clock_out', $attendance->clock_out ? \Carbon\Carbon::parse($attendance->clock_out)->format('H:i') : '') }}"
-						       class="form-control @error('clock_out') is-invalid @enderror">
+						       name="check_out"
+						       step="1"
+						       value="{{ old('check_out', $attendance->check_out->format('H:i:s')) }}"
+						       class="form-control @error('check_out') is-invalid @enderror">
 						@error('clock_out') <span class="form-error">{{ $message }}</span> @enderror
+					</div>
+
+					<!-- Attendance Status -->
+					<div class="form-group">
+						<label for="status" class="form-label required">Status</label>
+						<select name="status" id="status" class="form-control @error('status') is-invalid @enderror"
+						        required>
+							<option value="">-- Select Status --</option>
+							@foreach($statuses::cases() as $status)
+								<option value="{{ $status->value }}"
+									@selected(old('status', $attendance->status->value) === $status->value)>
+									{{ $status->label() }}
+								</option>
+							@endforeach
+						</select>
+						@error('status') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
 
 					<!-- Remarks / Notes -->
@@ -118,7 +128,7 @@
 						          name="notes"
 						          rows="3"
 						          class="form-control @error('notes') is-invalid @enderror"
-						          placeholder="Provide optional details or reasons for manually adjusting this record">{{ old('notes', $attendance->notes) }}</textarea>
+						          placeholder="Provide optional details or reasons for manually adjusting this record">{{ old('notes') }}</textarea>
 						@error('notes') <span class="form-error">{{ $message }}</span> @enderror
 					</div>
 

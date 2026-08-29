@@ -20,12 +20,12 @@
 			</div>
 
 			<div class="action-buttons-group">
-				<a href="{{ route('hr.leave-requests.index') }}" class="btn-secondary">
+				<a href="{{ route('hr.leaves.index') }}" class="btn-secondary">
 					<i class="fas fa-arrow-left"></i> Back to List
 				</a>
 				@can('leave_request.update')
-					@if($leaveRequest->status === 'pending')
-						<a href="{{ route('hr.leave-requests.edit', $leaveRequest->id) }}" class="btn-primary">
+					@if($leaveRequest->status->value === 'pending')
+						<a href="{{ route('hr.leaves.edit', $leaveRequest->id) }}" class="btn-primary">
 							<i class="fas fa-edit"></i> Edit Request
 						</a>
 					@endif
@@ -40,10 +40,18 @@
 			<div class="details-header-bar">
 				<div class="user-meta">
 					<div class="avatar-circle">
-						{{ strtoupper(substr($leaveRequest->employee->first_name, 0, 1) . substr($leaveRequest->employee->last_name, 0, 1)) }}
+						@if($leaveRequest->employee->user->account && $leaveRequest->employee->user->account->avatar_url)
+							<img src="{{ $leaveRequest->employee->user->account->avatar_url }}"
+							     alt="{{ $leaveRequest->employee->user->account->full_name }} Avatar"
+							     class="avatar-img">
+						@else
+							<div class="avatar-circle">
+								{{ $leaveRequest->employee->user->account ? strtoupper($leaveRequest->employee->user->account->initials) : 'EMP' }}
+							</div>
+						@endif
 					</div>
-					<div class="user-info">
-						<h3>{{ $leaveRequest->employee->first_name }} {{ $leaveRequest->employee->last_name }}</h3>
+					<div class="employee-details-info">
+						<h3>{{ $leaveRequest->employee->user?->account->full_name }}</h3>
 						<span class="user-role">{{ $leaveRequest->employee->position->title ?? 'No Position Assigned' }} ({{ $leaveRequest->employee->employee_code }})</span>
 					</div>
 				</div>
@@ -75,7 +83,7 @@
 				<div class="info-grid">
 					<div class="info-item">
 						<span class="info-label">Leave Category</span>
-						<span class="info-value text-highlight">{{ $leaveRequest->leaveType->name ?? 'N/A' }}</span>
+						<span class="info-value text-highlight">{{ $leaveRequest->leave_type->label() ?? 'N/A' }}</span>
 					</div>
 					<div class="info-item">
 						<span class="info-label">Total Duration</span>
@@ -85,12 +93,12 @@
 					<div class="info-item">
 						<span class="info-label">Start Date</span>
 						<span
-							class="info-value">{{ \Carbon\Carbon::parse($leaveRequest->start_date)->format('M d, Y') }}</span>
+							class="info-value">{{ $leaveRequest->start_date->format('M d, Y') }}</span>
 					</div>
 					<div class="info-item">
 						<span class="info-label">End Date</span>
 						<span
-							class="info-value">{{ \Carbon\Carbon::parse($leaveRequest->end_date)->format('M d, Y') }}</span>
+							class="info-value">{{ $leaveRequest->end_date->format('M d, Y') }}</span>
 					</div>
 					<div class="info-item full-width">
 						<span class="info-label">Reason / Application Notes</span>

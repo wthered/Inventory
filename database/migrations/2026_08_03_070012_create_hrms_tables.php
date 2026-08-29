@@ -1,5 +1,6 @@
 <?php
 
+	use App\Enums\HumanResources\EmployeeAttendanceStatus;
 	use App\Enums\HumanResources\LeaveStatus;
 	use Illuminate\Database\Migrations\Migration;
 	use Illuminate\Database\Schema\Blueprint;
@@ -52,16 +53,13 @@
 				$table->foreign('warehouse_id')->references('id')->on('warehouses')->nullOnDelete();
 
 				$table->string('employee_code')->unique(); // e.g., EMP-2026-001
-				$table->string('first_name');
-				$table->string('last_name');
-				$table->string('phone')->nullable();
 				$table->date('hire_date');
-				$table->boolean('is_active')->default(true);
+				$table->date('termination_date')->nullable();
 
 				$table->timestamps();
 				$table->softDeletes();
 
-				$table->index(['warehouse_id', 'department_id', 'is_active'], 'emp_wh_dept_active_idx');
+				$table->index(['warehouse_id', 'department_id'], 'employee_warehouse_department_idx');
 			});
 
 			// 4. Employee Details (Προσωπικά / Ευαίσθητα Στοιχεία - 1-to-1)
@@ -93,20 +91,24 @@
 
 				$table->date('start_date');
 				$table->date('end_date');
-				$table->decimal('total_days', 4, 1);
+				$table->unsignedInteger('total_days');
+
 				$table->text('reason')->nullable();
+				$table->text('rejection_reason')->nullable();
 
 				// Status: e.g. pending, approved, rejected
 				$table->string('status')->default(LeaveStatus::PENDING->value);
 
 				$table->unsignedInteger('approved_by')->nullable();
 				$table->foreign('approved_by')->references('id')->on('users')->nullOnDelete();
+				$table->timestamp('approved_at')->nullable();
 				$table->timestamp('action_at')->nullable();
 
 				$table->timestamps();
+				$table->softDeletes();
 			});
 
-			// 6. Attendances (Παρουσιολόγιο Αποθήκης)
+			// 6. Attendances (Απουσιολόγιο Αποθήκης)
 			Schema::create('attendances', function (Blueprint $table) {
 				$table->unsignedInteger('employee_id');
 				$table->unsignedInteger('warehouse_id'); // Σε ποια αποθήκη έγινε το check-in
@@ -115,9 +117,11 @@
 				$table->foreign('warehouse_id')->references('id')->on('warehouses');
 
 				$table->date('work_date');
-				$table->dateTime('check_in');
+				$table->dateTime('check_in')->nullable();
 				$table->dateTime('check_out')->nullable();
 				$table->decimal('overtime_hours', 4)->default(0);
+				$table->string('status')->default(EmployeeAttendanceStatus::ABSENT->value);
+				$table->text('notes')->nullable();
 
 				$table->timestamps();
 

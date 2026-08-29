@@ -334,10 +334,10 @@
                                     @endif
 
                                     <div class="user-name-stack">
-                                            <span class="user-name-full">
+                                            <a href="#" class="user-name-full">
                                                 {{ $transaction->creator->account->first_name ?? 'System' }}
-                                                {{ $transaction->creator->account->last_name ?? '' }}
-                                            </span>
+                                                {{ $transaction->creator->account->last_name ?? '' }} employee {{ $transaction->creator }}
+                                            </a>
                                         <span class="user-role-label">{{ $transaction->creator->main_role_name }}</span>
                                     </div>
                                 </div>

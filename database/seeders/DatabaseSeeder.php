@@ -8,6 +8,7 @@
 	use App\Models\Product;
 	use App\Models\Sales\SalesOrder;
 	use App\Models\Sales\SalesOrderItem;
+	use Database\Seeders\HumanResources\AttendanceSeeder;
 	use Database\Seeders\HumanResources\DepartmentSeeder;
 	use Database\Seeders\HumanResources\EmployeeSeeder;
 	use Database\Seeders\HumanResources\LeaveRequestSeeder;
@@ -56,7 +57,7 @@
 				SupplierSeeder::class,
 			]);
 
-			$this->command->info("Have seeded ".Product::query()->count()." in ".Category::query()->count()." categories and ".Brand::query()->count()." brands");
+			$this->command->info("Have seeded ".Product::query()->count()." products in ".Category::query()->count()." categories and ".Brand::query()->count()." brands");
 
 			// --- 2. Locations & Αρχικό Απόθεμα ---
 			$this->call([
@@ -105,7 +106,7 @@
 				PositionSeeder::class,
 				EmployeeSeeder::class,
 				LeaveRequestSeeder::class,
-				//				AttendanceSeeder::class,
+				AttendanceSeeder::class,
 			]);
 
 			Schema::enableForeignKeyConstraints();
