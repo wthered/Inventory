@@ -5,23 +5,32 @@
     --color-surface: #1f2937;
     --color-bg-alt: #111827;
     --color-bg-dark: var(--color-bg-alt);
+    --color-bg-subtle: #1e293b;
 
     --color-text-primary: #f9fafb;
     --color-text-secondary: #e5e7eb;
     --color-text-muted: #9ca3af;
 
-    --color-accent: #10b981;
     --color-primary: #3b82f6;
-    /* RGB version for transparency */
-    --color-primary-rgb: 59, 130, 246;
     --color-primary-hover: #2563eb;
+    --color-primary-focus: #1d4ed8;
 
-    --color-error: #ef4444;
+    --color-accent: #10b981;
     --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --color-error-focus: #dc2626;
+
     --color-border: #374151;
+
     --color-input-bg: var(--color-surface);
     --color-input-surface: var(--color-surface);
     --color-input-text: var(--color-text-primary);
+
+    /* --- RGB CHANNELS (FOR OPACITY SUPPORT) --- */
+    --color-primary-rgb: 59, 130, 246;
+    --color-accent-rgb: 16, 185, 129;
+    --color-warning-rgb: 245, 158, 11;
+    --color-error-rgb: 239, 68, 68;
 
     /* --- BORDER RADIUS --- */
     --radius-sm: 0.25rem;
@@ -44,14 +53,6 @@
     /* --- TYPOGRAPHY --- */
     --font-family: 'Inter', system-ui, -apple-system, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
-
-    /* RGB Channels for Opacity Support */
-    --color-accent-rgb: #10b981;
-    --color-warning-rgb: #f59e0b;
-    --color-error-rgb: #ef4444;
-
-    /* Subtle Backgrounds */
-    --color-bg-subtle: #1e293b; /* Subtle contrast for dark theme headers/panels */
 }
 
 /* --- Base Reset & Global Layout --- */
