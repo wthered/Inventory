@@ -18,11 +18,11 @@
 		public function run(): void {
 			// Έλεγχος αν υπάρχουν τα απαραίτητα δεδομένα
 			if (!Supplier::query()->exists() || !Warehouse::query()->exists() || !User::query()->exists()) {
-				$this->command->warn('⚠️ Missing suppliers, warehouses, or users. Skipping '.__CLASS__.'.');
+				$this->command->warn('⚠️ Missing suppliers, warehouses, or users. Skipping ' . __CLASS__ . '.');
 				return;
 			}
 
-			$suppliers = Supplier::query()->pluck('id')->toArray();
+			$suppliers  = Supplier::query()->pluck('id')->toArray();
 			$warehouses = Warehouse::query()->pluck('id')->toArray();
 
 			// Επιλέγουμε χρήστες που έχουν δικαίωμα να δημιουργήσουν ή να εγκρίνουν PO
@@ -35,15 +35,15 @@
 				// Αρχικά οικονομικά δεδομένα (θα ενημερωθούν σωστά αφού μπουν τα items αν χρειαστεί,
 				// αλλά βάζουμε ρεαλιστικές τιμές βάσης)
 				$subtotal = fake()->randomFloat(2, 500, 5000);
-				$tax = $subtotal * 0.24; // 24% ΦΠΑ
+				$tax      = $subtotal * 0.24; // 24% ΦΠΑ
 				$discount = fake()->randomFloat(2, 0, 200);
 
 				$expected = fake()->optional(0.8)->dateTimeBetween($orderDate, '+2 weeks');
 				PurchaseOrder::query()->create([
-					'po_number'       => 'PO-'.$orderDate->format('Ymd').'-'.Str::upper(Str::random(4)),
+					'order_number'    => 'PO-' . $orderDate->format('Ymd') . '-' . Str::upper(Str::random(4)),
 					'supplier_id'     => fake()->randomElement($suppliers),
 					'warehouse_id'    => fake()->randomElement($warehouses),
-					'status_id'       => fake()->randomElement(PurchaseOrderStatus::openStatuses()),
+					'status_id'       => fake()->randomElement(PurchaseOrderStatus::cases()),
 					'order_date'      => $orderDate->format('Y-m-d'),
 					'expected_date'   => $expected,
 					'received_at'     => fake()->boolean() ? $orderDate->copy()->addDays(mt_rand(1, 180)) : null,
@@ -58,6 +58,6 @@
 				]);
 			}
 
-			$this->command->info('✅ '.__CLASS__.' completed successfully.');
+			$this->command->info('✅ ' . __CLASS__ . ' completed successfully.');
 		}
 	}

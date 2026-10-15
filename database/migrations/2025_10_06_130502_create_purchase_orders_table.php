@@ -12,7 +12,7 @@
 		public function up(): void {
 			Schema::create('purchase_orders', function (Blueprint $table) {
 				$table->increments('id')->comment('Primary key: unique purchase order identifier');
-				$table->string('po_number')->unique()->comment('Unique purchase order reference number (e.g., PO-2026-0001)');
+				$table->string('order_number')->unique()->comment('Unique purchase order reference number (e.g., PO-2026-0001)');
 
 				// Σύνδεση με τον Προμηθευτή
 				$table->unsignedInteger('supplier_id')->comment('The supplier from whom the goods are ordered');
@@ -45,7 +45,10 @@
 				$table->timestamps();
 				$table->softDeletes();
 
-				$table->index(['supplier_id', 'status_id'], 'po_supplier_status_idx');
+				$table->index([
+					'supplier_id',
+					'status_id'
+				], 'po_supplier_status_idx');
 				$table->comment('Master table for purchase orders, tracking vendor relationships, procurement statuses, and financial totals.');
 			});
 
@@ -83,7 +86,11 @@
 
 				$table->timestamps();
 
-				$table->index(['purchase_order_id', 'product_id', 'batch_number'], 'po_items_product_batch_idx');
+				$table->index([
+					'purchase_order_id',
+					'product_id',
+					'batch_number'
+				], 'po_items_product_batch_idx');
 				$table->comment('Details line items for purchase orders. Captures quantity expectations vs actual physical receipts, while assigning items to batches and warehouse bins.');
 			});
 

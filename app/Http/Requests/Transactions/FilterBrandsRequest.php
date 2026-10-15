@@ -21,18 +21,22 @@
 		 * @return array<string, ValidationRule|array|string>
 		 */
 		public function rules(): array {
+			// Category deleted because part of the URL
 			return [
-				'category'        => [
-					'required',
-					'integer',
-					Rule::exists('categories', 'id')->where(function ($query) {
-						return $query->where('parent_id', $this->input('parent_category'));
-					})
-				],
 				'parent_category' => [
 					'required',
 					'integer',
 					Rule::exists('categories', 'id')->whereNull('parent_id'),
+				],
+				'product'         => [
+					'required',
+					'integer',
+					Rule::exists('inventories', 'product_id')->where('warehouse_id', $this->input('warehouse')),
+				],
+				'warehouse'       => [
+					'required',
+					'integer',
+					'exists:warehouses,id',
 				]
 			];
 		}

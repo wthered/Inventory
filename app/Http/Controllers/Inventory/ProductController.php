@@ -6,6 +6,7 @@
 	use App\Enums\Inventory\AdjustmentReason;
 	use App\Enums\Stock\ProductStockStatus;
 	use App\Http\Controllers\Controller;
+	use App\Http\Requests\Products\ProductDetailsRequest;
 	use App\Http\Requests\Products\ProductInformationRequest;
 	use App\Http\Requests\Products\ProductSearchRequest;
 	use App\Http\Requests\Products\ProductStoreRequest;
@@ -40,8 +41,8 @@
 			ProductSearchService $productSearchService,
 			LocationOptionsService $locationOptionsService,
 		) {
-			$this->service = $inventoryLevelService;
-			$this->searchService = $productSearchService;
+			$this->service         = $inventoryLevelService;
+			$this->searchService   = $productSearchService;
 			$this->locationService = $locationOptionsService;
 		}
 
@@ -66,7 +67,10 @@
 
 				'product_count' => Product::query()->count(),
 				'product_list'  => Product::with([
-					'images', 'category', 'brand', 'inventories'
+					'images',
+					'category',
+					'brand',
+					'inventories'
 				])->latest()->paginate(25),
 
 				// 2. Συνολική Αξία Αποθέματος
@@ -87,7 +91,7 @@
 		 * @throws Exception
 		 */
 		public function show(Request $request, Product $product): Factory|View {
-			$entry = new ProductDTO($product->id);
+			$entry  = new ProductDTO($product->id);
 			$profit = $entry->selling_price - $entry->cost_price;
 
 			$inventoryItems = Collection::make($entry->inventories->items());
@@ -128,7 +132,7 @@
 		 *********************/
 		public function edit(Request $request, int $product): Factory|View {
 
-			$object = new ProductDTO($product);
+			$object    = new ProductDTO($product);
 			$preferred = $object->suppliers->where('pivot.is_preferred', 1)->first();
 
 			return view('products.edit', [
@@ -174,7 +178,7 @@
 			$newProduct = $product->replicate();
 
 			// 2. Τροποποιούμε το όνομα για να δηλώσουμε ότι είναι αντίγραφο
-			$newProduct->name = $product->name.' (COPY)';
+			$newProduct->name = $product->name . ' (COPY)';
 
 			// 3. Καθαρίζουμε τα timestamps για να θεωρηθεί ως νέο record
 			$newProduct->created_at = now();
@@ -207,9 +211,17 @@
 
 		public function getInformation(ProductInformationRequest $request): JsonResponse {
 			$input = Collection::make($request->validated());
-			$productObject = new ProductDTO($input->get('product'));
+
 			return response()->json([
-				'product' => $productObject,
+				'product' => new ProductDTO($input->get('product')),
+			]);
+		}
+
+		public function getDetails(ProductDetailsRequest $request, Product $product): JsonResponse {
+			$input = $request->validated();
+
+			return response()->json([
+				'details' => $product->inventories()->where('warehouse_id', $input['warehouse'])->first(),
 			]);
 		}
 

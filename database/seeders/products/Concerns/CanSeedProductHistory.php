@@ -15,8 +15,8 @@
 			$currentPrice       = $product->selling_price;
 			$currentStock       = $product->current_stock;
 
-			// Δημιουργούμε 3-8 τυχαίες ενέργειες ιστορικού ανά προϊόν
-			for ($i = 0; $i < mt_rand(3, 8); $i++) {
+			// Δημιουργούμε 3-8 τυχαίες ενέργειες ιστορικού ανά προϊόν. Σβήηστηκε γιατί γέμιζε ο δίσκος (Table product_history is full - 2 GB)
+			for ($i = 0; $i < 2; $i++) {
 				$randomAction = fake()->randomElement($allPossibleActions);
 				$lastDate     = $lastDate->copy()->addDays(mt_rand(1, today()->day))->addMinutes(mt_rand(0, 59));
 
@@ -51,7 +51,7 @@
 						'note'      => fake()->sentence(),
 					]),
 					'ip_address' => fake()->ipv4(),
-					'reference'  => Str::upper(Str::random(8)) . '-' . $lastDate->format('Y-m-d'),
+					'reference'  => Str::upper(Str::random(8)) . '-' . $lastDate->format('Y-m-d') . '-' . Str::upper(Str::random(8)),
 					'created_at' => $lastDate,
 					'updated_at' => $lastDate,
 				]);

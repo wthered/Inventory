@@ -14,30 +14,23 @@
 		 * Run the database seeds.
 		 */
 		public function run(): void {
-			$departments = Department::query()->pluck('id');
+			$departments = Department::all();
 			$warehouses = Warehouse::all();
-			$usersCollection = User::query()->pluck('id');
+			$users = User::with('account')->get();
 
 			if ($departments->isEmpty()) {
 				return;
 			}
 
-			for ($i = 1; $i <= $usersCollection->count(); $i++) {
-				// Φιλτράρουμε τα διαθέσιμα IDs ώστε να εξαιρέσουμε το $i (αν υπάρχει ακόμα στη συλλογή)
-				$available = $usersCollection->reject(fn($id) => $id === $i);
-
-				// Αν λόγω εξαιρέσεων έμεινε μόνο το ίδιο το $i (σπάνιο edge case στο τελευταίο element),
-				// παίρνουμε αναγκαστικά όποιο υπάρχει στη συλλογή
-				$selectedUserId = $available->isNotEmpty() ? $available->random() : $usersCollection->random();
-
-				// Αφαιρούμε/Διαγράφουμε το επιλεγμένο ID από το αρχικό collection
-				$usersCollection = $usersCollection->reject(fn($id) => $id === $selectedUserId);
-
+			// 1. Δημιουργία Employee για ΟΛΟΥΣ τους υπάρχοντες Users (1-to-1)
+			foreach ($users as $user) {
 				$department = $departments->random();
-				$positions  = $department->positions;
+				$positions = Position::query()->where('department_id', $department->id)->get();
 
 				Employee::factory()->create([
-					'user_id'       => $selectedUserId,
+					'user_id'       => $user->id,
+					'first_name'    => $user->account?->first_name ?? $user->name,
+					'last_name'     => $user->account?->last_name ?? 'User',
 					'department_id' => $department->id,
 					'position_id'   => $positions->isNotEmpty() ? $positions->random()->id : null,
 					'warehouse_id'  => $warehouses->isNotEmpty() ? $warehouses->random()->id : null,
@@ -46,11 +39,11 @@
 
 			// 2. Δημιουργία επιπλέον Employees που ΔΕΝ έχουν User account (user_id = null)
 			foreach ($departments as $department) {
-				$positions = Position::query()->where('department_id', $department)->get();
+				$positions = Position::query()->where('department_id', $department->id)->get();
 
 				Employee::factory(3)->create([
 					'user_id'       => null, // Δεν έχουν login στο σύστημα
-					'department_id' => $departments->random(),
+					'department_id' => $department->id,
 					'position_id'   => $positions->isNotEmpty() ? fn() => $positions->random()->id : null,
 					'warehouse_id'  => $warehouses->isNotEmpty() ? fn() => $warehouses->random()->id : null,
 				]);

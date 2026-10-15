@@ -1,0 +1,141 @@
+<?php
+
+	return [
+		'payment_type' => [
+			'receipt' => 'Encaissement (Entrée)',
+			'payment' => 'Décaissement (Sortie)',
+			'refund'  => 'Remboursement',
+		],
+
+		'payment_method' => [
+			'cash'          => 'Espèces',
+			'bank_transfer' => 'Virement bancaire',
+			'credit_card'   => 'Carte de crédit',
+			'debit_card'    => 'Carte de débit',
+			'cheque'        => 'Chèque',
+			'paypal'        => 'PayPal',
+		],
+
+		'payment_status' => [
+			'all'            => 'Tous les statuts de paiement',
+			'unpaid'         => 'Non payé',
+			'partially_paid' => 'Partiellement payé',
+			'paid'           => 'Payé',
+			'refunded'       => 'Remboursé',
+			'void'           => 'Annulé',
+		],
+
+		'transaction_status' => [
+			'pending'    => 'En attente',
+			'completed'  => 'Terminée',
+			'failed'     => 'Échouée',
+			'refunded'   => 'Remboursée',
+			'reconciled' => 'Rapprochée',
+		],
+
+		'sales_order_status' => [
+			'all'                 => 'Tous les statuts',
+			'draft'               => 'Brouillon',
+			'pending'             => 'En attente',
+			'awaiting_approval'   => 'En attente d’approbation',
+			'confirmed'           => 'Confirmée',
+			'processing'          => 'En cours de traitement',
+			'on_hold'             => 'En pause',
+			'partially_shipped'   => 'Partiellement expédiée',
+			'shipped'             => 'Expédiée',
+			'partially_delivered' => 'Partiellement livrée',
+			'delivered'           => 'Livrée',
+			'completed'           => 'Terminée',
+			'cancelled'           => 'Annulée',
+			'returned'            => 'Retournée',
+			'refunded'            => 'Remboursée',
+		],
+
+		'payment_terms' => [
+			'cash'       => 'Comptant',
+			'immediate'  => 'Paiement immédiat',
+			'credit_7'   => 'Crédit (7 jours)',
+			'credit_15'  => 'Crédit (15 jours)',
+			'credit_30'  => 'Crédit (30 jours)',
+			'credit_45'  => 'Crédit (45 jours)',
+			'credit_60'  => 'Crédit (60 jours)',
+			'credit_90'  => 'Crédit (90 jours)',
+			'credit_120' => 'Crédit (120 jours)',
+			'eom'        => 'Fin de mois (FDM)',
+			'eom_30'     => '30 jours fin de mois',
+			'eom_60'     => '60 jours fin de mois',
+			'cia'        => 'Paiement d’avance (CIA)',
+			'cod'        => 'Paiement à la livraison (COD)',
+		],
+
+		'customer_type' => [
+			'individual'  => 'Particulier',
+			'retail'      => 'Client détail',
+			'wholesale'   => 'Partenaire grossiste',
+			'corporate'   => 'Grand compte / Entreprise',
+			'business'    => 'PME / TPE',
+			'freelancer'  => 'Indépendant / Libéral',
+			'government'  => 'Secteur public / État',
+			'non_profit'  => 'Association / ONG',
+			'distributor' => 'Distributeur',
+			'prospect'    => 'Prospect / Lead',
+		],
+
+		'transfer_status' => [
+			'draft'           => 'Brouillon',
+			'pending'         => 'En attente',
+			'approved'        => 'Approuvé',
+			'in_transit'      => 'En transit',
+			'completed'       => 'Terminé',
+			'canceled'        => 'Annulé',
+			'failed'          => 'Échoué',
+			'on_hold'         => 'En attente',
+			'expired'         => 'Expiré',
+			'refunded'        => 'Remboursé',
+			'action_required' => 'Action requise',
+			'partial'         => 'Partiellement reçu',
+			'returned'        => 'Retourné',
+		],
+
+		'alert_type' => [
+			'low_stock'     => 'Stock faible',
+			'out_of_stock'  => 'Rupture de stock',
+			'overstock'     => 'Surstockage',
+			'expiring_soon' => 'Expire bientôt',
+			'expired'       => 'Expiré',
+		],
+
+		'transaction_reason' => [
+			'purchase'           => 'Achat / Approvisionnement',
+			'customer_return_in' => 'Retour client',
+			'found'              => 'Trouvé (Surplus)',
+			'production'         => 'Production',
+			'supplier_return_in' => 'Retour fournisseur',
+			'sale'               => 'Vente',
+			'damage'             => 'Dommage / Destruction',
+			'loss'               => 'Perte / Vol',
+			'sample'             => 'Échantillon',
+			'promotion'          => 'Promotion / Marketing',
+			'expiration'         => 'Péremption du produit',
+			'adjustment'         => 'Ajustement manuel',
+			'transfer_in'        => 'Transfert (Entrant)',
+			'transfer_out'       => 'Transfert (Sortant)',
+			'other'              => 'Autre / Divers',
+		],
+
+		'quality_status' => [
+			'new'       => 'Neuf / Scellé',
+			'opened'    => 'Emballage ouvert',
+			'damaged'   => 'Endommagé',
+			'defective' => 'Défectueux',
+			'expired'   => 'Expiré',
+		],
+
+		'stock_return_status' => [
+			'pending'    => 'En attente',
+			'received'   => 'Reçu',
+			'inspecting' => 'En cours d’inspection',
+			'completed'  => 'Terminé',
+			'cancelled'  => 'Annulé',
+		],
+	];

@@ -118,9 +118,9 @@
 		</div>
 
 		<!-- Attendance Data Table Container -->
-		<div class="table-card" id="attendance-table-container">
+		<div class="table-card">
 			<div class="table-wrapper">
-				<table class="data-table">
+				<table class="data-table" id="attendance-table-container">
 					<thead>
 					<tr>
 						<th>Date</th>

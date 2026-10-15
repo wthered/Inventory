@@ -1,61 +1,57 @@
 <?php
 
-namespace App\Policies\Finance;
+	namespace App\Policies\Finance;
 
-use App\Models\Finance\Payment;
-use App\Models\User;
+	use App\Models\Finance\Payment;
+	use App\Models\User;
 
-class PaymentPolicy {
-	/**
-	 * Super admins bypass all checks.
-	 */
-	public function before(User $user, string $ability): ?bool {
-		if ($user->hasRole('admin')) {
-			return true;
+	class PaymentPolicy {
+		/**
+		 * Determine whether the user can view any payments list.
+		 */
+		public function viewAny(User $user): bool {
+			return $user->can('payment.view');
 		}
 
-		return null;
-	}
+		/**
+		 * Determine whether the user can view a specific payment detail.
+		 */
+		public function view(User $user, Payment $payment): bool {
+			return $user->can('payment.view');
+		}
 
-	/**
-	 * Determine whether the user can view payment records.
-	 */
-	public function viewAny(User $user): bool {
-		return $user->hasPermissionTo('payment.view');
-	}
+		/**
+		 * Determine whether the user can record/create payments.
+		 */
+		public function create(User $user): bool {
+			return $user->can('payment.create');
+		}
 
-	/**
-	 * Determine whether the user can view a specific payment record.
-	 */
-	public function view(User $user, Payment $payment): bool {
-		return $user->hasPermissionTo('payment.view');
-	}
+		/**
+		 * Determine whether the user can update a payment record.
+		 */
+		public function update(User $user, Payment $payment): bool {
+			return $user->can('payment.update');
+		}
 
-	/**
-	 * Determine whether the user can record a payment (Store Cashier & Accountant).
-	 */
-	public function create(User $user): bool {
-		return $user->hasPermissionTo('payment.create');
-	}
+		/**
+		 * Determine whether the user can delete a payment record.
+		 */
+		public function delete(User $user, Payment $payment): bool {
+			return $user->can('payment.delete');
+		}
 
-	/**
-	 * Determine whether the user can update a payment record (Accountant & Controllers).
-	 */
-	public function update(User $user, Payment $payment): bool {
-		return $user->hasPermissionTo('payment.update');
-	}
+		/**
+		 * Determine whether the user can restore a soft-deleted payment record.
+		 */
+		public function restore(User $user, Payment $payment): bool {
+			return $user->can('payment.delete');
+		}
 
-	/**
-	 * Determine whether the user can approve/reconcile payments.
-	 */
-	public function approve(User $user, Payment $payment): bool {
-		return $user->hasPermissionTo('payment.approve');
+		/**
+		 * Determine whether the user can permanently delete a payment record.
+		 */
+		public function forceDelete(User $user, Payment $payment): bool {
+			return $user->can('payment.delete');
+		}
 	}
-
-	/**
-	 * Determine whether the user can delete a payment record.
-	 */
-	public function delete(User $user, Payment $payment): bool {
-		return $user->hasPermissionTo('payment.delete');
-	}
-}

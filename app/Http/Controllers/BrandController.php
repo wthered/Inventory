@@ -7,8 +7,10 @@
 	use App\Http\Requests\Products\ProductSearchRequest;
 	use App\Models\Brand;
 	use App\Models\Category;
+	use App\Models\Inventories\Inventory;
 	use App\Models\Product;
 	use App\Services\Search\ProductSearchService;
+	use Illuminate\Http\JsonResponse;
 	use Illuminate\Http\RedirectResponse;
 	use Illuminate\Http\Request;
 	use Illuminate\Support\Facades\Storage;
@@ -30,7 +32,7 @@
 
 			// Text search on brand name
 			if ($request->filled('search')) {
-				$query->where('name', 'LIKE', '%'.trim($request->input('search')).'%');
+				$query->where('name', 'LIKE', '%' . trim($request->input('search')) . '%');
 			}
 
 			// Filter by child subcategory
@@ -89,7 +91,7 @@
 				$date = now()->format('Y-m-d');
 
 				// Construct custom filename: keychron_20260812.png
-				$filename = $input['slug']."_".$date.".".$file->getClientOriginalExtension();
+				$filename = $input['slug'] . "_" . $date . "." . $file->getClientOriginalExtension();
 
 				// Store in 'storage/app/public/brands/keychron_20260812.png'
 				// Saves 'brands/keychron_20260812.png' to $data['logo']
@@ -150,7 +152,7 @@
 				$extension = $file->getClientOriginalExtension();
 
 				// 3. Σύνθεση του custom ονόματος: {brand_name}-{Y-m-d}.{extension}
-				$filename = $brandSlug."-".today()->format('Y-m-d')."-".Str::lower(Str::random(4)).".".$extension;
+				$filename = $brandSlug . "-" . today()->format('Y-m-d') . "-" . Str::lower(Str::random(4)) . "." . $extension;
 
 				// 4. Αποθήκευση στον κατάλογο logos του public δίσκου με το νέο όνομα
 				$input['logo'] = $file->storeAs('logos', $filename, 'public');
@@ -181,29 +183,36 @@
 				->with('success', 'Το Brand αρχειοθετήθηκε/διαγράφηκε επιτυχώς!');
 		}
 
-		public function getProducts(ProductSearchRequest $request) {
+		/*****************************
+		 * @param  ProductSearchRequest  $request
+		 * @param  Brand  $brand
+		 *
+		 * @return JsonResponse
+		 * Used by purchases/{purchase}/edit to get related products to brand
+		 */
+		public function getProducts(ProductSearchRequest $request, Brand $brand) {
 			$input = $request->validated();
 //			dd($input);
 
-//			$products = Product::query()
-//			                   ->when(!empty($input['category_id']), function ($query) use ($input) {
-//				                   return $query->where('category_id', $input['category_id']);
-//			                   })
-//			                   ->when(!empty($input['brand_id']), function ($query) use ($input) {
-//				                   return $query->where('brand_id', $input['brand_id']);
-//			                   })
-//			                   ->orderBy('name')
-//			                   ->get();
+			$itemProduct = Product::query()->find($input['product']);
 
-			// 1. Μετατρέπουμε τα δεδομένα σε option tags
-			$options = $this->service->search($input)->map(function (Product $product) {
-				return "<option value='".$product->id."'>".$product->name." (SKU: ".$product->sku.")</option>";
-			});
+			$products = $brand->products()->whereHas('inventories', function ($query) use ($input) {
+				$query->where('warehouse_id', $input['warehouse']);
+			})->where('category_id', $input['category_id'])->get()->map(function (Product $product) use ($itemProduct) {
+				return "<option value='" . $product->id . "'" . ($product->id === $itemProduct->id ? 'selected' : '') . ">" . $product->name . "</option>";
+			})->prepend("<option value=''>Επιλέξτε προϊόν&hellip;</option>");
 
-			// 2. Αν θες ΠΑΝΤΑ ένα default prompt στην αρχή, το κάνεις prepend:
-			$options->prepend("<option value='' selected>Πληκτρολογήστε για αναζήτηση ή επιλέξτε προϊόν&hellip;</option>");
-
-			// 3. Επιστροφή καθαρού HTML string
-			return $options->join('');
+			// Επιστροφή καθαρού HTML string
+			return response()->json([
+				'products'  => $products->join(''),
+				'inventory' => Inventory::query()->whereHas('product', function ($query) use ($itemProduct) {
+					$query->where('product_id', $itemProduct->id);
+				})->get()->map(function (Inventory $inventory) {
+					return [
+						'manufacturing_date' => $inventory->manufacturing_date->format('Y-m-d'),
+						'expiry_date'        => $inventory->expiry_date->format('Y-m-d'),
+					];
+				})->first(),
+			]);
 		}
 	}

@@ -28,10 +28,13 @@
 		 * Get all warehouses where this product is currently stored.
 		 */
 		public function warehouses(): BelongsToMany {
-			return $this->belongsToMany(Warehouse::class, 'inventories')
-			            ->withPivot([
-				            'quantity', 'reserved_quantity', 'available_quantity', 'location_id', 'batch_number'
-			            ]);
+			return $this->belongsToMany(Warehouse::class, 'inventories')->withPivot([
+				'quantity',
+				'reserved_quantity',
+				'available_quantity',
+				'location_id',
+				'batch_number'
+			]);
 		}
 
 		/**
@@ -59,8 +62,12 @@
 		 * Suppliers that provide this product with pricing and lead times.
 		 */
 		public function suppliers(): BelongsToMany {
-			return $this->belongsToMany(Supplier::class, 'product_supplier', 'product_id', 'supplier_id')
-			            ->withPivot(['price', 'lead_time_days', 'is_preferred', 'moq']);
+			return $this->belongsToMany(Supplier::class, 'product_supplier', 'product_id', 'supplier_id')->withPivot([
+				'price',
+				'lead_time_days',
+				'is_preferred',
+				'moq'
+			]);
 		}
 
 		/**
@@ -81,14 +88,16 @@
 		 * History of stock movements (in/out/transfer).
 		 */
 		public function transactions(): HasMany {
-			return $this->hasMany(InventoryTransaction::class)->with(['warehouse', 'creator']);
+			return $this->hasMany(InventoryTransaction::class)->with([
+				'warehouse',
+				'creator'
+			]);
 		}
 
 		/**
 		 * Specific aisle/bin locations where the product is placed.
 		 */
 		public function locations(): BelongsToMany {
-			return $this->belongsToMany(WarehouseLocation::class, 'inventories', 'product_id', 'location_id')
-			            ->withPivot(['warehouse_id']);
+			return $this->belongsToMany(WarehouseLocation::class, 'inventories', 'product_id', 'location_id')->withPivot(['warehouse_id']);
 		}
 	}

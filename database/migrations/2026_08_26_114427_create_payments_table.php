@@ -31,12 +31,12 @@
 				$table->foreign('supplier_id')->references('id')->on('suppliers')->nullOnDelete();
 
 				// Οικονομικά στοιχεία
-				$table->decimal('amount', 15, 2)->comment('Monetary amount processed in this transaction');
+				$table->decimal('amount', 15)->comment('Monetary amount processed in this transaction');
 				$table->string('currency', 3)->default('EUR')->comment('ISO currency code (e.g., EUR, USD)');
 
 				// Τρόπος Πληρωμής & Κατάσταση
 				$table->string('payment_method')->default('bank_transfer')->comment('Method used: cash, bank_transfer, credit_card, cheque');
-				$table->unsignedInteger('status')->default(TransactionStatus::PENDING)->comment('Transaction status: pending, completed, failed, refunded, reconciled');
+				$table->unsignedInteger('status')->default(TransactionStatus::PENDING->value)->comment('Transaction status: pending, completed, etc.');
 
 				// Ημερομηνίες & Στοιχεία Τράπεζας
 				$table->timestamp('paid_at')->comment('Timestamp when the funds were transferred/received');
@@ -51,7 +51,11 @@
 				$table->softDeletes();
 
 				// Indexes για γρήγορα reports & audits
-				$table->index(['type', 'status', 'paid_at'], 'payments_type_status_date_idx');
+				$table->index([
+					'is_incoming',
+					'status',
+					'paid_at'
+				], 'payments_type_status_date_idx');
 				$table->comment('Master ledger for payments, handling customer inflows, supplier payouts, and payment method trackings.');
 			});
 		}

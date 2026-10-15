@@ -3,7 +3,6 @@
 	namespace App\Http\Requests\Filters\Employees;
 
 	use App\Enums\HumanResources\EmployeeAttendanceStatus;
-	use Carbon\Carbon;
 	use Illuminate\Foundation\Http\FormRequest;
 	use Illuminate\Support\Facades\Auth;
 	use Illuminate\Validation\Rule;
@@ -21,33 +20,20 @@
 			}
 
 			$hireDate = $employee->hire_date?->format('Y-m-d');
-			$maxDate = today()->format('Y-m-d');
+			$dateStart = $this->input('date_start', today()->startOfMonth()->format('Y-m-d'));
+			$dateFinal = $this->input('date_final', today()->format('Y-m-d'));
 
-			if ($employee->termination_date && Carbon::parse($employee->termination_date)->format('Y-m-d') < $maxDate) {
-				$maxDate = Carbon::parse($employee->termination_date)->format('Y-m-d');
-			}
-
-			$dateStart = $this->input('date_start');
-			$dateFinal = $this->input('date_final');
-
-			// Clamp date_start limits
-			if ($dateStart && $hireDate && $dateStart < $hireDate) {
+			// Prevent filtering prior to employee's hire date
+			if ($hireDate && $dateStart < $hireDate) {
 				$dateStart = $hireDate;
 			}
-			if ($dateStart && $dateStart > $maxDate) {
-				$dateStart = $maxDate;
-			}
 
-			// Clamp date_final limits
-			if ($dateFinal && $hireDate && $dateFinal < $hireDate) {
+			if ($hireDate && $dateFinal < $hireDate) {
 				$dateFinal = $hireDate;
 			}
-			if ($dateFinal && $dateFinal > $maxDate) {
-				$dateFinal = $maxDate;
-			}
 
-			// Ensure date_final is never earlier than date_start
-			if ($dateStart && $dateFinal && $dateFinal < $dateStart) {
+			// Ensure date_final is not earlier than date_start
+			if ($dateFinal < $dateStart) {
 				$dateFinal = $dateStart;
 			}
 

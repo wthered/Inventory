@@ -3,8 +3,8 @@
 	namespace App\Http\Controllers\HumanResources;
 
 	use App\Http\Controllers\Controller;
-	use App\Http\Requests\HumanResources\Employees\Details\StoreEmployeeDetailRequest;
-	use App\Http\Requests\HumanResources\Employees\Details\UpdateEmployeeDetailRequest;
+	use App\Http\Requests\HumanResources\StoreEmployeeDetailRequest;
+	use App\Http\Requests\HumanResources\UpdateEmployeeDetailRequest;
 	use App\Models\HumanResources\EmployeeDetail;
 
 	class EmployeeDetailController extends Controller {

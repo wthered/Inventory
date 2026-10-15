@@ -18,8 +18,8 @@
 				<td>{{ optional($leave->end_date)->format('d/m/Y') }}</td>
 				<td>{{ $leave->total_days }}</td>
 				<td>
-					<span class="badge status-{{ strtolower($leave->status->value) }}">
-						{{ $leave->status->label() }}
+					<span class="badge-leave {{ $leave->status->badgeClass() }}">
+						<i class="{{ $leave->status->icon() }}"></i> {{ $leave->status->label() }}
 					</span>
 				</td>
 				<td>

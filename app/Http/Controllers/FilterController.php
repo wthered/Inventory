@@ -3,23 +3,16 @@
 	namespace App\Http\Controllers;
 
 	use App\Http\Requests\Brands\BrandListFilterRequest;
-	use App\Http\Requests\Customers\CustomerIndexFilterRequest;
-	use App\Http\Requests\Filters\Employees\EmployeeAttendancesFilterRequest;
-	use App\Http\Requests\Filters\Employees\EmployeeLeavesFilterRequest;
-	use App\Http\Requests\HumanResources\Employees\EmployeeFilterRequest;
 	use App\Http\Requests\Products\FilterProductsRequest;
 	use App\Http\Requests\Sales\SalesIndexFilterRequest;
 	use App\Http\Requests\Stocks\StockAdjustments\FilterAdjustmentsRequest;
 	use App\Models\Brand;
-	use App\Models\Customer;
-	use App\Models\HumanResources\Employee;
 	use App\Models\Product;
 	use App\Models\Sales\SalesOrder;
 	use App\Models\StockAdjustment;
 	use App\Models\Supplier;
 	use App\Services\Filters\ProductFilterService;
 	use Illuminate\Http\JsonResponse;
-	use Illuminate\Pagination\Paginator;
 	use Throwable;
 
 	class FilterController extends Controller {
@@ -174,119 +167,6 @@
 			return response()->json([
 				'rows'       => $sales->getCollection()->implode(''),
 				'pagination' => view('partials.sales.pagination', ['sales' => $sales])->render(),
-			]);
-		}
-
-		/**
-		 * @throws Throwable
-		 */
-		public function customers(CustomerIndexFilterRequest $request) {
-			$input = $request->validated();
-
-			// 1. Initialize the query builder on the Customer model
-			$query = Customer::query();
-
-			// 2. Filter by search input
-			if (!empty($input['search'])) {
-				$search = $input['search'];
-				$query->where(function ($q) use ($search) {
-					$q->where('name', 'like', "%{$search}%")
-					  ->orWhere('email', 'like', "%{$search}%")
-					  ->orWhere('phone', 'like', "%{$search}%")
-					  ->orWhere('code', 'like', "%{$search}%");
-				});
-			}
-
-			// 3. Filter by status input
-			if (!empty($input['status'])) {
-				$query->where('is_active', $input['status'] === 'active');
-			}
-
-			// 4. Paginate results
-			$customers = $query->paginate($request->session()->get('per_page', 10))->withPath(route('inventory.customers.index'));
-
-			// 5. Return JSON response for AJAX
-			return response()->json([
-				'html'       => view('partials.customers.index_rows', compact('customers'))->render(),
-				'pagination' => $customers->hasPages() ? $customers->links('pagination::simple')->render() : ''
-			]);
-		}
-
-		/**
-		 * @throws Throwable
-		 */
-		public function filter(EmployeeFilterRequest $request) {
-			$query = Employee::with('department');
-
-			if ($request->filled('search')) {
-				$search = $request->input('search');
-				$query->where(function ($q) use ($search) {
-					$q->where('name', 'like', "%{$search}%")
-					  ->orWhere('surname', 'like', "%{$search}%")
-					  ->orWhere('email', 'like', "%{$search}%")
-					  ->orWhere('phone', 'like', "%{$search}%")
-					  ->orWhere('employee_number', 'like', "%{$search}%");
-				});
-			}
-
-			if ($request->filled('department_id')) {
-				$query->where('department_id', $request->validated('department_id'));
-			}
-
-			// Sort employees by ID
-			$employees = $query->orderBy('id')->paginate($request->session()->get('per_page', 10))->withPath(route('hr.employees.index'));
-
-			return response()->json([
-				'html'       => view('partials.employees.index_rows', compact('employees'))->render(),
-				'pagination' => $employees->hasPages() ? $employees->links('pagination::simple')->render() : ''
-			]);
-		}
-
-		public function employees(EmployeeFilterRequest $request) {
-			$input = $request->validated();
-			dd($input);
-		}
-
-		public function attendances(EmployeeAttendancesFilterRequest $request, Employee $employee) {
-			$input = $request->validated();
-			$page = $request->input('att_page', 1);
-
-			Paginator::currentPageResolver(function () use ($page) {
-				return $page;
-			});
-
-			$attendances = $employee->attendances()
-			                        ->when($request->filled('date_start'), function ($query) use ($input) {
-				                        $query->whereDate('work_date', '>', $input['date_start']);
-			                        })->when($request->filled('date_final'), function ($query) use ($input) {
-					$query->whereDate('work_date', '<', $input['date_final']);
-				})->when($request->filled('status'), function ($query) use ($input) {
-					$query->where('status', $input['status']);
-				})->paginate($request->session()->get('per_page'), ['*'], 'att_page');
-
-			return response()->json([
-				'attendances' => view('partials.employees.attendance_rows', [
-					'attendances' => $attendances,
-				])->render(),
-			]);
-		}
-
-		public function leaves(EmployeeLeavesFilterRequest $request, Employee $employee) {
-			$input = $request->validated();
-			$leaves = $employee->leaveRequests()->when($request->filled('leave_date_start'), function ($query) use (
-				$input
-			) {
-				$query->whereDate('start_date', '>', $input['leave_date_start']);
-			})->when($request->filled('leave_date_final'), function ($query) use ($input) {
-				$query->whereDate('end_date', '<', $input['leave_date_final']);
-			})->when($request->filled('status'), function ($query) use ($input) {
-				$query->where('status', $input['leave_status']);
-			})->when($request->filled('leave_type'), function ($query) use ($input) {
-				$query->where('leave_type', $input['leave_type']);
-			})->paginate($request->session()->get('per_page'), ['*'], 'leave_page');
-
-			return response()->json([
-				'leaves' => view('partials.employees.leave_rows', ['leaveRequests' => $leaves])->render(),
 			]);
 		}
 	}

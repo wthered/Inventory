@@ -72,17 +72,17 @@
 		 */
 		public function show(Request $request, int $id): View {
 			// 1. Eager load manager account and pre-aggregate relational counts in 1 query
-			$warehouseModel = Warehouse::with(['manager.account'])
-			                           ->withCount(['locations', 'inventories'])
-			                           ->findOrFail($id);
+			$warehouseModel = Warehouse::with(['manager.account'])->withCount([
+				'locations',
+				'inventories'
+			])->findOrFail($id);
 
 			// 2. Build the optimized base query for locations
-			$locationsQuery = $warehouseModel->locations()
-			                                 ->getQuery()
-			                                 ->with([
-				                                 'inventories.product',
-				                                 'inventories.warehouse' // Prevents N+1 lookup inside DTO conversions
-			                                 ]);
+			// Prevents N+1 lookup inside DTO conversions
+			$locationsQuery = $warehouseModel->locations()->getQuery()->with([
+				'inventories.product',
+				'inventories.warehouse'
+			]);
 
 			// 3. Apply standard layouts
 			$locationsQuery = $this->filterService->applyFilters($locationsQuery, $request->only([
@@ -93,7 +93,7 @@
 			]));
 
 			// 4. Tighten pagination chunks to prevent high memory hydration leaks
-			$perPage = $request->session()->get('per_page', 24); // Changed to 24 (even divisor for grid view layout alignment)
+			$perPage             = $request->session()->get('per_page', 24); // Changed to 24 (even divisor for grid view layout alignment)
 			$locationsPagination = $locationsQuery->paginate($perPage);
 
 			// 5. Transform collection in-place safely without duplicating array offsets
@@ -102,10 +102,7 @@
 			});
 
 			// 6. DEFER HEAVY LEDGER CALCULATION: Cache heavy calculations for 10 minutes
-			$analytics = cache()->remember("warehouse:{$id}:analytics", now()->addMinutes(10), function () use (
-				$warehouseModel,
-				$id
-			) {
+			$analytics = cache()->remember("warehouse:{$id}:analytics", now()->addMinutes(10), function () use ($warehouseModel, $id) {
 				return [
 					'recentActivities'  => $this->analyticsService->getRecentActivities($id),
 					'totalValue'        => $this->analyticsService->calculateWarehouseValue($id),
@@ -113,6 +110,8 @@
 					'transfersCount'    => $this->analyticsService->getMonthlyTransferCount($warehouseModel),
 				];
 			});
+
+			dd(WarehouseDTO::fromModel($warehouseModel));
 
 			return view('warehouses.show', [
 				'warehouse'         => WarehouseDTO::fromModel($warehouseModel),
@@ -155,7 +154,7 @@
 		 * Returns: a list of source and destination (target) warehouses
 		 *****************************************************/
 		public function getWarehouseList(IndexWarehousesRequest $request): JsonResponse {
-			$input = $request->validated();
+			$input   = $request->validated();
 			$product = new ProductDTO(intval($input->get('product_id')));
 
 			$inventories = $product->inventories->where('warehouse_id', $input['warehouse_id']);
@@ -163,7 +162,7 @@
 			$warehouses = $inventories->map(function ($inventory) use ($input) {
 				return [
 					'value'    => $inventory->location->id,
-					'text'     => $inventory->warehouse->name." (aka ".$inventory->location->name.")",
+					'text'     => $inventory->warehouse->name . " (aka " . $inventory->location->name . ")",
 					'selected' => $inventory->location->id === $input['location_id'],
 				];
 			});
@@ -191,31 +190,31 @@
 
 		private function createZoneOptions(Warehouse $warehouse): string {
 			return Collection::range(1, $warehouse['zones'])->map(function ($zone) {
-				return "<option value='Z".$zone."'>Zone ".$zone."</option>";
+				return "<option value='Z" . $zone . "'>Zone " . $zone . "</option>";
 			})->prepend("<option value=''>Warehouse Zone</option>")->implode('');
 		}
 
 		private function createAisleOptions(Warehouse $warehouse): string {
 			return Collection::range(1, $warehouse['aisles'])->map(function (int $aisle) {
-				return "<option value='".$aisle."'>Aisle ".$aisle."</option>";
+				return "<option value='" . $aisle . "'>Aisle " . $aisle . "</option>";
 			})->prepend("<option value=''>Warehouse Aisle</option>")->implode('');
 		}
 
 		private function createRackOptions(Warehouse $warehouse): string {
 			return Collection::range(1, $warehouse['racks'])->map(function ($rack) {
-				return "<option value='".$rack."'>Rack ".$rack."</option>";
+				return "<option value='" . $rack . "'>Rack " . $rack . "</option>";
 			})->prepend("<option value=''>Warehouse Rack</option>")->implode('');
 		}
 
 		private function createShelfOptions(Warehouse $warehouse): string {
 			return Collection::range(1, $warehouse['shelves'])->map(function ($shelf) {
-				return "<option value='".$shelf."'>Shelf ".$shelf."</option>";
+				return "<option value='" . $shelf . "'>Shelf " . $shelf . "</option>";
 			})->prepend("<option value=''>Warehouse Shelf</option>")->implode('');
 		}
 
 		private function createBinOptions(Warehouse $warehouse): string {
 			return Collection::range(1, $warehouse['bins'])->map(function ($bin) {
-				return "<option value='".$bin."'>Bin ".$bin."</option>";
+				return "<option value='" . $bin . "'>Bin " . $bin . "</option>";
 			})->prepend("<option value=''>Warehouse Bin</option>")->implode('');
 		}
 
@@ -234,7 +233,7 @@
 		}
 
 		public function getAisles(IndexWarehouseAislesRequest $request): JsonResponse {
-			$input = $request->validated();
+			$input     = $request->validated();
 			$warehouse = Warehouse::query()->find($input['warehouse']);
 
 			return response()->json([
@@ -255,7 +254,7 @@
 		}
 
 		public function getShelves(IndexWarehouseShelvesRequest $request): JsonResponse {
-			$input = $request->validated();
+			$input     = $request->validated();
 			$warehouse = Warehouse::query()->find($input['warehouse']);
 
 			return response()->json([
@@ -265,7 +264,7 @@
 		}
 
 		public function getBins(IndexWarehouseBinsRequest $request): JsonResponse {
-			$input = $request->validated();
+			$input     = $request->validated();
 			$warehouse = Warehouse::query()->find($input['warehouse']);
 
 			return response()->json([
@@ -289,7 +288,7 @@
 //			dd($request->validated());
 
 			// SYNTAX: Warehouse::query() is already a Builder, so this works as-is
-			$warehouse = Warehouse::query()->find($id);
+			$warehouse      = Warehouse::query()->find($id);
 			$locationsQuery = $warehouse->locations()->getQuery()->with(['inventories.product']);
 
 			// Now this matches the Builder type-hint in WarehouseFilterService
@@ -309,7 +308,7 @@
 			return response()->json([
 				'options'   => Collection::make($options[Str::plural($request->validated('type'))])
 				                         ->map(function ($option) {
-					                         return "<option value='".$option['value']."'>".$option['text']."</option>";
+					                         return "<option value='" . $option['value'] . "'>" . $option['text'] . "</option>";
 				                         })->implode(''),
 				'locations' => $locationCollection->map(function (LocationDTO $location) {
 					return view('partials.location_card', ['location' => $location])->render();
@@ -329,7 +328,7 @@
 			$inputLocation = $request->validated('location_id');
 
 			// Εύρεση της θέσης μαζί με την αποθήκη της
-			$location = WarehouseLocation::query()->with('warehouse')->findOrFail($inputLocation);
+			$location  = WarehouseLocation::query()->with('warehouse')->findOrFail($inputLocation);
 			$warehouse = $location->warehouse;
 
 			// Έλεγχος των ενεργών επιπέδων της αποθήκης
@@ -376,14 +375,19 @@
 			if ($levelsConfig['zone']) {
 				$zoneHtml = Collection::range(1, $warehouse->zones)->map(function (int $val) use ($location) {
 					$selected = ($location->zone == $val) ? 'selected' : '';
-					return "<option value='$val' $selected>".__('warehouse.levels.zone')." ".sprintf('%02d', $val)."</option>";
-				})->prepend("<option value=''>".__('warehouse.levels_plural.zone')."</option>")->join('');
+					return "<option value='$val' $selected>" . __('warehouse.levels.zone') . " " . sprintf('%02d', $val) . "</option>";
+				})->prepend("<option value=''>" . __('warehouse.levels_plural.zone') . "</option>")->join('');
 
-				$levels['zone'] = ['html' => $zoneHtml, 'disabled' => false, 'visible' => true];
+				$levels['zone'] = [
+					'html'     => $zoneHtml,
+					'disabled' => false,
+					'visible'  => true
+				];
 			} else {
 				$levels['zone'] = [
-					'html'     => "<option value=''>".__('warehouse.levels_plural.zone')."</option>",
-					'disabled' => true, 'visible' => false
+					'html'     => "<option value=''>" . __('warehouse.levels_plural.zone') . "</option>",
+					'disabled' => true,
+					'visible'  => false
 				];
 			}
 
@@ -391,14 +395,19 @@
 			if ($levelsConfig['aisle']) {
 				$aisleHtml = Collection::range(1, $warehouse->aisles)->map(function (int $val) use ($location) {
 					$selected = ($location->aisle == $val) ? 'selected' : '';
-					return "<option value='$val' $selected>".__('warehouse.levels.aisle')." ".sprintf('%02d', $val)."</option>";
-				})->prepend("<option value=''>".__('warehouse.levels_plural.aisle')."</option>")->join('');
+					return "<option value='$val' $selected>" . __('warehouse.levels.aisle') . " " . sprintf('%02d', $val) . "</option>";
+				})->prepend("<option value=''>" . __('warehouse.levels_plural.aisle') . "</option>")->join('');
 
-				$levels['aisle'] = ['html' => $aisleHtml, 'disabled' => false, 'visible' => true];
+				$levels['aisle'] = [
+					'html'     => $aisleHtml,
+					'disabled' => false,
+					'visible'  => true
+				];
 			} else {
 				$levels['aisle'] = [
-					'html'     => "<option value=''>".__('warehouse.levels_plural.aisle')."</option>",
-					'disabled' => true, 'visible' => false
+					'html'     => "<option value=''>" . __('warehouse.levels_plural.aisle') . "</option>",
+					'disabled' => true,
+					'visible'  => false
 				];
 			}
 
@@ -406,14 +415,19 @@
 			if ($levelsConfig['rack']) {
 				$rackHtml = Collection::range(1, $warehouse->racks)->map(function (int $val) use ($location) {
 					$selected = ($location->rack == $val) ? 'selected' : '';
-					return "<option value='$val' $selected>".__('warehouse.levels.rack')." ".sprintf('%02d', $val)."</option>";
-				})->prepend("<option value=''>".__('warehouse.levels_plural.rack')."</option>")->join('');
+					return "<option value='$val' $selected>" . __('warehouse.levels.rack') . " " . sprintf('%02d', $val) . "</option>";
+				})->prepend("<option value=''>" . __('warehouse.levels_plural.rack') . "</option>")->join('');
 
-				$levels['rack'] = ['html' => $rackHtml, 'disabled' => false, 'visible' => true];
+				$levels['rack'] = [
+					'html'     => $rackHtml,
+					'disabled' => false,
+					'visible'  => true
+				];
 			} else {
 				$levels['rack'] = [
-					'html'     => "<option value=''>".__('warehouse.levels_plural.rack')."</option>",
-					'disabled' => true, 'visible' => false
+					'html'     => "<option value=''>" . __('warehouse.levels_plural.rack') . "</option>",
+					'disabled' => true,
+					'visible'  => false
 				];
 			}
 
@@ -421,14 +435,19 @@
 			if ($levelsConfig['shelf']) {
 				$shelfHtml = Collection::range(1, $warehouse->shelves)->map(function (int $val) use ($location) {
 					$selected = ($location->shelf == $val) ? 'selected' : '';
-					return "<option value='$val' $selected>".__('warehouse.levels.shelf')." ".sprintf('%02d', $val)."</option>";
-				})->prepend("<option value=''>".__('warehouse.levels_plural.shelf')."</option>")->join('');
+					return "<option value='$val' $selected>" . __('warehouse.levels.shelf') . " " . sprintf('%02d', $val) . "</option>";
+				})->prepend("<option value=''>" . __('warehouse.levels_plural.shelf') . "</option>")->join('');
 
-				$levels['shelf'] = ['html' => $shelfHtml, 'disabled' => false, 'visible' => true];
+				$levels['shelf'] = [
+					'html'     => $shelfHtml,
+					'disabled' => false,
+					'visible'  => true
+				];
 			} else {
 				$levels['shelf'] = [
-					'html'     => "<option value=''>".__('warehouse.levels_plural.shelf')."</option>",
-					'disabled' => true, 'visible' => false
+					'html'     => "<option value=''>" . __('warehouse.levels_plural.shelf') . "</option>",
+					'disabled' => true,
+					'visible'  => false
 				];
 			}
 
@@ -436,14 +455,19 @@
 			if ($levelsConfig['bin']) {
 				$binHtml = Collection::range(1, $warehouse->bins)->map(function (int $val) use ($location) {
 					$selected = ($location->bin == $val) ? 'selected' : '';
-					return "<option value='$val' $selected>".__('warehouse.levels.bin')." ".sprintf('%02d', $val)."</option>";
-				})->prepend("<option value=''>".__('warehouse.levels_plural.bin')."</option>")->join('');
+					return "<option value='$val' $selected>" . __('warehouse.levels.bin') . " " . sprintf('%02d', $val) . "</option>";
+				})->prepend("<option value=''>" . __('warehouse.levels_plural.bin') . "</option>")->join('');
 
-				$levels['bin'] = ['html' => $binHtml, 'disabled' => false, 'visible' => true];
+				$levels['bin'] = [
+					'html'     => $binHtml,
+					'disabled' => false,
+					'visible'  => true
+				];
 			} else {
 				$levels['bin'] = [
-					'html'     => "<option value=''>".__('warehouse.levels_plural.bin')."</option>",
-					'disabled' => true, 'visible' => false
+					'html'     => "<option value=''>" . __('warehouse.levels_plural.bin') . "</option>",
+					'disabled' => true,
+					'visible'  => false
 				];
 			}
 

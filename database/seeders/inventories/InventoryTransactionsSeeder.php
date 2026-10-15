@@ -20,8 +20,8 @@
 		 */
 		public function run(): void {
 			// 1. Προετοιμασία δεδομένων (Μόνο IDs για μνήμη)
-			$products = Product::query()->get();
-			$users = User::query()->pluck('id');
+			$products = Product::query()->pluck('id');
+			$users    = User::query()->pluck('id');
 
 			if ($products->isEmpty() || $users->isEmpty()) {
 				$this->command->error('Required data (products/users) not found for Transactions.');

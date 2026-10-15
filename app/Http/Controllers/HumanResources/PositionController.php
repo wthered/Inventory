@@ -3,8 +3,8 @@
 	namespace App\Http\Controllers\HumanResources;
 
 	use App\Http\Controllers\Controller;
-	use App\Http\Requests\HumanResources\Position\StorePositionRequest;
-	use App\Http\Requests\HumanResources\Position\UpdatePositionRequest;
+	use App\Http\Requests\HumanResources\StorePositionRequest;
+	use App\Http\Requests\HumanResources\UpdatePositionRequest;
 	use App\Models\HumanResources\Position;
 
 	class PositionController extends Controller {

@@ -254,8 +254,7 @@
 							<input type="date" name="att_date_final" id="att_date_final" class="filter-input"
 							       value="{{ today()->format('Y-m-d') }}"
 							       min="{{ $employee->hire_date->format('Y-m-d') }}"
-							       max="{{ today()->format('Y-m-d') }}"
-							>
+							       max="{{ today()->format('Y-m-d') }}">
 							<span class="error-text" id="error-att_date_final"></span>
 						</div>
 					</div>

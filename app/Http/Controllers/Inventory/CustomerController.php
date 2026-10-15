@@ -41,7 +41,9 @@
 				$query->where('is_active', $request->status === 'active');
 			}
 
-			$customers = $query->latest()->paginate($request->session()->get('per_page', 25))->withQueryString();
+			$customers = $query->latest()
+			                   ->paginate(25)
+			                   ->withQueryString();
 
 			return view('customers.index', compact('customers'));
 		}

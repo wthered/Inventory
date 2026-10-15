@@ -26,14 +26,14 @@
 			// Search text term (Name, SKU, or Barcode)
 			if (!empty($filters['q'])) {
 				$query->where(function ($q) use ($filters) {
-					$q->where('name', 'LIKE', "%".$filters['q']."%")
-					  ->orWhere('sku', 'LIKE', "%".$filters['q']."%")
-					  ->orWhere('barcode', 'LIKE', "%".$filters['q']."%");
+					$q->where('name', 'LIKE', "%" . $filters['q'] . "%")
+					  ->orWhere('sku', 'LIKE', "%" . $filters['q'] . "%")
+					  ->orWhere('barcode', 'LIKE', "%" . $filters['q'] . "%");
 				});
 			}
 
 			// Limit results to keep Ajax payload lightweight and fast
-			return $query->limit(25)->get([
+			return $query->whereHas('inventories')->limit(25)->get([
 				'id',
 				'name',
 				'sku'

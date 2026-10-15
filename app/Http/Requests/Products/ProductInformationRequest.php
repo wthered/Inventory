@@ -32,12 +32,10 @@
 		}
 
 		public function passedValidation(): Collection {
-			$data = Collection::make($this->validated());
-
-			$product = intval($data->get('product'));
+			$data = Collection::make($this->validated())->get('product');
 
 			return Collection::make([
-				'product' => new ProductDTO($product),
+				'product' => new ProductDTO(intval($data)),
 			]);
 		}
 

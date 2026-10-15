@@ -58,18 +58,17 @@
 	</div>
 </div>
 
-<!-- Edit Attendance Record Modal -->
+<!-- Create Attendance Record Modal -->
 <div class="modal-backdrop" id="attendance-modal-backdrop" style="display: none;">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h3 class="modal-title"><i class="fas fa-clock"></i> Edit Attendance Record</h3>
+				<h3 class="modal-title"><i class="fas fa-clock"></i> Create Attendance Record</h3>
 				<button type="button" class="modal-close" id="btn-close-attendance-modal">&times;</button>
 			</div>
 
-			<form id="attendance-modal-form" action="" method="POST">
+			<form id="attendance-modal-form" action="{{ route('hr.attendances.store') }}" method="POST">
 				@csrf
-				@method('PUT')
 
 				<div class="modal-body">
 					<div class="form-group mb-3">
@@ -84,14 +83,39 @@
 
 					<div class="form-group mb-3">
 						<label for="modal_att_date" class="form-label required">Date</label>
-						<input type="date" name="date" id="modal_att_date" class="form-control" required>
+						<input type="date" name="date" id="modal_att_date" class="form-control"
+						       min="{{ $employee->hire_date->format('Y-m-d') }}"
+						       max="{{ today()->format('Y-m-d') }}"
+						       value="{{ old('date',today()->format('Y-m-d')) }}"
+						       required>
 						<span class="error-text" id="error-modal_att_date"></span>
+					</div>
+
+					<div class="form-group mb-3">
+						<label for="modal_att_check_in" class="form-label">Check In Time</label>
+						<input type="time" name="clock_in" id="modal_att_check_in" class="form-control" step="1">
+						<span class="error-text" id="error-modal_check_in"></span>
+					</div>
+
+					<div class="form-group mb-3">
+						<label for="modal_att_check_out" class="form-label">Check Out Time</label>
+						<input type="time" name="clock_out" id="modal_att_check_out" class="form-control" step="1">
+						<span class="error-text" id="error-modal_check_out"></span>
+					</div>
+
+					<div class="form-group mb-3">
+						<label for="modal_att_notes" class="form-label">Notes</label>
+						<textarea name="notes" id="modal_att_notes" class="form-control" rows="3"
+						          placeholder="Optional notes..."></textarea>
+						<span class="error-text" id="error-modal_notes"></span>
 					</div>
 				</div>
 
+				<input type="hidden" value="{{ $employee->id }}" name="employee_id">
+
 				<div class="modal-footer">
 					<button type="button" class="btn-secondary" id="btn-cancel-attendance-modal">Cancel</button>
-					<button type="submit" class="btn-primary">Update Attendance</button>
+					<button type="submit" class="btn-primary">Create Attendance</button>
 				</div>
 			</form>
 		</div>

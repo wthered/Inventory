@@ -2,11 +2,11 @@
 
 	namespace Database\Seeders\Stock;
 
-	use App\Models\Inventories\Inventory;
+	use App\Enums\Inventory\AdjustmentReason;
+	use App\Enums\Inventory\AdjustmentType;
 	use App\Models\Product;
-	use App\Models\StockTransfer;
-	use App\Models\User;
-	use App\Models\WarehouseLocation;
+	use App\Models\StockAdjustment;
+	use Carbon\Carbon;
 	use Database\Seeders\ParentSeeder;
 	use Illuminate\Support\Collection;
 	use Illuminate\Support\Facades\DB;
@@ -16,73 +16,73 @@
 		 * Run the database seeds.
 		 */
 		public function run(): void {
-			// 1. Fetch only what we need to minimize memory footprint
-			$products = Product::all();
+			DB::connection()->disableQueryLog();
 
-			// Sort the user IDs to comply with department rules and optimize lookups
-			$users = User::role(['warehouse_manager', 'admin'])->pluck('id')->sort()->values();
-			if ($users->isEmpty()) {
-				$users = User::pluck('id')->sort()->values();
+			// 1. Load minimal product data into an array
+			$products = Product::query()->select('id', 'current_stock', 'cost_price')->get();
+
+			if ($products->isEmpty()) {
+				$this->command->error("No products found. Run ProductSeeder first.");
+				return;
 			}
 
-			// Master buffer to hold raw data before chunked database insertion
-			$now          = now()->format('Y-m-d H:i:s');
-
-			// 2. Iterate through transfers efficiently using a cursor to prevent memory bloat
-			foreach (StockTransfer::query()->cursor() as $transfer) {
-				$randomProducts = $products->random(mt_rand(2, 8));
-
-				// Fetch locations as lightweight flat arrays
-				$sourceLocations = WarehouseLocation::query()->where('warehouse_id', $transfer->source_warehouse_id)->pluck('id');
-				$targetLocations = WarehouseLocation::query()->where('warehouse_id', $transfer->target_warehouse_id)->pluck('id');
-
-				if ($sourceLocations->isEmpty() || $targetLocations->isEmpty()) {
-					continue;
+			// 2. Use chunkById for safe memory management on large tables
+			StockAdjustment::with([
+				'warehouse.locations' => function ($q) {
+					$q->select('id', 'warehouse_id');
 				}
+			])->chunkById(64, function ($adjustments) use (&$products) {
 
-				foreach ($randomProducts as $product) {
-					// Efficient database check using database-level randomness instead of collecting entities
-					$sourceInventory = Inventory::query()
-						->where('product_id', $product->id)
-						->where('warehouse_id', $transfer->source_warehouse_id)
-						->inRandomOrder()
-						->first();
+				foreach ($adjustments as $adjustment) {
+					$locations = $adjustment->warehouse->locations->pluck('id');
 
-					if (!$sourceInventory || $sourceInventory->quantity <= 0) {
+					if ($locations->isEmpty()) {
 						continue;
 					}
 
-					$qty           = mt_rand(1, $sourceInventory->quantity);
-					$currentStatus = $transfer->status_id->value;
+					for ($i = 0; $i < mt_rand(4, 12); $i++) {
+						$product  = $products->random();
+						$creation = Carbon::yesterday();
+						$type     = fake()->randomElement(AdjustmentType::cases());
+						$reason   = $type == AdjustmentType::INCREASE ? fake()->randomElement(AdjustmentReason::increaseReasons()) : fake()->randomElement(AdjustmentReason::decreaseReasons());
+						$quantity = mt_rand(1, 64);
+						$after    = max($product['current_stock'] ?? 0, 0);
+						$before   = $after - ($quantity * fake()->randomElement([
+									1,
+									-1
+								]));
 
-					// 3. Collect RAW arrays instead of calling Eloquent $transfer->items()->create()
-					$this->list->push([
-						'stock_transfer_id'  => $transfer->id,
-						'product_id'         => $product->id,
-						'batch_number'       => $sourceInventory->batch_number,
-						'source_location_id' => $sourceInventory->location_id,
-						'target_location_id' => $targetLocations->random(),
-						'quantity_requested' => $qty,
-						'quantity_delivered' => ($currentStatus >= 2) ? $qty : 0,
-						'quantity_received'  => ($currentStatus === 3) ? $qty : 0,
-						'processed_by'       => $users->random(),
-						'processed_at'       => ($currentStatus >= 2) ? $transfer->created_at->addSeconds(mt_rand(1, 24 * 3600))->format('Y-m-d H:i:s') : null,
-						'created_at'         => $now,
-						'updated_at'         => $now,
-					]);
-					// 4. In chunks, into the database we save!
-					if ($this->list->count() >= self::BATCH_SIZE) {
-						DB::table('stock_transfer_items')->insert($this->list->toArray());
-						$this->list = Collection::empty(); // Wipe buffer immediately to free memory
-						$this->command->info('Transfer items written into database because '.$this->list->count().' > ' . self::BATCH_SIZE);
+						$this->list->push([
+							'stock_adjustment_id' => $adjustment->id,
+							'product_id'          => $product['id'],
+							'location_id'         => $locations->random(),
+							'reason'              => $reason->value,
+							'type'                => $type->value,
+							'quantity'            => $quantity,
+							'quantity_before'     => $before,
+							'quantity_after'      => $after,
+							'unit_cost'           => $product['cost_price'] ?? mt_rand(24, 128),
+							'notes'               => 'Verified by floor supervisor',
+							'created_at'          => $creation->subHours(mt_rand(0, 23))->subMinutes(mt_rand(0, 59))->subSeconds(mt_rand(0, 59)),
+							'updated_at'          => $creation->addHours(mt_rand(0, 23))->addMinutes(mt_rand(0, 59))->addSeconds(mt_rand(0, 59)),
+						]);
+
+						// Flush batch frequently to keep memory consumption low
+						if ($this->list->count() >= self::BATCH_SIZE) {
+							DB::table('stock_adjustment_items')->insert($this->list->toArray());
+							$this->list = Collection::empty();
+						}
 					}
 				}
-			}
 
-			// 5. Save remaining records left in the buffer
-			if ($this->list->count() > 0) {
-				DB::table('stock_transfer_items')->insert($this->list->toArray());
-//				$this->list = Collection::empty();
-			}
+				// Insert any remaining items for this chunk
+				if ($this->list->isNotEmpty()) {
+					DB::table('stock_adjustment_items')->insert($this->list->toArray());
+				}
+
+				// Explicitly clear memory cycles
+				unset($adjustments, $batchList);
+//				gc_collect_cycles();
+			});
 		}
 	}

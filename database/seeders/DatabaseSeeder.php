@@ -8,7 +8,6 @@
 	use App\Models\Product;
 	use App\Models\Sales\SalesOrder;
 	use App\Models\Sales\SalesOrderItem;
-	use Database\Seeders\HumanResources\AttendanceSeeder;
 	use Database\Seeders\HumanResources\DepartmentSeeder;
 	use Database\Seeders\HumanResources\EmployeeSeeder;
 	use Database\Seeders\HumanResources\LeaveRequestSeeder;
@@ -25,7 +24,6 @@
 	use Database\Seeders\Purchases\PurchaseOrderHistorySeeder;
 	use Database\Seeders\Purchases\PurchaseOrderItemSeeder;
 	use Database\Seeders\Purchases\PurchaseOrderSeeder;
-	use Database\Seeders\Stock\StockAdjustmentItemSeeder;
 	use Database\Seeders\Stock\StockAdjustmentSeeder;
 	use Database\Seeders\Stock\StockReturnItemSeeder;
 	use Database\Seeders\Stock\StockReturnSeeder;
@@ -56,8 +54,9 @@
 				// This seeder also does product_supplier seeding
 				SupplierSeeder::class,
 			]);
+			gc_collect_cycles();
 
-			$this->command->info("Have seeded ".Product::query()->count()." products in ".Category::query()->count()." categories and ".Brand::query()->count()." brands");
+			$this->command->info("Have seeded " . Product::query()->count() . " in " . Category::query()->count() . " categories and " . Brand::query()->count() . " brands");
 
 			// --- 2. Locations & Αρχικό Απόθεμα ---
 			$this->call([
@@ -72,11 +71,6 @@
 			]);
 
 			// --- 4. Sales Workflow (Προαιρετικό αλλά καλό) ---
-//			$this->call([
-//				SalesOrderSeeder::class,
-//				SalesOrderItemSeeder::class,
-//				SalesOrderHistorySeeder::class,
-//			]);
 			SalesOrder::unsetEventDispatcher();
 			SalesOrderItem::unsetEventDispatcher();
 
@@ -85,6 +79,7 @@
 				SalesOrderItemSeeder::class,
 				SalesOrderHistorySeeder::class,
 			]);
+			gc_collect_cycles();
 
 			// --- 5. Ιστορικό Κινήσεων & Operations ---
 			$this->call([
@@ -94,11 +89,12 @@
 				StockTransferItemSeeder::class,
 
 				StockAdjustmentSeeder::class,
-				StockAdjustmentItemSeeder::class,
+				StockTransferItemSeeder::class,
 
 				StockReturnSeeder::class,
 				StockReturnItemSeeder::class,
 			]);
+			gc_collect_cycles();
 
 			// Human Resources
 			$this->call([
@@ -106,7 +102,7 @@
 				PositionSeeder::class,
 				EmployeeSeeder::class,
 				LeaveRequestSeeder::class,
-				AttendanceSeeder::class,
+				//				AttendanceSeeder::class,
 			]);
 
 			Schema::enableForeignKeyConstraints();
@@ -122,7 +118,7 @@
 			         ->get()
 			         ->each(function (Inventory $inventory) {
 				         $absAvailable = abs($inventory->available_quantity);
-				         $last_update = $inventory->updated_at;
+				         $last_update  = $inventory->updated_at;
 
 				         $inventory->update([
 					         'quantity'   => round($absAvailable + (mt_rand(0, 500) / 100) * $absAvailable),

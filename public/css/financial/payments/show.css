@@ -1,0 +1,113 @@
+
+.payment-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-lg);
+}
+
+.payment-info-card {
+    padding: var(--space-lg);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.card-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.details-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px dashed var(--color-border);
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.detail-value {
+    font-size: 0.925rem;
+    color: var(--color-text-primary);
+    font-weight: 500;
+}
+
+.amount-highlight {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+.link-primary {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.link-primary:hover {
+    text-decoration: underline;
+}
+
+/* Status Badges */
+.badge-status {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-full);
+    border: 1px solid transparent;
+}
+
+.badge-status-completed {
+    background-color: rgba(var(--color-accent-rgb), 0.15);
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.badge-status-pending {
+    background-color: rgba(var(--color-warning-rgb), 0.15);
+    color: var(--color-warning);
+    border-color: var(--color-warning);
+}
+
+.badge-status-failed {
+    background-color: rgba(var(--color-error-rgb), 0.15);
+    color: var(--color-error);
+    border-color: var(--color-error);
+}
+
+@media print {
+    .navbar, .main-sidebar, .footer, .action-buttons-group {
+        display: none !important;
+    }
+
+    #box {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+}

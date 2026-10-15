@@ -1,0 +1,222 @@
+/* Page Layout */
+.page-container {
+    padding: var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.header-title-group h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.subtitle {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin-top: var(--space-xs);
+}
+
+.action-buttons-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+/* Filters Layout */
+.filter-card {
+    padding: var(--space-md) var(--space-lg);
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: minmax(200px, 2fr) minmax(160px, 1fr) minmax(160px, 1fr) auto;
+    gap: var(--space-md);
+    align-items: center;
+}
+
+.filter-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+/* Data Table Adjustments */
+.table-card {
+    background-color: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.data-table th {
+    background-color: var(--color-bg-subtle);
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.data-table td {
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.9rem;
+    color: var(--color-text-primary);
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+    background-color: var(--color-bg-hover);
+}
+
+/* Table Utilities */
+.td-id {
+    font-family: monospace;
+    font-weight: 600;
+}
+
+.td-name {
+    font-weight: 500;
+}
+
+.align-right {
+    text-align: right;
+}
+
+.font-weight-bold {
+    font-weight: 700;
+}
+
+.icon-subtle {
+    color: var(--color-text-muted);
+    margin-right: var(--space-xs);
+}
+
+.icon-empty {
+    font-size: 2.5rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-sm);
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-xl) !important;
+    color: var(--color-text-muted);
+}
+
+/* Action Icons */
+.table-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.inline-form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    padding: var(--space-xs);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.btn-icon:hover {
+    color: var(--color-primary);
+    background-color: var(--color-bg-hover);
+}
+
+.btn-icon.text-danger:hover {
+    color: var(--color-error);
+}
+
+/* Status Badges */
+.badge-status {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-full);
+    border: 1px solid transparent;
+    display: inline-block;
+}
+
+.badge-status-completed {
+    background-color: rgba(var(--color-accent-rgb), 0.15);
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.badge-status-pending {
+    background-color: rgba(var(--color-warning-rgb), 0.15);
+    color: var(--color-warning);
+    border-color: var(--color-warning);
+}
+
+.badge-status-failed {
+    background-color: rgba(var(--color-error-rgb), 0.15);
+    color: var(--color-error);
+    border-color: var(--color-error);
+}
+
+/* Responsive Breakdown */
+@media (max-width: 992px) {
+    .filter-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .filter-actions {
+        grid-column: span 2;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 576px) {
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions {
+        grid-column: span 1;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

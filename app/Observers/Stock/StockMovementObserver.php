@@ -22,7 +22,5 @@
 				$model->rma_number = $model->generateRmaNumber($model);
 				$model->return_number = $model->generateReturnNumber();
 			}
-
-			$model->items->notes = "Set by movement observer";
 		}
 	}

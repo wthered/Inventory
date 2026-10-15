@@ -13,8 +13,9 @@
 		use CanPopulateInventory;
 
 		public function run(): void {
-			
-			$this->seedInventoryRecords(Product::query()->pluck('id'), Warehouse::all());
+
+			// Γεμίζει τα υπάρχοντα slots με stock
+			$this->seedInventoryRecords(Product::query()->whereDoesntHave('locations')->pluck('id'), Warehouse::all());
 
 			$this->command->info('✅ Inventory Seeding Completed Successfully.');
 		}

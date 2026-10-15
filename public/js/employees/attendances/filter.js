@@ -7,10 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	const fetchFilteredAttendances = async (page = 1) => {
 		const employee = attFilterBar.querySelector('#employee_id')?.value;
 
-		// if (!employee) {
-		// 	console.error('Employee ID hidden input field not found.');
-		// 	return;
-		// }
+		if (!employee) {
+			console.error('Employee ID hidden input field not found.');
+			return;
+		}
 
 		const filterUrl = `/hr/attendances/employees/${employee}/filter`;
 

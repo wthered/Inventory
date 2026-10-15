@@ -11,6 +11,7 @@
 	use App\Models\Brand;
 	use App\Models\Category;
 	use App\Models\Product;
+	use Illuminate\Http\JsonResponse;
 
 
 	class CategoryController extends Controller {
@@ -56,7 +57,7 @@
 			// Redirect directly to the newly created inventory category detail profile[cite: 21]
 			return redirect()
 				->route('inventory.categories.show', $category->id)
-				->with('success', "Category '".$validated['name']."' was successfully created.");
+				->with('success', "Category '" . $validated['name'] . "' was successfully created.");
 		}
 
 		/**
@@ -101,7 +102,7 @@
 
 			return redirect()
 				->route('inventory.categories.show', $category->id)
-				->with('success', "Category '".$category->name."' was successfully updated.");
+				->with('success', "Category '" . $category->name . "' was successfully updated.");
 		}
 
 		/**
@@ -113,48 +114,70 @@
 		}
 
 		public function filterBrands(FilterBrandsRequest $request, Category $category) {
-			return $category->brands()->whereHas('products')
-			                ->pluck('name', 'id')
-			                ->map(function ($name, $id) {
-				                return "<option value='".$id."'>".$name."</option>";
-			                })
-			                ->prepend("<option value='' selected>Επιλέξτε Μάρκα...</option>")
-			                ->join('');
+			$input = $request->validated();
+
+			// Safely check if product input exists before querying
+			$product = !empty($input['product']) ? $category->products()->where('id', $input['product'])->first() : null;
+
+			$brands = $category->brands()->whereHas('products', function ($query) use ($input) {
+				$query->whereHas('inventories', function ($q) use ($input) {
+					$q->where('warehouse_id', $input['warehouse']);
+				});
+			})->pluck('name', 'id')->map(function ($name, $id) use ($product) {
+				// Safe check using optional chaining or ternary
+				$isSelected = $product && $product->brand_id == $id ? ' selected' : '';
+				return "<option value='" . $id . "'" . $isSelected . ">" . $name . "</option>";
+			})->prepend("<option value='' selected>Επιλέξτε Μάρκα...</option>")->join('');
+
+			return response()->json(['options' => $brands]);
 		}
 
-		public function filter(CategoryFilterRequest $request, Category $category) {
-			$category->load(['brands', 'children']);
+		public function filter(CategoryFilterRequest $request, Category $category): JsonResponse {
+			$input = $request->validated();
+//			dd($input);
 
 			// Extract child category IDs once to keep queries clean and efficient
-			$children = $category->children()->pluck('id');
+			$children = Category::query()->where('parent_id', $category->id)
+			                    ->whereHas('products', function ($query) use ($input) {
+				                    $query->whereHas('inventories', function ($q) use ($input) {
+					                    $q->where('warehouse_id', $input['warehouse']);
+				                    });
+			                    })->pluck('id');
+
+//			dd($children);
+			$itemProduct = Product::query()->find($input['product']);
+//			dd($itemProduct);
 
 			return response()->json([
-				'categories' => $category->children()->whereHas('products')->get()->map(function (Category $child) {
-					return "<option value='".$child->id."'>".$child->name."</option>";
+				'categories' => Category::query()->whereIn('id', $children)->get()->map(function (Category $child) use ($itemProduct) {
+					return "<option value='" . $child->id . "'" . ($child->id == $itemProduct->category_id ? 'selected' : '') . ">" . $child->name . "</option>";
 				})->prepend("<option value=''>Select Sub Category</option>")->join(''),
 
 				'brands' => Brand::query()->whereHas('products', function ($query) use ($children) {
 					$query->whereIn('category_id', $children);
-				})->get()->map(function (Brand $brand) {
-					return "<option value='".$brand->id."'>".$brand->name."</option>";
+				})->get()->map(function (Brand $brand) use ($itemProduct) {
+					return "<option value='" . $brand->id . "'" . ($brand->id === $itemProduct->brand_id ? 'selected' : '') . ">" . $brand->name . "</option>";
 				})->prepend("<option value=''>All Brands</option>")->join(''),
 
-				'products' => Product::query()->whereIn('category_id', $children)->orderBy('name')->get()
-				                     ->map(function (Product $product) {
-					                     return view('common.products.index_row', ['product' => $product])->render();
-				                     })->join(''),
+				'products' => Product::query()->whereHas('category', function ($query) use ($children) {
+					$query->whereIn('id', $children);
+				})->whereHas('inventories', function ($q) use ($input) {
+					$q->where('warehouse_id', $input['warehouse']);
+				})->orderBy('name')->get()->map(function (Product $product) {
+					return view('common.products.index_row', ['product' => $product])->render();
+				})->join(''),
 			]);
 		}
 
 
 		public function filterBrandList(BrandListFilterRequest $request, Category $category) {
 			$input = $request->validated();
-			$term = $input['search'] ?? null;
+			$term  = $input['search'] ?? null;
 
 			$brands = $category->brands()
 			                   ->with('categories')
 			                   ->when($term, function ($query) use ($term) {
-				                   $query->where('name', 'LIKE', '%'.$term.'%');
+				                   $query->where('name', 'LIKE', '%' . $term . '%');
 			                   })
 			                   ->orderBy('name')
 			                   ->paginate($request->session()->get('per_page', 15));

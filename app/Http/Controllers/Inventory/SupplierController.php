@@ -3,6 +3,7 @@
 	namespace App\Http\Controllers\Inventory;
 
 	use App\Http\Controllers\Controller;
+	use App\Http\Requests\Suppliers\CalculateDeliveryDateRequest;
 	use App\Http\Requests\Suppliers\SupplierUpdateRequest;
 	use App\Models\Supplier;
 	use Illuminate\Contracts\View\Factory;
@@ -95,5 +96,10 @@
 		 */
 		public function destroy(string $id) {
 			//
+		}
+
+		public function delivery(CalculateDeliveryDateRequest $request, Supplier $supplier) {
+//			dd($request->validated());
+			dd($supplier->)
 		}
 	}

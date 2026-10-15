@@ -19,9 +19,8 @@
 				<td>{{ $attendance->check_in ? $attendance->check_in->format('H:i:s') : '-' }}</td>
 				<td>{{ $attendance->check_out ? $attendance->check_out->format('H:i:s') : '-' }}</td>
 				<td>
-					<span
-						class="badge badge-status-{{ strtolower($attendance->status->value ?? $attendance->status) }}">
-						{{ $attendance->status->label() ?? $attendance->status }}
+					<span class="badge-attendance {{ $attendance->status->badgeClass() }}">
+						<i class="{{ $attendance->status->icon() }}"></i> {{ $attendance->status->label() }}
 					</span>
 				</td>
 				<td class="actions-cell text-right">
@@ -63,5 +62,10 @@
 		{{ $attendances->appends(request()->query())->links('pagination::simple') }}
 	</div>
 @else
-	<p class="empty-state-text">No attendance records logged matching your criteria.</p>
+	<tr>
+		<td colspan="7" class="table-empty-state">
+			<i class="fas fa-calendar-times empty-icon"></i>
+			<p class="empty-state-text">No attendance records logged matching your criteria.</p>
+		</td>
+	</tr>
 @endif

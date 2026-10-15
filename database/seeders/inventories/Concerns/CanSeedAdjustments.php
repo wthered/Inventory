@@ -31,18 +31,18 @@
 			]);
 
 			for ($i = 0; $i < $locationsList->count(); $i++) {
-				$product = $products->random();
-				$user = $users->random();
+				$product = Product::query()->find($products->random());
+				$user    = $users->random();
 
 				// 2. ΕΠΙΛΟΓΗ ΣΥΓΚΕΚΡΙΜΕΝΟΥ LOCATION
-				$location = $locationsList->random();
-				$type = fake()->boolean() ? AdjustmentType::INCREASE : AdjustmentType::DECREASE;
+				$location   = $locationsList->random();
+				$type       = fake()->boolean() ? AdjustmentType::INCREASE : AdjustmentType::DECREASE;
 				$enumReason = Collection::make(AdjustmentReason::cases())->random();
 
 				$quantityBefore = mt_rand(24, 160);
-				$adjQty = mt_rand(1, 64);
-				$quantityAfter = ($type == AdjustmentType::INCREASE) ? $quantityBefore + $adjQty : $quantityBefore - $adjQty;
-				$createdAt = now()->subDays(mt_rand(0, 90));
+				$adjQty         = mt_rand(1, 64);
+				$quantityAfter  = ($type == AdjustmentType::INCREASE) ? $quantityBefore + $adjQty : $quantityBefore - $adjQty;
+				$createdAt      = now()->subDays(mt_rand(0, 90));
 
 				// 3. ΠΡΟΣΘΗΚΗ $location ΚΑΙ $i ΣΤΟ use
 				DB::transaction(function () use (
@@ -60,7 +60,7 @@
 
 					// 4. ΔΙΟΡΘΩΣΗ adjustment_number (Str::padLeft στο $i)
 					$adjustment = StockAdjustment::query()->create([
-						'adjustment_number' => 'ADJ-'.$createdAt->format('Y-m-d').'-'.Str::upper(Str::random(mt_rand(6, 12))),
+						'adjustment_number' => 'ADJ-' . $createdAt->format('Y-m-d') . '-' . Str::upper(Str::random(mt_rand(6, 12))),
 						'warehouse_id'      => $location->warehouse_id,
 						'adjustment_date'   => $createdAt,
 						'status'            => fake()->randomElement(MovementStatus::forAdjustment())->value,
@@ -202,14 +202,14 @@
 				],
 			];
 
-			return $notes[$reason->value][$type->value] ?? "Regular adjustment of ".$quantity." units";
+			return $notes[$reason->value][$type->value] ?? "Regular adjustment of " . $quantity . " units";
 		}
 
 		/**
 		 * Δημιουργεί μια τυχαία, ρεαλιστική σημείωση για κάθε γραμμή προσαρμογής (StockAdjustmentItem).
 		 *
-		 * @param  AdjustmentType    $type
-		 * @param  int               $quantity
+		 * @param  AdjustmentType  $type
+		 * @param  int  $quantity
 		 * @param  AdjustmentReason  $reason
 		 *
 		 * @return string
@@ -370,7 +370,7 @@
 			}
 
 			// Δυναμικό Fallback σε περίπτωση που προκύψει μη προδιαγεγραμμένος συνδυασμός στο array
-			$typeLabel = $type === AdjustmentType::INCREASE ? 'Πλεόνασμα' : 'Έλλειμμα';
+			$typeLabel   = $type === AdjustmentType::INCREASE ? 'Πλεόνασμα' : 'Έλλειμμα';
 			$reasonLabel = method_exists($reason, 'label') ? $reason->label() : $reason->value;
 
 			return "Προσαρμογή γραμμής είδους ({$typeLabel}). Ποσότητα: {$quantity} τεμ. Αιτιολογία: {$reasonLabel}";

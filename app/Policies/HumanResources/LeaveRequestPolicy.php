@@ -2,72 +2,56 @@
 
 	namespace App\Policies\HumanResources;
 
-	use App\Enums\HumanResources\LeaveStatus;
 	use App\Models\HumanResources\LeaveRequest;
 	use App\Models\User;
 
 	class LeaveRequestPolicy {
 		/**
-		 * Super admins bypass all checks.
-		 */
-		public function before(User $user, string $ability): ?bool {
-			if ($user->hasRole('admin')) {
-				return true;
-			}
-
-			return null;
-		}
-
-		/**
-		 * Determine whether the user can view any leave requests.
+		 * Determine whether the user can view any models.
 		 */
 		public function viewAny(User $user): bool {
-			return $user->hasPermissionTo('leave_request.view');
+			return false;
 		}
 
 		/**
-		 * Determine whether the user can view a specific leave request.
+		 * Determine whether the user can view the model.
 		 */
 		public function view(User $user, LeaveRequest $leaveRequest): bool {
-			if ($user->hasPermissionTo('leave_request.view')) {
-				return true;
-			}
-
-			// Ο εργαζόμενος μπορεί να δει τη δική του αίτηση
-			return $leaveRequest->employee_id === $user->employee?->id;
+			return false;
 		}
 
 		/**
-		 * Determine whether the user can create leave requests.
+		 * Determine whether the user can create models.
 		 */
 		public function create(User $user): bool {
-			return $user->hasPermissionTo('leave_request.create');
+			return false;
 		}
 
 		/**
-		 * Determine whether the user can approve/reject the leave request.
+		 * Determine whether the user can update the model.
 		 */
-		public function approve(User $user, LeaveRequest $leaveRequest): bool {
-			// Μπορεί να εγκριθεί μόνο αν εκκρεμεί
-			if ($leaveRequest->status !== LeaveStatus::PENDING) {
-				return false;
-			}
-
-			return $user->hasPermissionTo('leave_request.approve');
+		public function update(User $user, LeaveRequest $leaveRequest): bool {
+			return false;
 		}
 
 		/**
-		 * Determine whether the user can cancel their own leave request.
-		 */
-		public function cancel(User $user, LeaveRequest $leaveRequest): bool {
-			return $leaveRequest->employee_id === $user->employee?->id
-				&& $leaveRequest->status === LeaveStatus::PENDING;
-		}
-
-		/**
-		 * Determine whether the user can delete a leave request record.
+		 * Determine whether the user can delete the model.
 		 */
 		public function delete(User $user, LeaveRequest $leaveRequest): bool {
-			return $user->hasPermissionTo('leave_request.delete');
+			return false;
+		}
+
+		/**
+		 * Determine whether the user can restore the model.
+		 */
+		public function restore(User $user, LeaveRequest $leaveRequest): bool {
+			return false;
+		}
+
+		/**
+		 * Determine whether the user can permanently delete the model.
+		 */
+		public function forceDelete(User $user, LeaveRequest $leaveRequest): bool {
+			return false;
 		}
 	}

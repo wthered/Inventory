@@ -112,6 +112,42 @@
 	min-width : 180px;
 }
 
+/* Base Badge Style */
+.badge-status {
+	display       : inline-flex;
+	align-items   : center;
+	padding       : 0.25rem 0.625rem;
+	font-size     : 0.75rem;
+	font-weight   : 600;
+	border-radius : var(--radius-md, 4px);
+	border        : 1px solid transparent;
+}
+
+/* Status Specific Variants */
+.badge-active {
+	color            : var(--color-accent);
+	background-color : rgba(34, 197, 94, 0.1);
+	border-color     : var(--color-accent);
+}
+
+.badge-on-leave {
+	color            : var(--color-warning);
+	background-color : rgba(245, 158, 11, 0.1);
+	border-color     : var(--color-warning);
+}
+
+.badge-suspended {
+	color            : var(--color-text-muted);
+	background-color : rgba(156, 163, 175, 0.1);
+	border-color     : var(--color-text-muted);
+}
+
+.badge-terminated {
+	color            : var(--color-error);
+	background-color : rgba(239, 68, 68, 0.1);
+	border-color     : var(--color-error);
+}
+
 /* Mobile Responsiveness */
 @media (max-width : 640px) {
 	.toolbar-form {

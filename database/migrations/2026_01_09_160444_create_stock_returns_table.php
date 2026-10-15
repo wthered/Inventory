@@ -44,7 +44,6 @@
 				$table->boolean('is_restockable')->default(true);
 				$table->text('inspection_notes')->nullable();
 				$table->timestamp('restocked_at')->nullable();
-				$table->text('notes')->nullable();
 				$table->timestamps();
 				$table->softDeletes();
 

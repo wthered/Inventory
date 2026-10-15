@@ -7,15 +7,12 @@
 	use App\Enums\Inventory\MovementStatus;
 	use App\Http\Controllers\Controller;
 	use App\Http\Requests\Inventories\AdjustInventoryRequest;
-	use App\Http\Requests\Inventories\FetchProductLocationOptionsRequest;
 	use App\Models\Inventories\Inventory;
-	use App\Models\Product;
 	use App\Models\StockAdjustment;
 	use App\Services\Inventory\InventoryReportService;
 	use App\Services\Inventory\LocationOptionsService;
 	use Carbon\Carbon;
 	use Illuminate\Contracts\View\View;
-	use Illuminate\Http\JsonResponse;
 	use Illuminate\Support\Str;
 
 	class InventoryController extends Controller {
@@ -29,7 +26,7 @@
 		 * Constructor with dependency injection
 		 */
 		public function __construct(InventoryReportService $reportService, LocationOptionsService $locationService) {
-			$this->reportService = $reportService;
+			$this->reportService   = $reportService;
 			$this->locationService = $locationService;
 		}
 
@@ -48,24 +45,12 @@
 			]);
 		}
 
-		/**
-		 * Get location options for a product in a warehouse
-		 * Used by product/show on open Modal
-		 */
-		public function getLocations(FetchProductLocationOptionsRequest $request, Product $product): JsonResponse {
-			$input = $request->validated();
-
-			$options = $this->locationService->getLocationOptions($product->id, $input['warehouse'], $input['location'] ?? null);
-
-			return response()->json($options);
-		}
-
 		public function adjust(AdjustInventoryRequest $request, Inventory $inventory) {
 			$input = $request->validated();
 //			dd($input);
 
 			$adjustment = StockAdjustment::query()->create([
-				'adjustment_number' => 'ADJ-'.Str::upper(Str::random(8)),
+				'adjustment_number' => 'ADJ-' . Str::upper(Str::random(8)),
 				'warehouse_id'      => $input['warehouse_id'],
 				'adjustment_date'   => Carbon::now(config('app.timezone'))->toDateString(),
 				'notes'             => $input['notes'],
@@ -73,7 +58,7 @@
 				'created_by'        => $input['created_by'],
 			]);
 
-			$object = new ProductDTO($input['product']);
+			$object          = new ProductDTO($input['product']);
 			$productLocation = $object->product->inventories()->where('location_id', $input['location'])->first();
 			$adjustment->items()->create([
 				'product_id'      => $object->id,

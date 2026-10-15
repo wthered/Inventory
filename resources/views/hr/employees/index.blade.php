@@ -55,19 +55,44 @@
 				</div>
 
 				<div class="filter-group">
+					<select name="warehouse_id" id="warehouse-select" class="form-control select-filter">
+						<option value="">All Warehouses</option>
+						@foreach($warehouses as $warehouse)
+							<option value="{{ $warehouse->id }}" @selected(request('warehouse') == $warehouse->id)>
+								{{ $warehouse->name }}
+							</option>
+						@endforeach
+					</select>
+
 					<select name="department_id" id="department-select" class="form-control select-filter">
 						<option value="">All Departments</option>
 						@foreach($departments as $department)
 							<option
-								value="{{ $department->id }}" {{ request('department_id') == $department->id ? 'selected' : '' }}>
+								value="{{ $department->id }}" @selected(request('department_id') == $department->id)>
 								{{ $department->name }}
 							</option>
 						@endforeach
 					</select>
 
-					<button type="submit" class="btn-secondary">Filter</button>
+					<select name="position_id" id="position-select" class="form-control select-filter">
+						<option value="">All Positions</option>
+						@foreach($positions as $position)
+							<option value="{{ $position->id }}" @selected(request('position_id') == $position->id)>
+								{{ $position->title }}
+							</option>
+						@endforeach
+					</select>
 
-					@if(request()->hasAny(['search', 'department_id']))
+					<select name="status" id="status-select" class="form-control select-filter">
+						<option value="">All Statuses</option>
+						@foreach($statuses::cases() as $status)
+							<option value="{{ $status->value }}" @selected(request('status') == $status->value)>
+								{{ $status->label() }}
+							</option>
+						@endforeach
+					</select>
+
+					@if(request()->hasAny(['search', 'department_id', 'warehouse_id', 'position_id', 'status']))
 						<a href="{{ route('hr.employees.index') }}" class="btn-reset" title="Clear Filters">
 							<i class="fas fa-times"></i> Clear
 						</a>
@@ -84,8 +109,10 @@
 					<tr>
 						<th>Employee ID</th>
 						<th>Full Name</th>
-						<th>Contact Details</th>
+						<th>Phone</th>
 						<th>Department</th>
+						<th>Warehouse</th>
+						<th>Position</th>
 						<th>Status</th>
 						<th class="text-right">Actions</th>
 					</tr>

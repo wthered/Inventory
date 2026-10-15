@@ -404,21 +404,84 @@
 	font-weight   : 600;
 }
 
-.badge-success,
-.status-approved {
+/* Base Leave Badge */
+.badge-leave {
+	display       : inline-flex;
+	align-items   : center;
+	gap           : 0.35rem;
+	padding       : 0.25rem 0.625rem;
+	border-radius : var(--radius-full);
+	font-size     : 0.75rem;
+	font-weight   : 600;
+	border        : 1px solid transparent;
+}
+
+/* Status Modifiers */
+.badge-leave.leave-approved {
 	background-color : rgba(var(--color-accent-rgb), 0.15);
 	color            : var(--color-accent);
+	border-color     : var(--color-accent);
 }
 
-.badge-danger,
-.status-rejected {
-	background-color : rgba(var(--color-error-rgb), 0.15);
-	color            : var(--color-error);
-}
-
-.status-pending {
+.badge-leave.leave-pending {
 	background-color : rgba(var(--color-warning-rgb), 0.15);
 	color            : var(--color-warning);
+	border-color     : var(--color-warning);
+}
+
+.badge-leave.leave-rejected {
+	background-color : rgba(var(--color-error-rgb), 0.15);
+	color            : var(--color-error);
+	border-color     : var(--color-error);
+}
+
+.badge-leave.leave-cancelled {
+	background-color : rgba(156, 163, 175, 0.15);
+	color            : var(--color-text-muted);
+	border-color     : var(--color-text-muted);
+}
+
+/* Attendance Status */
+/* Base Attendance Badge */
+.badge-attendance {
+	display       : inline-flex;
+	align-items   : center;
+	gap           : 0.35rem;
+	padding       : 0.25rem 0.625rem;
+	border-radius : var(--radius-full);
+	font-size     : 0.75rem;
+	font-weight   : 600;
+	border        : 1px solid transparent;
+}
+
+.badge-attendance.att-present {
+	background-color : rgba(var(--color-accent-rgb), 0.15);
+	color            : var(--color-accent);
+	border-color     : var(--color-accent);
+}
+
+.badge-attendance.att-absent {
+	background-color : rgba(var(--color-error-rgb), 0.15);
+	color            : var(--color-error);
+	border-color     : var(--color-error);
+}
+
+.badge-attendance.att-late {
+	background-color : rgba(var(--color-warning-rgb), 0.15);
+	color            : var(--color-warning);
+	border-color     : var(--color-warning);
+}
+
+.badge-attendance.att-on_leave {
+	background-color : rgba(var(--color-primary-rgb), 0.15);
+	color            : var(--color-primary);
+	border-color     : var(--color-primary);
+}
+
+.badge-attendance.att-half_day {
+	background-color : rgba(156, 163, 175, 0.15);
+	color            : var(--color-text-muted);
+	border-color     : var(--color-text-muted);
 }
 
 /* ==========================================================================

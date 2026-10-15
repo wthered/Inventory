@@ -30,10 +30,10 @@
 		}
 
 		/**
-		 * Get CSS badge class name based on status value.
+		 * Get CSS modifier class name based on status string value.
 		 */
 		public function badgeClass(): string {
-			return 'badge-' . $this->value;
+			return 'att-'.$this->value;
 		}
 
 		/**

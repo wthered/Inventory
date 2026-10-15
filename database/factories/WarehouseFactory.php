@@ -47,8 +47,9 @@
 					'prefix'      => 'LOTR-BYW'
 				],
 				[
-					'name'   => 'Tuckborough', 'description' => 'The ancestral home of the Took family in the Shire',
-					'prefix' => 'LOTR-TUC'
+					'name'        => 'Tuckborough',
+					'description' => 'The ancestral home of the Took family in the Shire',
+					'prefix'      => 'LOTR-TUC'
 				],
 				[
 					'name'        => 'Brandy Hall',
@@ -56,16 +57,19 @@
 					'prefix'      => 'LOTR-BRA'
 				],
 				[
-					'name'   => 'Buckland', 'description' => 'The area east of the Shire, home of the Brandybucks',
-					'prefix' => 'LOTR-BUC'
+					'name'        => 'Buckland',
+					'description' => 'The area east of the Shire, home of the Brandybucks',
+					'prefix'      => 'LOTR-BUC'
 				],
 				[
-					'name'   => 'Stock', 'description' => 'A village in the Eastfarthing of the Shire',
-					'prefix' => 'LOTR-STO'
+					'name'        => 'Stock',
+					'description' => 'A village in the Eastfarthing of the Shire',
+					'prefix'      => 'LOTR-STO'
 				],
 				[
-					'name'   => 'Frogmorton', 'description' => 'A village in the Northfarthing of the Shire',
-					'prefix' => 'LOTR-FRO'
+					'name'        => 'Frogmorton',
+					'description' => 'A village in the Northfarthing of the Shire',
+					'prefix'      => 'LOTR-FRO'
 				],
 				[
 					'name'        => 'Bree',
@@ -73,16 +77,19 @@
 					'prefix'      => 'LOTR-BRE'
 				],
 				[
-					'name'   => 'Combe', 'description' => 'A village in Bree-land, located near Bree',
-					'prefix' => 'LOTR-COM'
+					'name'        => 'Combe',
+					'description' => 'A village in Bree-land, located near Bree',
+					'prefix'      => 'LOTR-COM'
 				],
 				[
-					'name'   => 'Staddle', 'description' => 'A village in Bree-land, known for its stone houses',
-					'prefix' => 'LOTR-STA'
+					'name'        => 'Staddle',
+					'description' => 'A village in Bree-land, known for its stone houses',
+					'prefix'      => 'LOTR-STA'
 				],
 				[
-					'name'   => 'Archet', 'description' => 'A village in Bree-land, located in the Chetwood forest',
-					'prefix' => 'LOTR-ARC'
+					'name'        => 'Archet',
+					'description' => 'A village in Bree-land, located in the Chetwood forest',
+					'prefix'      => 'LOTR-ARC'
 				],
 				[
 					'name'        => 'Rivendell',
@@ -109,10 +116,15 @@
 					'description' => 'The port city of the Elves, from which they sail to the Undying Lands',
 					'prefix'      => 'LOTR-GRE'
 				],
-				['name' => 'Mithlond', 'description' => 'The Elvish name for the Grey Havens', 'prefix' => 'LOTR-MIT'],
+				[
+					'name'        => 'Mithlond',
+					'description' => 'The Elvish name for the Grey Havens',
+					'prefix'      => 'LOTR-MIT'
+				],
 				[
 					'name'        => 'Woodland Realm',
-					'description' => 'The kingdom of the Elves in Mirkwood, ruled by Thranduil', 'prefix' => 'LOTR-WOO'
+					'description' => 'The kingdom of the Elves in Mirkwood, ruled by Thranduil',
+					'prefix'      => 'LOTR-WOO'
 				],
 				[
 					'name'        => 'Minas Tirith',
@@ -140,8 +152,9 @@
 					'prefix'      => 'LOTR-OSG'
 				],
 				[
-					'name'   => 'Dol Amroth', 'description' => 'The coastal city of Gondor, ruled by Prince Imrahil',
-					'prefix' => 'LOTR-DOL'
+					'name'        => 'Dol Amroth',
+					'description' => 'The coastal city of Gondor, ruled by Prince Imrahil',
+					'prefix'      => 'LOTR-DOL'
 				],
 				[
 					'name'        => 'Pelargir',
@@ -159,8 +172,9 @@
 					'prefix'      => 'LOTR-HEN'
 				],
 				[
-					'name'   => 'Edoras', 'description' => 'The golden hall and capital city of Rohan',
-					'prefix' => 'LOTR-EDO'
+					'name'        => 'Edoras',
+					'description' => 'The golden hall and capital city of Rohan',
+					'prefix'      => 'LOTR-EDO'
 				],
 				[
 					'name'        => 'Helm\'s Deep',
@@ -173,16 +187,19 @@
 					'prefix'      => 'LOTR-DUN'
 				],
 				[
-					'name'   => 'The Hornburg', 'description' => 'The great fortress at Helm\'s Deep',
-					'prefix' => 'LOTR-HOR'
+					'name'        => 'The Hornburg',
+					'description' => 'The great fortress at Helm\'s Deep',
+					'prefix'      => 'LOTR-HOR'
 				],
 				[
-					'name'   => 'Aldburg', 'description' => 'The ancient capital of Rohan, located in the Eastfold',
-					'prefix' => 'LOTR-ALD'
+					'name'        => 'Aldburg',
+					'description' => 'The ancient capital of Rohan, located in the Eastfold',
+					'prefix'      => 'LOTR-ALD'
 				],
 				[
-					'name'   => 'Snowbourn', 'description' => 'The river that flows through Rohan, near Edoras',
-					'prefix' => 'LOTR-SNO'
+					'name'        => 'Snowbourn',
+					'description' => 'The river that flows through Rohan, near Edoras',
+					'prefix'      => 'LOTR-SNO'
 				],
 				[
 					'name'        => 'Isengard',
@@ -195,8 +212,9 @@
 					'prefix'      => 'LOTR-ORT'
 				],
 				[
-					'name'   => 'Nan Curunir', 'description' => 'The valley of Isengard, meaning "Valley of Saruman"',
-					'prefix' => 'LOTR-NAN'
+					'name'        => 'Nan Curunir',
+					'description' => 'The valley of Isengard, meaning "Valley of Saruman"',
+					'prefix'      => 'LOTR-NAN'
 				],
 				[
 					'name'        => 'Moria',
@@ -204,23 +222,34 @@
 					'prefix'      => 'LOTR-MOR'
 				],
 				[
-					'name'   => 'Khazad-dûm', 'description' => 'The Dwarvish name for Moria, meaning "Dwarf-mansion"',
-					'prefix' => 'LOTR-KHA'
+					'name'        => 'Khazad-dûm',
+					'description' => 'The Dwarvish name for Moria, meaning "Dwarf-mansion"',
+					'prefix'      => 'LOTR-KHA'
 				],
-				['name' => 'Barad-dûr', 'description' => 'The Dark Tower of Sauron in Mordor', 'prefix' => 'LOTR-BAR'],
+				[
+					'name'        => 'Barad-dûr',
+					'description' => 'The Dark Tower of Sauron in Mordor',
+					'prefix'      => 'LOTR-BAR'
+				],
 				[
 					'name'        => 'Mount Doom',
 					'description' => 'The volcanic mountain in Mordor where the One Ring was forged',
 					'prefix'      => 'LOTR-MTD'
 				],
-				['name' => 'Orodruin', 'description' => 'The Elvish name for Mount Doom', 'prefix' => 'LOTR-ORO'],
+				[
+					'name'        => 'Orodruin',
+					'description' => 'The Elvish name for Mount Doom',
+					'prefix'      => 'LOTR-ORO'
+				],
 				[
 					'name'        => 'The Black Gate',
 					'description' => 'The north gate of Mordor, guarding the entrance to the Dark Land',
 					'prefix'      => 'LOTR-BLA'
 				],
 				[
-					'name' => 'Morannon', 'description' => 'The Elvish name for the Black Gate', 'prefix' => 'LOTR-MRN'
+					'name'        => 'Morannon',
+					'description' => 'The Elvish name for the Black Gate',
+					'prefix'      => 'LOTR-MRN'
 				],
 				[
 					'name'        => 'Cirith Ungol',
@@ -237,10 +266,15 @@
 					'description' => 'The hilltop where Frodo was stabbed by the Witch-king with a Morgul blade',
 					'prefix'      => 'LOTR-WEA'
 				],
-				['name' => 'Amon Sûl', 'description' => 'The Elvish name for Weathertop', 'prefix' => 'LOTR-AMO'],
+				[
+					'name'        => 'Amon Sûl',
+					'description' => 'The Elvish name for Weathertop',
+					'prefix'      => 'LOTR-AMO'
+				],
 				[
 					'name'        => 'The Prancing Pony',
-					'description' => 'The famous inn in Bree where the hobbits met Strider', 'prefix' => 'LOTR-PRA'
+					'description' => 'The famous inn in Bree where the hobbits met Strider',
+					'prefix'      => 'LOTR-PRA'
 				],
 				[
 					'name'        => 'The Green Dragon',
@@ -253,8 +287,9 @@
 					'prefix'      => 'LOTR-GOL'
 				],
 				[
-					'name'   => 'The Ivy Bush', 'description' => 'An inn on the Bywater road, near Hobbiton',
-					'prefix' => 'LOTR-IVY'
+					'name'        => 'The Ivy Bush',
+					'description' => 'An inn on the Bywater road, near Hobbiton',
+					'prefix'      => 'LOTR-IVY'
 				],
 				[
 					'name'        => 'Barrow-downs',
@@ -268,29 +303,39 @@
 				],
 				[
 					'name'        => 'Bombadil\'s House',
-					'description' => 'The home of Tom Bombadil and Goldberry in the Old Forest', 'prefix' => 'LOTR-BOM'
+					'description' => 'The home of Tom Bombadil and Goldberry in the Old Forest',
+					'prefix'      => 'LOTR-BOM'
 				],
 				[
-					'name'   => 'The Withywindle', 'description' => 'The river that flows through the Old Forest',
-					'prefix' => 'LOTR-WIT'
+					'name'        => 'The Withywindle',
+					'description' => 'The river that flows through the Old Forest',
+					'prefix'      => 'LOTR-WIT'
 				],
 				[
 					'name'        => 'Fangorn Forest',
-					'description' => 'The ancient forest where the Ents live, led by Treebeard', 'prefix' => 'LOTR-FAN'
+					'description' => 'The ancient forest where the Ents live, led by Treebeard',
+					'prefix'      => 'LOTR-FAN'
 				],
 				[
-					'name'   => 'The Entwash', 'description' => 'The river that flows through Fangorn Forest',
-					'prefix' => 'LOTR-ENT'
+					'name'        => 'The Entwash',
+					'description' => 'The river that flows through Fangorn Forest',
+					'prefix'      => 'LOTR-ENT'
 				],
 				[
-					'name'   => 'The Anduin', 'description' => 'The great river that flows through Middle-earth',
-					'prefix' => 'LOTR-AND'
+					'name'        => 'The Anduin',
+					'description' => 'The great river that flows through Middle-earth',
+					'prefix'      => 'LOTR-AND'
 				],
 				[
 					'name'        => 'The Gladden Fields',
-					'description' => 'The area where Isildur lost the One Ring and was killed', 'prefix' => 'LOTR-GLA'
+					'description' => 'The area where Isildur lost the One Ring and was killed',
+					'prefix'      => 'LOTR-GLA'
 				],
-				['name' => 'Dale', 'description' => 'The city of Men near the Lonely Mountain', 'prefix' => 'LOTR-DAL'],
+				[
+					'name'        => 'Dale',
+					'description' => 'The city of Men near the Lonely Mountain',
+					'prefix'      => 'LOTR-DAL'
+				],
 				[
 					'name'        => 'Erebor',
 					'description' => 'The Lonely Mountain, home of the Dwarves and the treasure of Thror',
@@ -301,19 +346,25 @@
 					'description' => 'The town of Men on the Long Lake, built on wooden pilings',
 					'prefix'      => 'LOTR-LAK'
 				],
-				['name' => 'Esgaroth', 'description' => 'The Elvish name for Lake-town', 'prefix' => 'LOTR-ESG'],
+				[
+					'name'        => 'Esgaroth',
+					'description' => 'The Elvish name for Lake-town',
+					'prefix'      => 'LOTR-ESG'
+				],
 				[
 					'name'        => 'The Misty Mountains',
 					'description' => 'The great mountain range that runs through the middle of Middle-earth',
 					'prefix'      => 'LOTR-MIS'
 				],
 				[
-					'name'   => 'The High Pass', 'description' => 'The pass through the Misty Mountains near Rivendell',
-					'prefix' => 'LOTR-HIG'
+					'name'        => 'The High Pass',
+					'description' => 'The pass through the Misty Mountains near Rivendell',
+					'prefix'      => 'LOTR-HIG'
 				],
 				[
 					'name'        => 'The Redhorn Pass',
-					'description' => 'The mountain pass near Moria, also known as Caradhras', 'prefix' => 'LOTR-RED'
+					'description' => 'The mountain pass near Moria, also known as Caradhras',
+					'prefix'      => 'LOTR-RED'
 				],
 				[
 					'name'        => 'Caradhras',
@@ -322,7 +373,8 @@
 				],
 				[
 					'name'        => 'The Dead Marshes',
-					'description' => 'The marshes where the dead of the Battle of Dagorlad lie', 'prefix' => 'LOTR-DEA'
+					'description' => 'The marshes where the dead of the Battle of Dagorlad lie',
+					'prefix'      => 'LOTR-DEA'
 				],
 				[
 					'name'        => 'The Emyn Muil',
@@ -340,12 +392,14 @@
 					'prefix'      => 'LOTR-STO'
 				],
 				[
-					'name'   => 'The Pelennor Fields', 'description' => 'The great battlefield outside Minas Tirith',
-					'prefix' => 'LOTR-PEL'
+					'name'        => 'The Pelennor Fields',
+					'description' => 'The great battlefield outside Minas Tirith',
+					'prefix'      => 'LOTR-PEL'
 				],
 				[
-					'name'   => 'The River Anduin', 'description' => 'The great river that flows through Middle-earth',
-					'prefix' => 'LOTR-RIV'
+					'name'        => 'The River Anduin',
+					'description' => 'The great river that flows through Middle-earth',
+					'prefix'      => 'LOTR-RIV'
 				],
 			]);
 
@@ -426,8 +480,9 @@
 					'prefix'      => 'WOW-BOR'
 				],
 				[
-					'name'   => 'Dazar\'alor', 'description' => 'The great golden pyramid-city of the Zandalari Empire',
-					'prefix' => 'WOW-DAZ'
+					'name'        => 'Dazar\'alor',
+					'description' => 'The great golden pyramid-city of the Zandalari Empire',
+					'prefix'      => 'WOW-DAZ'
 				],
 				[
 					'name'        => 'Lordaeron',
@@ -450,8 +505,9 @@
 					'prefix'      => 'WOW-HEA'
 				],
 				[
-					'name'   => 'Tarren Mill', 'description' => 'The small Horde village in the Hillsbrad Foothills',
-					'prefix' => 'WOW-TAR'
+					'name'        => 'Tarren Mill',
+					'description' => 'The small Horde village in the Hillsbrad Foothills',
+					'prefix'      => 'WOW-TAR'
 				],
 				[
 					'name'        => 'Southshore',
@@ -459,8 +515,9 @@
 					'prefix'      => 'WOW-SOU'
 				],
 				[
-					'name'   => 'Booty Bay', 'description' => 'The bustling goblin port city in Stranglethorn Vale',
-					'prefix' => 'WOW-BOO'
+					'name'        => 'Booty Bay',
+					'description' => 'The bustling goblin port city in Stranglethorn Vale',
+					'prefix'      => 'WOW-BOO'
 				],
 				[
 					'name'        => 'Gadgetzan',
@@ -468,16 +525,19 @@
 					'prefix'      => 'WOW-GAD'
 				],
 				[
-					'name'   => 'Ratchet', 'description' => 'The goblin port city in the Barrens, neutral trading post',
-					'prefix' => 'WOW-RAT'
+					'name'        => 'Ratchet',
+					'description' => 'The goblin port city in the Barrens, neutral trading post',
+					'prefix'      => 'WOW-RAT'
 				],
 				[
-					'name'   => 'Everlook', 'description' => 'The goblin city in the frozen Winterspring',
-					'prefix' => 'WOW-EVE'
+					'name'        => 'Everlook',
+					'description' => 'The goblin city in the frozen Winterspring',
+					'prefix'      => 'WOW-EVE'
 				],
 				[
-					'name'   => 'Mudsprocket', 'description' => 'The goblin settlement in Dustwallow Marsh',
-					'prefix' => 'WOW-MUD'
+					'name'        => 'Mudsprocket',
+					'description' => 'The goblin settlement in Dustwallow Marsh',
+					'prefix'      => 'WOW-MUD'
 				],
 				[
 					'name'        => 'Durotar',
@@ -505,8 +565,9 @@
 					'prefix'      => 'WOW-MOU'
 				],
 				[
-					'name'   => 'Ahn\'Qiraj', 'description' => 'The ancient Silithid city in the desert of Silithus',
-					'prefix' => 'WOW-AHN'
+					'name'        => 'Ahn\'Qiraj',
+					'description' => 'The ancient Silithid city in the desert of Silithus',
+					'prefix'      => 'WOW-AHN'
 				],
 				[
 					'name'        => 'Un\'Goro Crater',
@@ -514,8 +575,9 @@
 					'prefix'      => 'WOW-UNG'
 				],
 				[
-					'name'   => 'Feralas', 'description' => 'The dense forest of the Night Elves and highborne',
-					'prefix' => 'WOW-FER'
+					'name'        => 'Feralas',
+					'description' => 'The dense forest of the Night Elves and highborne',
+					'prefix'      => 'WOW-FER'
 				],
 				[
 					'name'        => 'The Barrens',
@@ -538,8 +600,9 @@
 					'prefix'      => 'WOW-DES'
 				],
 				[
-					'name'   => 'Dustwallow Marsh', 'description' => 'The murky swamp where Theramore Isle is located',
-					'prefix' => 'WOW-DUS'
+					'name'        => 'Dustwallow Marsh',
+					'description' => 'The murky swamp where Theramore Isle is located',
+					'prefix'      => 'WOW-DUS'
 				],
 				[
 					'name'        => 'Tanaris',
@@ -552,8 +615,9 @@
 					'prefix'      => 'WOW-SIL'
 				],
 				[
-					'name'   => 'Moonglade', 'description' => 'The sacred druid sanctuary in the mountains of Kalimdor',
-					'prefix' => 'WOW-MOO'
+					'name'        => 'Moonglade',
+					'description' => 'The sacred druid sanctuary in the mountains of Kalimdor',
+					'prefix'      => 'WOW-MOO'
 				],
 				[
 					'name'        => 'Winterspring',
@@ -611,8 +675,9 @@
 					'prefix'      => 'WOW-ICE'
 				],
 				[
-					'name'   => 'Wintergarde Keep', 'description' => 'The Alliance fortress in Dragonblight',
-					'prefix' => 'WOW-WIN'
+					'name'        => 'Wintergarde Keep',
+					'description' => 'The Alliance fortress in Dragonblight',
+					'prefix'      => 'WOW-WIN'
 				],
 				[
 					'name'        => 'Grizzly Hills',
@@ -646,11 +711,13 @@
 				],
 				[
 					'name'        => 'Dragonblight',
-					'description' => 'The frozen valley where the dragons of Northrend go to die', 'prefix' => 'WOW-DRA'
+					'description' => 'The frozen valley where the dragons of Northrend go to die',
+					'prefix'      => 'WOW-DRA'
 				],
 				[
-					'name'   => 'Wyrmrest Temple', 'description' => 'The great temple of the dragons in Dragonblight',
-					'prefix' => 'WOW-WYR'
+					'name'        => 'Wyrmrest Temple',
+					'description' => 'The great temple of the dragons in Dragonblight',
+					'prefix'      => 'WOW-WYR'
 				],
 				[
 					'name'        => 'The Jade Forest',
@@ -729,7 +796,8 @@
 				],
 				[
 					'name'        => 'Frostfire Ridge',
-					'description' => 'The frozen ridge of Draenor, home to the Frostwolf Clan', 'prefix' => 'WOW-FRO'
+					'description' => 'The frozen ridge of Draenor, home to the Frostwolf Clan',
+					'prefix'      => 'WOW-FRO'
 				],
 				[
 					'name'        => 'Gorgrond',
@@ -752,8 +820,9 @@
 					'prefix'      => 'WOW-TAN'
 				],
 				[
-					'name'   => 'Ashran', 'description' => 'The island of Ashran, a PvP zone in the middle of Draenor',
-					'prefix' => 'WOW-ASH'
+					'name'        => 'Ashran',
+					'description' => 'The island of Ashran, a PvP zone in the middle of Draenor',
+					'prefix'      => 'WOW-ASH'
 				],
 				[
 					'name'        => 'The Stockades',
@@ -781,12 +850,14 @@
 					'prefix'      => 'WOW-MOL'
 				],
 				[
-					'name'   => 'Blackwing Lair', 'description' => 'The lair of Nefarian in the Blackrock Spire',
-					'prefix' => 'WOW-BLA'
+					'name'        => 'Blackwing Lair',
+					'description' => 'The lair of Nefarian in the Blackrock Spire',
+					'prefix'      => 'WOW-BLA'
 				],
 				[
 					'name'        => 'Ruins of Ahn\'Qiraj',
-					'description' => 'The ancient Silithid city in the desert of Silithus', 'prefix' => 'WOW-RUI'
+					'description' => 'The ancient Silithid city in the desert of Silithus',
+					'prefix'      => 'WOW-RUI'
 				],
 				[
 					'name'        => 'Naxxramas',
@@ -799,12 +870,14 @@
 					'prefix'      => 'WOW-KAR'
 				],
 				[
-					'name'   => 'The Eye', 'description' => 'The floating prison of Illidan Stormrage in Outland',
-					'prefix' => 'WOW-EYE'
+					'name'        => 'The Eye',
+					'description' => 'The floating prison of Illidan Stormrage in Outland',
+					'prefix'      => 'WOW-EYE'
 				],
 				[
 					'name'        => 'Serpentshrine Cavern',
-					'description' => 'The cavern of Lady Vashj in the Coilfang Reservoir', 'prefix' => 'WOW-SER'
+					'description' => 'The cavern of Lady Vashj in the Coilfang Reservoir',
+					'prefix'      => 'WOW-SER'
 				],
 				[
 					'name'        => 'Sunwell Plateau',
@@ -838,11 +911,13 @@
 				],
 				[
 					'name'        => 'The Firelands',
-					'description' => 'The elemental plane of Fire, home to Ragnaros the Firelord', 'prefix' => 'WOW-FIR'
+					'description' => 'The elemental plane of Fire, home to Ragnaros the Firelord',
+					'prefix'      => 'WOW-FIR'
 				],
 				[
 					'name'        => 'The Eye of Eternity',
-					'description' => 'The floating isle of the Blue Dragonflight in the Nexus', 'prefix' => 'WOW-EYE'
+					'description' => 'The floating isle of the Blue Dragonflight in the Nexus',
+					'prefix'      => 'WOW-EYE'
 				],
 				[
 					'name'        => 'The Oculus',
@@ -851,7 +926,8 @@
 				],
 				[
 					'name'        => 'The Lich King\'s Throne',
-					'description' => 'The throne of the Lich King in Icecrown Citadel', 'prefix' => 'WOW-LIC'
+					'description' => 'The throne of the Lich King in Icecrown Citadel',
+					'prefix'      => 'WOW-LIC'
 				],
 			]);
 
@@ -871,11 +947,11 @@
 			$usedNames = DB::table('warehouses')->pluck('name')->toArray();
 
 			self::$availableLocations = self::$availableLocations->filter(function ($location) use ($usedNames) {
-				$name = $location['name'];
+				$name   = $location['name'];
 				$isLotr = Str::startsWith($location['prefix'], 'LOTR');
 
 				if (!$isLotr && !Str::contains($name, 'Depot') && !Str::contains($name, 'Warehouse')) {
-					$name = $name.' Warehouse';
+					$name = $name . ' Warehouse';
 				}
 
 				return !in_array($name, $usedNames);
@@ -891,32 +967,29 @@
 			// 1. Παίρνουμε τυχαίο key και αφαιρούμε (pull) το στοιχείο
 			if (self::$availableLocations->isNotEmpty()) {
 				$randomKey = self::$availableLocations->keys()->random();
-				$selected = self::$availableLocations->pull($randomKey);
+				$selected  = self::$availableLocations->pull($randomKey);
 			}
 
 			// Fallback αν τελειώσουν τα διαθέσιμα
 			if (!$selected) {
 				$fallbackName = fake()->unique()->city();
-				$selected = [
-					'name'        => $fallbackName.' Depot',
+				$selected     = [
+					'name'        => $fallbackName . ' Depot',
 					'description' => 'An automated logistics hub extension.',
-					'prefix'      => 'GEN-'.Str::upper(Str::substr($fallbackName, 0, 3))
+					'prefix'      => 'GEN-' . Str::upper(Str::substr($fallbackName, 0, 3))
 				];
 			}
 
-			$name = $selected['name'];
+			$name   = $selected['name'];
 			$isLotr = Str::startsWith($selected['prefix'], 'LOTR');
 
 			if (!$isLotr && !Str::contains($name, 'Depot') && !Str::contains($name, 'Warehouse')) {
-				$name = $name.' Warehouse';
+				$name = $name . ' Warehouse';
 			}
 
-			$code = $selected['prefix'].'-'.Str::padLeft(mt_rand(1, 99), 2, '0');
-
-			$existing = DB::table('warehouses')->where('code', $code)->exists();
-			if ($existing) {
-				$code = $selected['prefix'].'-'.Str::padLeft(mt_rand(1, 999), 3, '0');
-			}
+			do {
+				$code = $selected['prefix'] . '-' . Str::padLeft(mt_rand(1, 999), 3, '0');
+			} while (DB::table('warehouses')->where('code', $code)->exists());
 
 			return [
 				'code'        => $code,

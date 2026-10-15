@@ -3,19 +3,16 @@
 	namespace App\Models\Purchases;
 
 	use App\Enums\Purchases\PurchaseOrderStatus;
-	use App\Models\Finance\Payment;
 	use App\Models\Supplier;
 	use App\Models\User;
 	use App\Models\Warehouse;
-	use App\Traits\HasUserScope;
 	use Illuminate\Database\Eloquent\Model;
 	use Illuminate\Database\Eloquent\Relations\BelongsTo;
 	use Illuminate\Database\Eloquent\Relations\HasMany;
-	use Illuminate\Database\Eloquent\Relations\MorphMany;
 	use Illuminate\Database\Eloquent\SoftDeletes;
 
 	class PurchaseOrder extends Model {
-		use SoftDeletes, HasUserScope;
+		use SoftDeletes;
 
 		protected $fillable = [
 			'po_number',
@@ -61,24 +58,6 @@
 		 */
 		public function history(): HasMany {
 			return $this->hasMany(PurchaseOrderHistory::class, 'purchase_order_id');
-		}
-
-		public function payments(): MorphMany {
-			return $this->morphMany(Payment::class, 'payable');
-		}
-
-		/**
-		 * Υπολογισμός συνολικών πληρωμών προς τον προμηθευτή για το συγκεκριμένο PO.
-		 */
-		public function totalPaid(): float {
-			return (float) $this->payments()->where('status', 'completed')->sum('amount');
-		}
-
-		/**
-		 * Υπόλοιπο προς εξόφληση.
-		 */
-		public function remainingBalance(): float {
-			return $this->grand_total - $this->totalPaid();
 		}
 
 		// Used by Show View File

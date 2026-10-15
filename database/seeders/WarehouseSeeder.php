@@ -12,10 +12,13 @@
 		public function run(): void {
 			$this->command->info('🏗️ Creating Warehouses via Factories...');
 
-			$users = User::role(['admin', 'warehouse_manager'])->pluck('id')->sort()->unique()->values();
+			$users = User::role([
+				'admin',
+				'warehouse_manager'
+			])->pluck('id')->sort()->unique()->values();
 
 			// 1. Δημιουργούμε τις αποθήκες
-			$warehouses = Warehouse::factory()->count(mt_rand(8, 24))->create()->each(function ($warehouse) use ($users) {
+			$warehouses = Warehouse::factory()->count(mt_rand(16, 24))->create()->each(function ($warehouse) use ($users) {
 				if ($users->isNotEmpty()) {
 					$warehouse->update([
 						'manager_id' => $users->random()
@@ -24,7 +27,7 @@
 			});
 
 			if ($warehouses->isNotEmpty()) {
-				$warehouses->first()->update(['is_primary' => true]);
+				$warehouses->shuffle()->first()->update(['is_primary' => true]);
 			}
 
 			$totalLocations = 0;
@@ -40,6 +43,6 @@
 				$totalLocations += count($locationsData);
 			}
 
-			$this->command->info("✅ Successfully seeded {$warehouses->count()} warehouses with {$totalLocations} slots using WarehouseLocationFactory!");
+			$this->command->info("✅ Successfully seeded " . $warehouses->count() . " warehouses with " . $totalLocations . " slots using WarehouseLocationFactory!");
 		}
 	}

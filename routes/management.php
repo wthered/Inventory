@@ -33,52 +33,106 @@
 	*/
 	// 1. Place fixed explicit paths FIRST
 	Route::middleware('permission:category.create')->group(function () {
-		Route::get('categories/create', [CategoryController::class, 'create'])->name('categories.create');
-		Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
+		Route::get('categories/create', [
+			CategoryController::class,
+			'create'
+		])->name('categories.create');
+		Route::post('categories', [
+			CategoryController::class,
+			'store'
+		])->name('categories.store');
 	});
 
 	// 2. Place wildcard evaluation parameters LAST
 	Route::middleware('permission:category.view')->group(function () {
-		Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
-		Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+		Route::get('categories', [
+			CategoryController::class,
+			'index'
+		])->name('categories.index');
+		Route::get('categories/{category}', [
+			CategoryController::class,
+			'show'
+		])->name('categories.show');
 	});
 
 	Route::middleware('permission:category.update')->group(function () {
-		Route::get('categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
-		Route::put('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
-		Route::patch('categories/{category}', [CategoryController::class, 'update']);
+		Route::get('categories/{category}/edit', [
+			CategoryController::class,
+			'edit'
+		])->name('categories.edit');
+		Route::put('categories/{category}', [
+			CategoryController::class,
+			'update'
+		])->name('categories.update');
+		Route::patch('categories/{category}', [
+			CategoryController::class,
+			'update'
+		]);
 	});
 
 	Route::middleware('permission:category.delete')->group(function () {
-		Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+		Route::delete('categories/{category}', [
+			CategoryController::class,
+			'destroy'
+		])->name('categories.destroy');
 	});
 
 	// Search products for adjustments or other dropdown autocompletes
-	Route::post('/products/search', [ProductController::class, 'search'])->name('products.search');
+	Route::post('/products/search', [
+		ProductController::class,
+		'search'
+	])->name('products.search');
 
 	Route::prefix('products')->group(function () {
 		Route::post('/{product}/images/attach', [
-			ProductImageController::class, 'store'
+			ProductImageController::class,
+			'store'
 		])->name('products.image.upload');
 
 		Route::delete('{product}/images/detach', [
-			ProductImageController::class, 'destroy'
+			ProductImageController::class,
+			'destroy'
 		])->name('products.image.destroy');
 
-		Route::post('/{product}/clone', [ProductController::class, 'clone'])->name('product.clone');
-		Route::post('/{product}/history', [ProductController::class, 'history'])->name('product.history');
+		Route::post('/{product}/clone', [
+			ProductController::class,
+			'clone'
+		])->name('product.clone');
+
+		Route::post('/{product}/history', [
+			ProductController::class,
+			'history'
+		])->name('product.history');
+
 		Route::post('/{product}/information', [
-			ProductController::class, 'getInformation'
+			ProductController::class,
+			'getInformation'
 		])->name('product.information');
 
-		Route::post('/{product}/locations', [ProductController::class, 'getInventory'])->name('product.inventories');
+		// Used by Purchases::edit
+		Route::post('/{product}/details', [
+			ProductController::class,
+			'getDetails'
+		])->name('product.details');
+
+		Route::post('/{product}/locations', [
+			ProductController::class,
+			'getInventory'
+		])->name('product.inventories');
 	});
 
 	// Suppliers Resource Operations
 	Route::resource('suppliers', SupplierController::class);
+	Route::post('/suppliers/{supplier}/delivery-delay', [
+		SupplierController::class,
+		'delivery'
+	])->name('suppliers.delivery.delay');
 
 	// Brands Resource Operations
-	Route::resource('brands', BrandController::class)->withTrashed(['edit', 'update']);
+	Route::resource('brands', BrandController::class)->withTrashed([
+		'edit',
+		'update'
+	]);
 
 	// Single-Action Structural View Resources
 	Route::resource('customers', CustomerController::class);
@@ -144,15 +198,27 @@
 	*/
 
 	Route::prefix('inventories')->group(function () {
-		Route::resource('inventory', InventoryController::class);
+		Route::resource('inventory', InventoryController::class)->only(['index']);
 
 		// Core Inline Event Logging Handlers
-		Route::post('/{inventory}/transfer', [StockTransferController::class, 'store'])->name('transfer');
-		Route::post('/{inventory}/adjust', [InventoryController::class, 'adjust'])->name('adjust');
+		Route::post('/{inventory}/transfer', [
+			StockTransferController::class,
+			'store'
+		])->name('transfer');
+		Route::post('/{inventory}/adjust', [
+			InventoryController::class,
+			'adjust'
+		])->name('adjust');
 
 		// Stock Validation & Setup (FIXED: Route names are unique now)
-		Route::post('/adjustment/reasons', [StockAdjustmentController::class, 'reasons'])->name('reasons');
-		Route::post('/adjustment/validation', [StockAdjustmentController::class, 'check'])->name('validation');
+		Route::post('/adjustment/reasons', [
+			StockAdjustmentController::class,
+			'reasons'
+		])->name('reasons');
+		Route::post('/adjustment/validation', [
+			StockAdjustmentController::class,
+			'check'
+		])->name('validation');
 	});
 
 	// Full historical documentation resource workflows over time
@@ -160,7 +226,8 @@
 
 	// Έγκριση Παραστατικού Προσαρμογής
 	Route::patch('adjustments/{adjustment}/approve', [
-		StockAdjustmentController::class, 'approve'
+		StockAdjustmentController::class,
+		'approve'
 	])->name('adjustments.approve');
 
 	Route::resource('adjustments', StockAdjustmentController::class);
@@ -172,11 +239,18 @@
 	| Global Framework Utilities & Geographic Lookup
 	|--------------------------------------------------------------------------
 	*/
-	Route::post('products/filter', [FilterController::class, 'products'])->name('products.filter');
-	Route::post('adjustments/filter', [FilterController::class, 'adjustments'])->name('adjustments.filter');
-	Route::post('brands/{brand}/products/filter', [FilterController::class, 'brandProducts']);
-	Route::post('customers/filter', [FilterController::class, 'customers'])->name('customers.index.filter');
-	Route::post('employess/filter', [FilterController::class, 'employees'])->name('employees.index.filter');
+	Route::post('products/filter', [
+		FilterController::class,
+		'products'
+	])->name('products.filter');
+	Route::post('adjustments/filter', [
+		FilterController::class,
+		'adjustments'
+	])->name('adjustments.filter');
+	Route::post('brands/{brand}/products/filter', [
+		FilterController::class,
+		'brandProducts'
+	]);
 
 	// Sovereign Countries REST Resource
 	Route::resource('countries', CountryController::class);

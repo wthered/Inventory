@@ -88,6 +88,7 @@
     background-color: var(--color-surface);
     color: var(--color-text-secondary);
     border-color: var(--color-border);
+    flex: 1;
 }
 
 .btn-secondary:hover {
@@ -129,28 +130,47 @@
     border: 1px solid transparent;
 }
 
-.badge-draft, .badge-pending {
+/* Draft & Pending Approvals */
+.badge-draft,
+.badge-awaiting_approval {
     background-color: rgba(245, 158, 11, 0.15);
     color: var(--color-warning);
     border-color: rgba(245, 158, 11, 0.3);
 }
 
-.badge-ordered, .badge-sent {
+/* Active Procurement Pipeline */
+.badge-approved,
+.badge-sent_to_vendor {
     background-color: rgba(59, 130, 246, 0.15);
     color: var(--color-primary);
     border-color: rgba(59, 130, 246, 0.3);
 }
 
-.badge-received, .badge-completed {
+/* Warehouse Receipts & Progress */
+.badge-partially_received {
+    background-color: rgba(102, 16, 242, 0.15);
+    color: #a855f7;
+    border-color: rgba(102, 16, 242, 0.3);
+}
+
+.badge-received {
     background-color: rgba(16, 185, 129, 0.15);
     color: var(--color-accent);
     border-color: rgba(16, 185, 129, 0.3);
 }
 
-.badge-cancelled, .badge-rejected {
-    background-color: rgba(239, 68, 108, 0.15);
+.badge-backorder {
+    background-color: rgba(156, 163, 175, 0.15);
+    color: var(--color-text-muted);
+    border-color: rgba(156, 163, 175, 0.3);
+}
+
+/* Terminated States */
+.badge-cancelled,
+.badge-rejected {
+    background-color: rgba(239, 68, 68, 0.15);
     color: var(--color-error);
-    border-color: rgba(239, 68, 108, 0.3);
+    border-color: rgba(239, 68, 68, 0.3);
 }
 
 /* ==========================================================================
@@ -186,6 +206,7 @@
     align-items: center;
     gap: var(--space-sm);
     margin: 0;
+    flex: 3;
 }
 
 .card-header h3 i {

@@ -2,13 +2,16 @@
 
 	namespace Database\Seeders\Stock;
 
+	use App\DataTransferObjects\Warehouse\WarehouseDTO;
 	use App\Enums\Inventory\MovementStatus;
 	use App\Models\Product;
 	use App\Models\StockAdjustment;
 	use App\Models\User;
 	use App\Models\Warehouse;
+	use App\Models\WarehouseLocation;
 	use Carbon\Carbon;
 	use Database\Seeders\ParentSeeder;
+	use Illuminate\Support\Collection;
 	use Illuminate\Support\Str;
 
 	class StockAdjustmentSeeder extends ParentSeeder {
@@ -17,93 +20,82 @@
 		 */
 		public function run(): void {
 			$warehouses = Warehouse::all();
-			$userIds = User::query()->pluck('id');
+			$users      = User::query()->pluck('id');
 
-			if (!Product::query()->exists()) {
+//			$parentCategories = Category::query()->whereNull('parent_id')->with('children')->orderBy('sort_order')->pluck('id');
+
+			if (Product::query()->pluck('id')->isEmpty()) {
 				$this->command->error('No products found. Skipping Adjustments.');
 				return;
 			}
 
-			// Pre-fetch category tree mapping to avoid queries inside loops
-//			$parentCategories = Category::query()->whereNull('parent_id')->pluck('id');
+			$warehouses->each(function (Warehouse $warehouse) use ($users) {
 
-			foreach ($warehouses as $warehouse) {
-				// Fetch warehouse locations as flat array
-				$locations = $warehouse->locations->pluck('id');
+//				$parentCategory = $parentCategories->shuffle()->random();
+//				$categories     = [
+//					'parent'   => $parentCategory,
+//					'children' => Category::query()->where('parent_id', $parentCategory)->pluck('id'),
+//				];
 
-				if ($locations->isEmpty()) {
-					continue;
-				}
-
-				// Pick relevant products for this warehouse (chunked to preserve memory)
-//				$randomCategory = $parentCategories->isNotEmpty() ? $parentCategories->random() : null;
-//				$childCategoryIds = $randomCategory
-//					? Category::query()->where('parent_id', $randomCategory)->pluck('id')
-//					: collect();
-
-//				$products = Product::query()
-//				                   ->when($childCategoryIds->isNotEmpty(), function($q) use ($childCategoryIds) {
-//					                   $q->whereIn('category_id', $childCategoryIds);
-//								   })->limit(100)
-//				                   ->get(['id', 'cost_price', 'current_stock']);
+//				$products = Product::query()->whereHas('category', function ($query) use ($categories) {
+//					$query->whereIn('id', $categories['children']);
+//				})->get();
 
 //				if ($products->isEmpty()) {
-//					$products = Product::query()->inRandomOrder()->limit(50)->get([
-//						'id', 'cost_price', 'current_stock'
-//					]);
+//					$products = Product::query()->get()->shuffle()->take(self::BATCH_SIZE);
 //				}
 
-				for ($i = 1; $i <= mt_rand(6, 12); $i++) {
-					$createdAt = Carbon::now()->subDays(mt_rand(1, 180));
-					$status = fake()->randomElement(MovementStatus::cases());
+				// Περιορίζουμε λίγο τα adjustments ανά αποθήκη για ταχύτητα (π.χ. 6 - 12)
+				Collection::range(1, mt_rand(6, 12))->each(function ($i) use ($users, $warehouse) {
 
-					// Insert Adjustment Master Record
-//					$adjustmentId = DB::table('stock_adjustments')->insertGetId([
+					$createdAt = Carbon::now(config('app.timezone'))->subDays(mt_rand(1, today()->dayOfYear));
+					$status    = fake()->randomElement(MovementStatus::cases());
+
 					$adjustment = StockAdjustment::query()->create([
-						'adjustment_number' => 'ADJ-'.Str::padLeft($i, 2, '0').'-'.Str::upper(Str::random(8)),
+						'adjustment_number' => 'ADJ-' . Str::padLeft($i, 2, '0') . '-' . Str::upper(Str::random(8)),
 						'warehouse_id'      => $warehouse->id,
 						'adjustment_date'   => $createdAt,
 						'status'            => $status->value,
-						'created_by'        => $userIds->random(),
-						'approved_by'       => $status === MovementStatus::APPROVED ? $userIds->random() : null,
-						'approved_at'       => $status === MovementStatus::APPROVED ? $createdAt->copy()->addHours(2) : null,
+						'created_by'        => $users->random(),
+						'approved_by'       => $status === MovementStatus::APPROVED ? $users->random() : null,
+						'approved_at'       => $status === MovementStatus::APPROVED ? $createdAt->addHours(2) : null,
 						'notes'             => 'Monthly stock reconciliation',
-						'created_at'        => $createdAt,
-						'updated_at'        => $createdAt,
 					]);
 
-					// Bulk Insert Adjustment Items
-//					$itemsCount = mt_rand(8, 16);
-					$itemsBatch = [];
+					// Παίρνουμε τοποθεσίες ΜΟΝΟ για τη συγκεκριμένη αποθήκη
+					$warehouseLocations = WarehouseLocation::query()->where('warehouse_id', $warehouse->id)->pluck('id');
+					if ($warehouseLocations->isEmpty()) {
+						return;
+					}
 
-//					for ($j = 0; $j < $itemsCount; $j++) {
+					// 8 - 16 items ανά adjustment είναι υπεραρκετά
+					$itemsCount = mt_rand(8, 16);
+
+//					Collection::range(1, $itemsCount)->each(function () use (
+//						$adjustment,
+//						$warehouseLocations,
+//						$products
+//					) {
 //						$product = $products->random();
 //						$type = fake()->randomElement([AdjustmentType::INCREASE, AdjustmentType::DECREASE]);
-//						$reasons = $type === AdjustmentType::INCREASE
-//							? AdjustmentReason::increaseReasons()
-//							: AdjustmentReason::decreaseReasons();
-//
-//						$this->list->push([
-//							'stock_adjustment_id' => $adjustmentId, // Adjust foreign key column name if different
-//							'product_id'          => $product->id,
-//							'location_id'         => $locationIds->random(),
-//							'reason'              => fake()->randomElement($reasons)->value,
-//							'type'                => $type->value,
-//							'quantity'            => mt_rand(1, 24),
-//							'quantity_before'     => $product->current_stock ?? 0,
-//							'unit_cost'           => $product->cost_price ?? mt_rand(16, 128),
-//							'notes'               => 'Verified by floor supervisor',
-//							'created_at'          => $createdAt,
-//							'updated_at'          => $createdAt,
+//						$reasons = $type === AdjustmentType::INCREASE ? AdjustmentReason::increaseReasons() : AdjustmentReason::decreaseReasons();
+
+//						$adjustment->items()->create([
+//							'product_id'      => $product->id,
+//							'location_id'     => $warehouseLocations->random(), // ✅ Σωστή τοποθεσία
+//							'reason'          => fake()->randomElement($reasons)->value,
+//							'type'            => $type->value,
+//							'quantity'        => mt_rand(1, 24),
+//							'quantity_before' => $product->quantity ?? 0,
+//							'unit_cost'       => $product->cost_price ?? mt_rand(16, 128),
+//							'notes'           => 'Verified by floor supervisor',
 //						]);
-//					}
-//
-//					DB::table('stock_adjustment_items')->insert($this->list->toArray());
+//					});
 
-					$this->command->getOutput()->write("Created Adjustment ".$adjustment->adjustment_number."\r");
-				}
-
-				$this->command->info("\nEnd of Adjustments for ".$warehouse->name);
-			}
+					$this->command->getOutput()->write("Created Adjustment " . $adjustment->adjustment_number . " with " . Str::padLeft($itemsCount, 2) . " items\r");
+				});
+				$this->command->getOutput()->write("\n");
+				$this->command->info('End of Adjustments for ' . WarehouseDTO::fromModel($warehouse)->name);
+			});
 		}
 	}

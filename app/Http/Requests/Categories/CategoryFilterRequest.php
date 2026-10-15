@@ -16,25 +16,26 @@
 		}
 
 		/**
-		 * Merge route parameter into validation data.
-		 */
-		protected function prepareForValidation(): void {
-			$this->merge([
-				'category_id' => intval($this->route('category')->id),
-			]);
-		}
-
-		/**
 		 * Get the validation rules that apply to the request.
+		 *
+		 * Deleted for CategoryController@filter
 		 *
 		 * @return array<string, ValidationRule|array|string>
 		 */
 		public function rules(): array {
+//			dd($this->input('warehouse'));
 			return [
-				'category_id' => [
+				'product'   => [
 					'required',
 					'integer',
-					Rule::exists('categories', 'id')->whereNull('parent_id'),
+					Rule::exists('inventories', 'product_id')->where(function ($query) {
+						$query->where('warehouse_id', $this->input('warehouse'));
+					}),
+				],
+				'warehouse' => [
+					'required',
+					'integer',
+					Rule::exists('warehouses', 'id'),
 				],
 			];
 		}

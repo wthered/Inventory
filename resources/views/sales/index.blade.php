@@ -37,7 +37,7 @@
 						<option value="">All Statuses</option>
 						@foreach($statuses::cases() as $status)
 							<option
-								value="{{ $status->value }}" {{ session('sales_filters.status') == $status->value ? 'selected' : '' }}>
+									value="{{ $status->value }}" {{ session('sales_filters.status') == $status->value ? 'selected' : '' }}>
 								{{ $status->label() }}
 							</option>
 						@endforeach
@@ -50,7 +50,7 @@
 						<option value="">{{ __('enums.payment_status.all') }}</option>
 						@foreach($payments::cases() as $payment)
 							<option
-								value="{{ $payment->value }}" {{ session('sales_filters.payment_status')  == $payment->value ? 'selected' : '' }}>
+									value="{{ $payment->value }}" {{ session('sales_filters.payment_status')  == $payment->value ? 'selected' : '' }}>
 								{{ $payment->label() }}
 							</option>
 						@endforeach
@@ -156,8 +156,8 @@
 						</tr>
 					@empty
 						<tr>
-							<td colspan="7" class="text-center no-data">
-								<i class="fas fa-shopping-bag fa-2x"></i>
+							<td colspan="7" class="table-empty-state">
+								<i class="fas fa-shopping-bag empty-icon"></i>
 								<p>No sales orders found matching your criteria.</p>
 							</td>
 						</tr>

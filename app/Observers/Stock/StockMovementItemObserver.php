@@ -8,7 +8,8 @@
 		Sales\SalesOrderItem,
 		StockAdjustmentItem,
 		StockReturnItem,
-		StockTransferItem};
+		StockTransferItem
+	};
 	use App\Services\Inventory\StockMovementService;
 	use Exception;
 	use Illuminate\Database\Eloquent\Model;
@@ -36,7 +37,7 @@
 		 * @throws Exception|Throwable
 		 */
 		public function created(Model $item): void {
-			dd(__METHOD__);
+//			dd(__METHOD__);
 			if ($item instanceof StockTransferItem) {
 				// ONLY execute the OUT movement from the source warehouse.
 				// The items are now leaving Warehouse A.
@@ -62,10 +63,10 @@
 		protected function determineTransactionType(Model $item): string {
 			return match (true) {
 				$item instanceof StockAdjustmentItem => ($item->quantity >= 0) ? TransactionType::IN->value : TransactionType::OUT->value,
-				$item instanceof SalesOrderItem      => TransactionType::OUT->value,
-				$item instanceof PurchaseOrderItem   => TransactionType::IN->value,
-				$item instanceof StockReturnItem     => TransactionType::RETURN->value,
-				default                              => throw new InvalidArgumentException("Unknown stock movement for model: ".get_class($item)),
+				$item instanceof SalesOrderItem => TransactionType::OUT->value,
+				$item instanceof PurchaseOrderItem => TransactionType::IN->value,
+				$item instanceof StockReturnItem => TransactionType::RETURN->value,
+				default => throw new InvalidArgumentException("Unknown stock movement for model: " . get_class($item)),
 			};
 		}
 
@@ -97,7 +98,7 @@
 					quantity: abs($diff), // Πάντα θετικός αριθμός για την execute
 					type: $type,
 					reason: TransactionReason::TRANSFER_OUT->value,
-//					warehouseId: $item->movement->source_warehouse_id,
+					                      //					warehouseId: $item->movement->source_warehouse_id,
 					locationId: $item->source_location_id,
 					batchNumber: $item->batch_number,
 					reference: $item
@@ -158,7 +159,7 @@
 				return;
 			}
 
-			$type = $this->determineTransactionType($item);
+			$type        = $this->determineTransactionType($item);
 			$reverseType = ($type === TransactionType::IN->value) ? TransactionType::OUT->value : TransactionType::IN->value;
 
 			$this->movementService->handleItemMovement($item, $reverseType);

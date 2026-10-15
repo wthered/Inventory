@@ -23,12 +23,23 @@
 			@endif
 		</td>
 		<td>
-			@if($employee->user->account->is_active)
-				<span class="badge-count"
-				      style="color: var(--color-accent); border-color: var(--color-accent);">Active</span>
+			@if($employee->warehouse)
+				<span class="badge-count">{{ $employee->warehouse->name }}</span>
 			@else
-				<span class="badge-count" style="color: var(--color-text-muted);">Inactive</span>
+				<span class="td-description">—</span>
 			@endif
+		</td>
+		<td>
+			@if($employee->position)
+				<span class="badge-count">{{ $employee->position->title }}</span>
+			@else
+				<span class="td-description">—</span>
+			@endif
+		</td>
+		<td>
+		    <span class="badge-status {{ $employee->status->badgeClass() }}">
+		        {{ $employee->status->label() }}
+		    </span>
 		</td>
 		<td class="text-right actions-cell">
 			<div class="action-buttons-group">

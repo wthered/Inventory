@@ -23,9 +23,33 @@
 		 */
 		public function rules(): array {
 			return [
-				'q'           => ['nullable', 'string', 'max:255'],
-				'category_id' => ['nullable', 'integer', Rule::exists('categories', 'id')->whereNotNull('parent_id')],
-				'brand_id'    => ['nullable', 'integer', Rule::exists('brands', 'id')],
+				'q'           => [
+					'nullable',
+					'string',
+					'max:255'
+				],
+				'category_id' => [
+					'nullable',
+					'integer',
+					Rule::exists('categories', 'id')->whereNotNull('parent_id')
+				],
+				'brand_id'    => [
+					'nullable',
+					'integer',
+					Rule::exists('brands', 'id')
+				],
+				'product'     => [
+					'nullable',
+					'integer',
+					Rule::exists('inventories', 'product_id')->where(function ($query) {
+						$query->where('warehouse_id', $this->input('warehouse'));
+					}),
+				],
+				'warehouse'   => [
+					'nullable',
+					'integer',
+					Rule::exists('warehouses', 'id')
+				],
 			];
 		}
 	}

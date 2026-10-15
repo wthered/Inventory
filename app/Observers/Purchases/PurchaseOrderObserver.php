@@ -31,9 +31,11 @@
 					'purchase_order_id' => $order->id,
 					'user_id'           => Auth::id() ?? null,
 					'action'            => $action,
-					'event'             => $eventEnum->value, // String value για τη βάση
+					'event'             => $eventEnum->value,
+					// String value για τη βάση
 					'details'           => $details,
-					'description'       => $eventEnum->description(), // Κλήση της μεθόδου πάνω στο Enum Object
+					'description'       => $eventEnum->description(),
+					// Κλήση της μεθόδου πάνω στο Enum Object
 				]);
 
 			} catch (Exception $e) {
@@ -54,7 +56,12 @@
 				$this->handleStatusTransition($order);
 			}
 
-			$financialFields = ['grand_total', 'tax_amount', 'discount_amount', 'subtotal'];
+			$financialFields = [
+				'grand_total',
+				'tax_amount',
+				'discount_amount',
+				'subtotal'
+			];
 			foreach ($financialFields as $field) {
 				if ($order->isDirty($field)) {
 					$changes[$field] = [
@@ -64,7 +71,10 @@
 				}
 			}
 
-			$dateFields = ['expected_date', 'order_date'];
+			$dateFields = [
+				'expected_date',
+				'order_date'
+			];
 			foreach ($dateFields as $field) {
 				if ($order->isDirty($field)) {
 					$changes[$field] = [
@@ -79,6 +89,9 @@
 			}
 		}
 
+		/**
+		 * @throws Exception
+		 */
 		protected function handleStatusTransition(PurchaseOrder $order): void {
 			$oldStatus = $order->getOriginal('status_id');
 			$newStatus = $order->status_id;
@@ -100,8 +113,8 @@
 
 		protected function handleReceipt(PurchaseOrder $order): void {
 			$unreceivedItems = $order->items()
-				->whereRaw('quantity_received < quantity_ordered')
-				->count();
+			                         ->whereRaw('quantity_received < quantity_ordered')
+			                         ->count();
 
 			if ($unreceivedItems > 0) {
 				Log::warning("PO #{$order->id} marked as received but has unreceived items.");
@@ -110,7 +123,7 @@
 
 		protected function handleCancellation(PurchaseOrder $order): void {
 			$oldStatus = $order->getOriginal('status_id');
-			$oldRaw = $oldStatus instanceof PurchaseOrderStatus ? $oldStatus->value : $oldStatus;
+			$oldRaw    = $oldStatus instanceof PurchaseOrderStatus ? $oldStatus->value : $oldStatus;
 
 			if ($oldRaw === 3) {
 				throw new Exception('Cannot cancel a received purchase order');
@@ -145,15 +158,15 @@
 				$order->order_date = now()->subDays(mt_rand(1, 7));
 			}
 
-			if (empty($order->po_number)) {
-				$order->po_number = $this->generateOrderNumber();
+			if (empty($order->order_number)) {
+				$order->order_number = $this->generateOrderNumber();
 			}
 		}
 
 		protected function generateOrderNumber(): string {
-			$prefix = 'PO-' . date('Ymd-');
-			$lastOrder = PurchaseOrder::query()->where('po_number', 'like', $prefix . '%')->orderBy('id', 'desc')->first();
-			$sequence = $lastOrder ? (int) str_replace($prefix, '', $lastOrder->po_number) + 1 : 1;
+			$prefix    = 'PO-' . date('Ymd-');
+			$lastOrder = PurchaseOrder::query()->where('order_number', 'like', $prefix . '%')->orderBy('id', 'desc')->first();
+			$sequence  = $lastOrder ? (int) str_replace($prefix, '', $lastOrder->order_number) + 1 : 1;
 
 			return $prefix . str_pad($sequence, 4, '0', STR_PAD_LEFT);
 		}

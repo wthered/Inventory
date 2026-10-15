@@ -3,7 +3,6 @@
    ========================================================================== */
 .main-container {
     padding: var(--space-lg);
-    margin-top: 60px; /* Aligns under navbar */
 }
 
 .page-header {
@@ -28,49 +27,6 @@
 /* ==========================================================================
    Buttons
    ========================================================================== */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.6rem 1.2rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s;
-    border: 1px solid transparent;
-}
-
-.btn-primary {
-    background-color: var(--color-primary);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: var(--color-primary-dark, #1a56db);
-}
-
-.btn-secondary {
-    background-color: var(--color-surface);
-    color: var(--color-text-secondary);
-    border-color: var(--color-border);
-}
-
-.btn-secondary:hover {
-    background-color: var(--color-bg);
-}
-
-.btn-link {
-    color: var(--color-text-muted);
-    background: none;
-    border: none;
-}
-
-.btn-link:hover {
-    color: var(--color-primary);
-}
-
 .btn-icon {
     background: none;
     border: none;
@@ -164,12 +120,6 @@
     font-weight: 700;
     padding: 1rem var(--space-md);
     border-bottom: 2px solid var(--color-border);
-}
-
-.data-table td {
-    padding: 1rem var(--space-md);
-    border-bottom: 1px solid var(--color-border);
-    color: var(--color-text-primary);
 }
 
 .data-table tbody tr:hover {

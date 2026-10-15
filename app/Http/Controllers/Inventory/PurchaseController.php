@@ -2,18 +2,16 @@
 
 	namespace App\Http\Controllers\Inventory;
 
-	use App\DataTransferObjects\ProductDTO;
 	use App\Enums\Purchases\PurchaseOrderStatus;
 	use App\Http\Controllers\Controller;
 	use App\Http\Requests\Purchases\OrderStoreRequest;
 	use App\Http\Requests\Purchases\OrderUpdateRequest;
 	use App\Models\Category;
+	use App\Models\Product;
 	use App\Models\Purchases\PurchaseOrder;
-	use App\Models\Purchases\PurchaseOrderItem;
 	use App\Models\Supplier;
 	use App\Models\Warehouse;
 	use Illuminate\Http\Request;
-	use Illuminate\Support\Collection;
 	use Illuminate\Support\Facades\DB;
 	use Throwable;
 
@@ -67,15 +65,10 @@
 		/**
 		 * Show the form for editing the specified resource.
 		 */
-		public function edit(PurchaseOrder $purchase) {
-			$purchase->load(['items']);
-			$products = Collection::empty();
+		public function edit(Request $request, PurchaseOrder $purchase) {
+//			$purchase->load(['items']);
 
-			if ($purchase->items->isNotEmpty()) {
-				$products = $purchase->items->map(function (PurchaseOrderItem $item) {
-					return new ProductDTO($item->product_id);
-				});
-			}
+			$purchaseItems = $purchase->items->pluck('product_id');
 
 //			dd($products->get(1));
 
@@ -83,8 +76,8 @@
 				'order'      => $purchase,
 				'suppliers'  => Supplier::all(),
 				'warehouses' => Warehouse::all(),
-				'categories' => Category::query()->whereNull('parent_id')->with(['children'])->get(),
-				'products'   => $products,
+				'categories' => Category::query()->whereNull('parent_id')->get(),
+				'products'   => Product::query()->whereIn('id', $purchaseItems)->get(),
 				'statuses'   => PurchaseOrderStatus::class,
 			]);
 		}
